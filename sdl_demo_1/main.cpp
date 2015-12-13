@@ -19,6 +19,9 @@ Camera *camera;
 LightSource *lightSource;
 Cube *cube;
 
+UpdateNode *rootUpdateNode;
+ModelNode *rootModelNode;
+
 void init(void)
 {
 	Cube::Init();
@@ -34,24 +37,31 @@ void init(void)
 	Game::ViewDistance = 100.0;
 	int w, h;
 	SDL_GetWindowSize(window, &w, &h);
-	//Game::Projection = perspective(45.0f, w/static_cast<float>(h), 1.0f, Game::ViewDistance);
+	Game::Projection = perspective(45.0f, w/static_cast<float>(h), 1.0f, Game::ViewDistance);
 	//Game::Projection = Util::Perspective(45.0f, w/h, 1.0f, Game::ViewDistance);
-	Game::Projection = ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
+	//Game::Projection = ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
 	Shader::SetProjection(Game::Projection);
 
-	camera = new Camera();
-	camera->SetPosition(vec4(0.0f, 0.0f, 25.0f, 1.0f));
+	// create root object
+	Object *rootObject = new Object(NULL);
+	rootUpdateNode = rootObject->GetUpdateNode();
+	rootModelNode = rootObject->GetModelNode();
+
+	camera = new Camera(rootObject);
+	camera->SetPosition(vec4(0.0f, -25.0f, 0.0f, 1.0f));
+	camera->LookAt(vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
 	lightSource = LightSource::ObtainLightSource();
 	lightSource->ambient = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->specular = vec4(1.0, 1.0, 1.0, 1.0);
-	lightSource->position = vec4(50.0, 50.0, 50.0, 0.0);
+	lightSource->position = vec4(50.0, -250.0, 50.0, 0.0);
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
-	cube = new Cube();
-	cube->SetMaterial(Material::BlackPlastic());
+	cube = new Cube(rootObject);
+	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+	cube->Scale(10.0f);
 }
 
 //----------------------------------------------------------------------------
@@ -64,6 +74,8 @@ int update()
 	SDL_Event ev;
 	while (SDL_PollEvent(&ev))
 	{
+		camera->InputEvent(ev);
+
 		if (ev.type == SDL_QUIT)
 		{
 			return 1;
@@ -98,9 +110,19 @@ int update()
 
 	// update stuff
 
-	cube->Update();
+	SDL_SetWindowTitle(window, Util::ToString(FpsTracker::GetFps()).c_str());
 
-	camera->Update();
+	cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f);
+	cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f);
+	cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f);
+	/*cube->Update();
+	cube->UpdateModel();*/
+
+	rootUpdateNode->Update();
+
+	rootModelNode->Update();
+
+	//camera->Update();
 
 	return 0;
 }
@@ -139,6 +161,9 @@ int main(int argc, char **argv)
 	glewInit();
 
 	init();
+
+	if (SDL_SetRelativeMouseMode(SDL_TRUE) == -1)
+		std::cerr << "ünable to set relative mouse mode.\n";
 
 	std::cout << "all systems are go bro\n";
 

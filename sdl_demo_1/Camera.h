@@ -14,7 +14,7 @@ namespace Bagnall
 		Function:		Camera constructor
 		Purpose:		Create a camera object
 		**********************************************************************/
-		Camera();
+		Camera(Object *par);
 
 		/**********************************************************************
 		Function:		Update
@@ -33,12 +33,24 @@ namespace Bagnall
 		Function:		GetLookDirection
 		Purpose:		Getter for lookDirection
 		**********************************************************************/
-		vec4 GetLookDirection();
+		vec4 GetLookDirection() const;
+
+		void SetLookDirection(const vec3& lookDir);
+
+		void LookAt(const vec4& pos);
+
+		void RotateX(float x);
+
+		void InputEvent(SDL_Event ev);
 
 	private:
+		bool holdingW, holdingA, holdingS, holdingD;
 		vec3 lookTheta; // rotation values of the camera
 		vec4 lookDirection; // look direction vector of the camera
+		mat4 lookRotation;
 		float zoomOut; // zoom out value
+
+		void move();
 
 		/**********************************************************************
 		Function:		updateGameCamera

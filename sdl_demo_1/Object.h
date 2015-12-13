@@ -1,9 +1,10 @@
-
 #ifndef OBJECT_H
 #define OBJECT_H
 
 #include "Bagnall.h"
 #include "Material.h"
+#include "UpdateGraph.h"
+#include "ModelGraph.h"
 #include <vector>
 
 namespace Bagnall
@@ -35,7 +36,7 @@ namespace Bagnall
 		Function:		Object constructor
 		Purpose:		Create an Object object.
 		**********************************************************************/
-		Object();
+		Object(Object *parent);
 
 		/**********************************************************************
 		Function:		Object destructor
@@ -49,6 +50,10 @@ namespace Bagnall
 		Purpose:		Virtual update method to be overridden by a subclass.
 		**********************************************************************/
 		virtual void Update();
+
+		int UpdateModel();
+
+		void PassDownParentModel(Object *c) const;
 
 		/**********************************************************************
 		Function:		Draw
@@ -304,14 +309,13 @@ namespace Bagnall
 
 		void AddIgnoreParentModelFlag(IgnoreParentModel ignoreFlag);
 
-		/**********************************************************************
-		Function:		AddChild
-		Purpose:		Add a child object
-		Parameters:		Object *c - pointer to the child object
-		**********************************************************************/
 		void AddChild(Object *c);
 
 		void RemoveChild(Object *c);
+
+		UpdateNode* GetUpdateNode() const;
+
+		ModelNode* GetModelNode() const;
 
 	protected:
 		vec4 color; // color of the object (for emission)
@@ -338,16 +342,17 @@ namespace Bagnall
 		unsigned int ignoreParentModelFlags;
 		mat4 model; // model-view matrix
 
-		std::vector<Object*> children; // children of the object
-
 		mat4 parentModel; // the parent transform matrix
 		mat4 finalModel; // the product of parentModel and model
 
 		Material material; // material of the object
 
-		void updateModel();
+		std::vector<Object*> children; // children of the object
 
-		void updateChildrenParentModels();
+		ModelNode *modelNode;
+		UpdateNode *updateNode;
+
+		int updateModel();
 	};
 }
 

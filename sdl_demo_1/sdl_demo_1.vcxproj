@@ -132,8 +132,10 @@
     <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="ModelGraph.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="UpdateGraph.cpp" />
     <ClCompile Include="Util.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -151,8 +153,10 @@
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="ModelGraph.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="UpdateGraph.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

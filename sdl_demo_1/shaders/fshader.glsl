@@ -69,15 +69,18 @@ void main()
 			objectSpecular = materialSpecular;
 		}
 
-		vec4 ambientProduct = objectAmbient * lightSource;
-		vec4 diffuseProduct = objectDiffuse * lightSource;
-		vec4 specularProduct = objectSpecular * lightSource;
+		vec4 ambientProduct = objectAmbient * lightSource[0];
+		vec4 diffuseProduct = objectDiffuse * lightSource[1];
+		vec4 specularProduct = objectSpecular * lightSource[2];
+		/*vec4 ambientProduct = objectAmbient;
+		vec4 diffuseProduct = objectDiffuse;
+		vec4 specularProduct = objectSpecular;*/
 
 		float distance;
-		if (lightSource.w == 0.0)
+		if (lightSource[3].w == 0.0)
 			distance = 1.0;
 		else
-			distance = pow(max(1.0, length(L)), 2.0);
+			distance = pow(length(L), 2.0);
 
 		vec3 LL = normalize(L);
 		float LdotN = dot(LL, NN);
@@ -101,6 +104,7 @@ void main()
 			specular = Ks*specularProduct;
 
 		gl_FragColor = vec4((ambient + diffuse + specular).xyz, 1.0);
+		//gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
 	}
 
 	if (alphaOverride != 0.0)

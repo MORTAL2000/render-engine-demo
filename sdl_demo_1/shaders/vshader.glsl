@@ -31,7 +31,7 @@ void main()
 
 		// compute light direction
 		if (lightSource[3].w == 0.0)
-			L = normalize(lightSource[3].xyz);
+			L = lightSource[3].xyz;
 		else
 			L = (lightSource[3] - vPositionWorld).xyz;
 	}

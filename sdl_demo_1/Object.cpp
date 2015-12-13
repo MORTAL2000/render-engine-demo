@@ -9,34 +9,63 @@ namespace Bagnall
 {
 	// PUBLIC
 
-	Object::Object()
+	Object::Object(Object *parent)
 	{
 		position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		oldPosition = position;
 		centerOfRotation = position;
 		useCenterOfRotation = false;
-		//color = vec4(0.0, 0.0, 0.0, 1.0);
 		theta = vec3();
 		scale = vec3(1.0, 1.0, 1.0);
 		SetMaterial(Material::Plastic(vec4(1.0, 1.0, 1.0, 1.0)));
-		SetParentModel(mat4(1.0));
 		changedFlags = INT_MAX;
 		ignoreParentModelFlags = 0;
+
+		if (parent == NULL)
+		{
+			updateNode = new UpdateNode(NULL, this);
+			modelNode = new ModelNode(NULL, this);
+			SetParentModel(mat4(1.0));
+		}
+		else
+		{
+			updateNode = new UpdateNode(parent->updateNode, this);
+			modelNode = new ModelNode(parent->modelNode, this);
+			SetParentModel(parent->GetModel());
+		}
 	}
 
 	Object::~Object()
 	{
-		/*for (std::vector<Object*>::iterator it = children.begin(); it != children.end(); ++it)
-		delete *it;*/
+		// delete updateNode and its children nodes
+		delete updateNode;
+
+		// delete modelNode and its children nodes
+		delete modelNode;
+
+		// delete children objects (recursive)
 		for (int i = 0; i < children.size(); ++i)
 			delete children[i];
 	}
 
 	void Object::Update()
 	{
-		updateModel();
+		/*updateModel();
 		for (std::vector<Object*>::iterator it = children.begin(); it != children.end(); ++it)
-			(*it)->Update();
+			(*it)->Update();*/
+	}
+
+	int Object::UpdateModel()
+	{
+		return updateModel();
+	}
+
+	void Object::PassDownParentModel(Object *c) const
+	{
+		if (c->ignoreParentModelFlags)
+			c->SetParentModel(translationMatrix, rotationXMatrix, rotationYMatrix, rotationZMatrix, scaleMatrix);
+		else
+			c->SetParentModel(finalModel);
 	}
 
 	void Object::Draw() const
@@ -143,7 +172,8 @@ namespace Bagnall
 	}
 	void Object::SetRotationX(float rotX)
 	{
-		theta.x = wrapAngle(rotX);
+		//theta.x = wrapAngle(rotX);
+		theta.x = rotX;
 		changedFlags |= ROTATIONX_CHANGED;
 	}
 	void Object::RotateX(float x)
@@ -158,7 +188,8 @@ namespace Bagnall
 	}
 	void Object::SetRotationY(float rotY)
 	{
-		theta.y = wrapAngle(rotY);
+		//theta.y = wrapAngle(rotY);
+		theta.y = rotY;
 		changedFlags |= ROTATIONY_CHANGED;
 	}
 	void Object::RotateY(float y)
@@ -273,20 +304,6 @@ namespace Bagnall
 		return rotationMatrix;
 	}
 
-	void Object::AddChild(Object *c)
-	{
-		c->SetParentModel(finalModel);
-		children.push_back(c);
-	}
-
-	void Object::RemoveChild(Object *c)
-	{
-		//c->SetParentModel(Util::Identity());
-		std::vector<Object*>::iterator it = std::find(children.begin(), children.end(), c);
-		if (it != children.end())
-			children.erase(std::find(children.begin(), children.end(), c));
-	}
-
 	void Object::SetParentModel(const mat4& pt)
 	{
 		parentModel = pt;
@@ -316,9 +333,33 @@ namespace Bagnall
 		ignoreParentModelFlags |= ignoreFlag;
 	}
 
+	void Object::AddChild(Object *c)
+	{
+		c->SetParentModel(finalModel);
+		children.push_back(c);
+	}
+
+	void Object::RemoveChild(Object *c)
+	{
+		//c->SetParentModel(Util::Identity());
+		std::vector<Object*>::iterator it = std::find(children.begin(), children.end(), c);
+		if (it != children.end())
+			children.erase(std::find(children.begin(), children.end(), c));
+	}
+
+	UpdateNode* Object::GetUpdateNode() const
+	{
+		return updateNode;
+	}
+
+	ModelNode* Object::GetModelNode() const
+	{
+		return modelNode;
+	}
+
 	// PROTECTED
 
-	void Object::updateModel()
+	int Object::updateModel()
 	{
 		if (changedFlags)
 		{
@@ -358,21 +399,14 @@ namespace Bagnall
 
 			finalModel = parentModel * model;
 
-			updateChildrenParentModels();
+			//updateChildrenParentModels();
 
 			oldPosition = position;
 			changedFlags = 0;
-		}
-	}
 
-	void Object::updateChildrenParentModels()
-	{
-		for (std::vector<Object*>::iterator it = children.begin(); it != children.end(); ++it)
-		{
-			if ((*it)->ignoreParentModelFlags)
-				(*it)->SetParentModel(translationMatrix, rotationXMatrix, rotationYMatrix, rotationZMatrix, scaleMatrix);
-			else
-				(*it)->SetParentModel(finalModel);
+			return 1;
 		}
+
+		return 0;
 	}
 }
