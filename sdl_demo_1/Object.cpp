@@ -17,7 +17,6 @@ namespace Bagnall
 		useCenterOfRotation = false;
 		theta = vec3();
 		scale = vec3(1.0, 1.0, 1.0);
-		SetMaterial(Material::Plastic(vec4(1.0, 1.0, 1.0, 1.0)));
 		changedFlags = INT_MAX;
 		ignoreParentModelFlags = 0;
 
@@ -25,7 +24,7 @@ namespace Bagnall
 		{
 			updateNode = new UpdateNode(NULL, this);
 			modelNode = new ModelNode(NULL, this);
-			SetParentModel(mat4(1.0));
+			SetParentModel(mat4(1.0f));
 		}
 		else
 		{
@@ -62,78 +61,10 @@ namespace Bagnall
 
 	void Object::PassDownParentModel(Object *c) const
 	{
-		if (c->ignoreParentModelFlags)
-			c->SetParentModel(translationMatrix, rotationXMatrix, rotationYMatrix, rotationZMatrix, scaleMatrix);
-		else
+		if (!c->ignoreParentModelFlags)
 			c->SetParentModel(finalModel);
-	}
-
-	void Object::Draw() const
-	{
-		//glUniformMatrix4fv(Game::ModelLoc, 1, GL_TRUE, finalModel);
-		////glUniform4fv(Game::ColorLoc, 1, color);
-		//glUniform4fv(Game::MaterialAmbientLoc, 1, material.ambient);
-		//glUniform4fv(Game::MaterialDiffuseLoc, 1, material.diffuse);
-		//glUniform4fv(Game::MaterialSpecularLoc, 1, material.specular);
-		//glUniform1f(Game::MaterialShininessLoc, material.shininess);
-		Shader::SetModel(finalModel);
-		Shader::SetMaterialAmbient(material.ambient);
-		Shader::SetMaterialDiffuse(material.diffuse);
-		Shader::SetMaterialSpecular(material.specular);
-		Shader::SetMaterialShininess(material.shininess);
-	};
-
-	//void Object::DrawRaw() const
-	//{
-	//	glUniformMatrix4fv(Game::ModelLoc, 1, GL_TRUE, finalModel);
-	//}
-
-	//void Object::StartDrawEmissive() const
-	//{
-	//	glUniformMatrix4fv(Game::ModelLoc, 1, GL_TRUE, finalModel);
-	//	glUniform1i(Game::EmissiveLoc, 1);
-	//	glUniform4fv(Game::EmissionColorLoc, 1, color);
-	//};
-
-	//void Object::EndDrawEmissive() const
-	//{
-	//	glUniform1i(Game::EmissiveLoc, 0);
-	//}
-
-	vec4 Object::GetColor() const
-	{
-		return color;
-	}
-	void Object::SetColor(const vec4& c)
-	{
-		color = c;
-	}
-
-	Material Object::GetMaterial() const
-	{
-		return material;
-	}
-	void Object::SetMaterial(const Material& m, bool propagateToChildren)
-	{
-		material = m;
-		/*ambientProduct = Util::Product(material.ambient, LightSource::Default.ambient);
-		diffuseProduct = Util::Product(material.diffuse, LightSource::Default.diffuse);
-		specularProduct = Util::Product(material.specular, LightSource::Default.specular);*/
-
-		if (propagateToChildren)
-			for (auto it = children.begin(); it != children.end(); ++it)
-				(*it)->SetMaterial(m, true);
-	}
-	void Object::UseMaterial(const Material& m)
-	{
-		/*glUniform4fv(Game::MaterialAmbientLoc, 1, m.ambient);
-		glUniform4fv(Game::MaterialDiffuseLoc, 1, m.diffuse);
-		glUniform4fv(Game::MaterialSpecularLoc, 1, m.specular);
-		glUniform1f(Game::MaterialShininessLoc, m.shininess);*/
-		Shader::SetMaterialAmbient(m.ambient);
-		Shader::SetMaterialDiffuse(m.diffuse);
-		Shader::SetMaterialSpecular(m.specular);
-		Shader::SetMaterialShininess(m.shininess);
+		else
+			c->SetParentModel(translationMatrix, rotationXMatrix, rotationYMatrix, rotationZMatrix, scaleMatrix);
 	}
 
 	vec4 Object::GetPosition() const
@@ -390,16 +321,17 @@ namespace Bagnall
 				else
 				{
 					rotationMatrix = rotationZMatrix * rotationYMatrix * rotationXMatrix;
-					if (useCenterOfRotation)
-						model = translationMatrix * rotationMatrix * centerOfRotationTranslationMatrix * scaleMatrix;
-					else
+					if (!useCenterOfRotation)
 						model = translationMatrix * rotationMatrix * scaleMatrix;
+					else
+						model = translationMatrix * rotationMatrix * centerOfRotationTranslationMatrix * scaleMatrix;
 				}
 			}
 
-			finalModel = parentModel * model;
-
-			//updateChildrenParentModels();
+			//if (hasParentModel)
+				finalModel = parentModel * model;
+			//else
+			//	finalModel = model;
 
 			oldPosition = position;
 			changedFlags = 0;

@@ -27,7 +27,7 @@ namespace Bagnall
 
 	void Cube::Draw() const
 	{
-		Object::Draw();
+		DrawableObject::Draw();
 		glDrawArrays(GL_TRIANGLES, globalVertexOffset, vertexCount);
 	}
 
@@ -68,14 +68,6 @@ namespace Bagnall
 
 	bool Cube::ContainsPoint(const vec4& p) const
 	{
-		/*vec4 tp = Angel::Translate(vec4(scale.x / 2.0, scale.y / 2.0, scale.z / 2.0, 0.0))
-		* Util::RotateX(-theta.x) * Util::RotateY(-theta.y) * Util::RotateZ(-theta.z)
-		* Angel::Translate(-vec4(position.x, position.y, position.z, 0.0))
-		* p;*/
-		/*return (tp.x >= 0 && tp.x <= scale.x
-		&& tp.y >= 0 && tp.y <= scale.y
-		&& tp.z >= 0 && tp.z <= scale.z);*/
-
 		vec4 tp = Util::RotateX(-theta.x) * Util::RotateY(-theta.y) * Util::RotateZ(-theta.z)
 			* translate(-vec3(position.x, position.y, position.z))
 			* p;

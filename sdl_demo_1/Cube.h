@@ -1,11 +1,11 @@
 #ifndef CUBE_H
 #define CUBE_H
 
-#include "Object.h"
+#include "DrawableObject.h"
 
 namespace Bagnall
 {
-	class Cube : public Object
+	class Cube : public DrawableObject
 	{
 	public:
 		/**********************************************************************
@@ -15,7 +15,7 @@ namespace Bagnall
 		**********************************************************************/
 		static void Init();
 
-		Cube(Object *par) : Object(par) {}
+		Cube(Object *par) : DrawableObject(par) {}
 
 		/**********************************************************************
 		Function:		Draw

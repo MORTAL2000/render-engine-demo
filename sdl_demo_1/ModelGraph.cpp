@@ -1,5 +1,7 @@
 #include "ModelGraph.h"
 #include "Object.h"
+#include <thread>
+#include <ppl.h>
 
 namespace Bagnall
 {
@@ -27,17 +29,26 @@ namespace Bagnall
 	{
 		if (object->UpdateModel())
 		{
-			for (auto it = children.begin(); it != children.end(); ++it)
+			concurrency::parallel_for_each(begin(children), end(children), [&](ModelNode *child)
+			{
+				object->PassDownParentModel(child->object);
+				child->Update();
+			}, concurrency::static_partitioner());
+
+			/*for (auto it = children.begin(); it != children.end(); ++it)
 			{
 				auto child = *it;
 				object->PassDownParentModel(child->object);
 				child->Update();
-			}
+			}*/
 		}
 		else
 		{
-			for (auto it = children.begin(); it != children.end(); ++it)
-				(*it)->Update();
+			concurrency::parallel_for_each(begin(children), end(children), [&](ModelNode *child) {
+				child->Update();
+			}, concurrency::static_partitioner());
+			/*for (auto it = children.begin(); it != children.end(); ++it)
+				(*it)->Update();*/
 		}
 	}
 

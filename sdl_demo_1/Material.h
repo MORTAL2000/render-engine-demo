@@ -14,11 +14,11 @@ namespace Bagnall
 		vec4 emission; // emission color
 		float shininess; // shininess coefficient
 
-						 /**********************************************************************
-						 Function:		Plastic
-						 Purpose:		Create a plastic material based on a given color
-						 Calls:			const vec4& color - the color of the plastic material
-						 **********************************************************************/
+		/**********************************************************************
+		Function:		Plastic
+		Purpose:		Create a plastic material based on a given color
+		Calls:			const vec4& color - the color of the plastic material
+		**********************************************************************/
 		static Material Plastic(const vec4& color);
 
 		/**********************************************************************
@@ -48,7 +48,36 @@ namespace Bagnall
 		static Material GreenRubber();
 		static Material RedRubber();
 		static Material YellowRubber();
+
+		bool operator==(const Material& other) const;
 	};
+}
+
+#include <glm/gtx/hash.hpp>
+
+// hash function for materials
+namespace std {
+
+	template <>
+	struct hash<Bagnall::Material>
+	{
+		std::size_t operator()(const Bagnall::Material& m) const
+		{
+			using std::size_t;
+			using std::hash;
+			using std::string;
+
+			// Compute individual hash values for first,
+			// second and third and combine them using XOR
+			// and bit shifting:
+
+			return ((hash<vec4>()(m.ambient)
+				^ (hash<vec4>()(m.diffuse) << 1)) >> 1)
+				^ (hash<vec4>()(m.specular) << 1)
+				^ (hash<float>()(m.shininess));
+		}
+	};
+
 }
 
 #endif

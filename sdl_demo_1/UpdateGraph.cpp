@@ -1,5 +1,7 @@
 #include "UpdateGraph.h"
 #include "Object.h"
+#include <thread>
+#include <ppl.h>
 
 namespace Bagnall
 {
@@ -31,6 +33,10 @@ namespace Bagnall
 		if (parallel)
 		{
 			// update children in parallel
+			concurrency::parallel_for_each(begin(children), end(children), [&](UpdateNode *child)
+			{
+				child->Update();
+			}, concurrency::static_partitioner());
 		}
 		else
 		{

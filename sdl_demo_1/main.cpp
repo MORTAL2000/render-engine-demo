@@ -7,8 +7,14 @@
 #include "Cube.h"
 #include "LightSource.h"
 #include "Util.h"
+#include "UpdateGraph.h"
+#include "ModelGraph.h"
+#include "RenderGraph.h"
 #include <vector>
 #include <iostream>
+
+#include <thread>
+#include <ppl.h>
 
 using namespace Bagnall;
 
@@ -17,10 +23,23 @@ SDL_GLContext glcontext;
 
 Camera *camera;
 LightSource *lightSource;
-Cube *cube;
+Object *cubeContainer;
+std::vector<Cube*> cubes;
 
 UpdateNode *rootUpdateNode;
 ModelNode *rootModelNode;
+
+void updateProjectionMatrixAndViewport()
+{
+	int w, h;
+	SDL_GetWindowSize(window, &w, &h);
+	Game::Projection = perspective(45.0f, w / static_cast<float>(h), 1.0f, Game::ViewDistance);
+	//Game::Projection = Util::Perspective(45.0f, w/h, 1.0f, Game::ViewDistance);
+	//Game::Projection = ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
+	Shader::SetProjection(Game::Projection);
+
+	glViewport(0, 0, w, h);
+}
 
 void init(void)
 {
@@ -33,14 +52,10 @@ void init(void)
 	//glClearColor(1.0, 1.0, 1.0, 1.0); // white background
 	glClearColor(0.5, 0.5, 0.5, 1.0);
 
+	Game::ViewDistance = Game::WorldSize * 2.0f;
+
 	// initialize projection matrix
-	Game::ViewDistance = 100.0;
-	int w, h;
-	SDL_GetWindowSize(window, &w, &h);
-	Game::Projection = perspective(45.0f, w/static_cast<float>(h), 1.0f, Game::ViewDistance);
-	//Game::Projection = Util::Perspective(45.0f, w/h, 1.0f, Game::ViewDistance);
-	//Game::Projection = ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
-	Shader::SetProjection(Game::Projection);
+	updateProjectionMatrixAndViewport();
 
 	// create root object
 	Object *rootObject = new Object(NULL);
@@ -59,9 +74,17 @@ void init(void)
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
-	cube = new Cube(rootObject);
-	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
-	cube->Scale(10.0f);
+	cubeContainer = new Object(rootObject);
+
+	int range = Game::WorldSize - 5.0f;
+	for (int i = 0; i < 25000; ++i)
+	{
+		Cube *cube = new Cube(cubeContainer);
+		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		cube->Scale(5.0f);
+		cubes.push_back(cube);
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -74,12 +97,15 @@ int update()
 	SDL_Event ev;
 	while (SDL_PollEvent(&ev))
 	{
+		// send event to camera
 		camera->InputEvent(ev);
 
+		// quit
 		if (ev.type == SDL_QUIT)
 		{
 			return 1;
 		}
+		// key press
 		else if (ev.type == SDL_KEYDOWN)
 		{
 			switch (ev.key.keysym.sym)
@@ -87,19 +113,30 @@ int update()
 			case SDLK_ESCAPE:
 				return 1;
 				break;
+			case SDLK_f:
+				SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+				break;
 			}
 		}
+		// mouse click
 		else if (ev.type == SDL_MOUSEBUTTONDOWN)
 		{
 			holdingMouseClick = true;
 		}
+		// mouse release
 		else if (ev.type == SDL_MOUSEBUTTONUP)
 		{
 			holdingMouseClick = false;
 		}
+		// mouse motion
 		else if (ev.type == SDL_MOUSEMOTION)
 		{
 			//
+		}
+		// window event
+		else if (ev.type == SDL_WINDOWEVENT)
+		{
+			updateProjectionMatrixAndViewport();
 		}
 	}
 
@@ -112,11 +149,26 @@ int update()
 
 	SDL_SetWindowTitle(window, Util::ToString(FpsTracker::GetFps()).c_str());
 
-	cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f);
-	cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f);
-	cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f);
-	/*cube->Update();
-	cube->UpdateModel();*/
+	/*cubeContainer->RotateX(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
+	cubeContainer->RotateY(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
+	cubeContainer->RotateZ(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());*/
+	cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	cubeContainer->RotateY(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+
+	////for (auto it = cubes.begin(); it != cubes.end(); ++it)
+	//concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
+	//{
+	//	cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+	//	cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+	//	cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+	//});
+	concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
+	{
+		cube->RotateX(1.0f / 1000.0f * FpsTracker::GetFrameTimeMs());
+		cube->RotateY(1.0f / 1000.0f * FpsTracker::GetFrameTimeMs());
+		cube->RotateZ(1.0f / 1000.0f * FpsTracker::GetFrameTimeMs());
+	}, concurrency::static_partitioner());
 
 	rootUpdateNode->Update();
 
@@ -133,8 +185,9 @@ void draw()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// draw stuff
+	Game::GameRenderGraph->Render();
 
-	cube->Draw();
+	//cube->Draw();
 
 	SDL_GL_SwapWindow(window);
 	glFlush();
@@ -163,7 +216,7 @@ int main(int argc, char **argv)
 	init();
 
 	if (SDL_SetRelativeMouseMode(SDL_TRUE) == -1)
-		std::cerr << "ünable to set relative mouse mode.\n";
+		std::cerr << "unable to set relative mouse mode.\n";
 
 	std::cout << "all systems are go bro\n";
 

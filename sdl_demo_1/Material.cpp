@@ -235,4 +235,12 @@ namespace Bagnall
 		m.shininess = 10.0;
 		return m;
 	}
+
+	bool Material::operator==(const Material& other) const
+	{
+		return (ambient == other.ambient
+			&& diffuse == other.diffuse
+			&& specular == other.specular
+			&& shininess == other.shininess);
+	}
 }
