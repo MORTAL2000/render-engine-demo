@@ -16,6 +16,12 @@
     <Filter Include="Source Files\shaders">
       <UniqueIdentifier>{a63dbbab-7648-401c-bfa6-5421f47d5001}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\textures">
+      <UniqueIdentifier>{bdbbca3f-47f7-4309-bb82-cc638c85e0b4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\bumpmaps">
+      <UniqueIdentifier>{98f11d16-5a6b-4d38-b2e1-a07b7b998369}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -67,6 +73,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -130,5 +139,22 @@
     <ClInclude Include="RenderGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="textures\Shrek-and-Yoda.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="bumpmaps\Shrek-and-Yoda_NRM.jpg">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="textures\ben.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="bumpmaps\ben_NRM.jpg">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
   </ItemGroup>
 </Project>

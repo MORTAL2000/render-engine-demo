@@ -95,6 +95,48 @@ namespace Bagnall
 		return c;
 	}
 
+	mat4 Util::InverseTranslation(const mat4& translation)
+	{
+		mat4 t = translation;
+		t[0][3] *= -1;
+		t[1][3] *= -1;
+		t[2][3] *= -1;
+		return t;
+	}
+
+	mat4 Util::InverseRotateX(const mat4& rotateX)
+	{
+		mat4 r = rotateX;
+		r[2][1] = -r[2][1];
+		r[1][2] = -r[1][2];
+		return r;
+	}
+
+	mat4 Util::InverseRotateY(const mat4& rotateY)
+	{
+		mat4 r = rotateY;
+		r[0][2] = -r[0][2];
+		r[2][0] = -r[2][0];
+		return r;
+	}
+
+	mat4 Util::InverseRotateZ(const mat4& rotatZ)
+	{
+		mat4 r = rotatZ;
+		r[1][0] = -r[1][0];
+		r[0][1] = -r[0][1];
+		return r;
+	}
+
+	mat4 Util::InverseScale(const mat4& scale)
+	{
+		mat4 s;
+		s[0][0] = 1.0f / s[0][0];
+		s[1][1] = 1.0f / s[1][1];
+		s[2][2] = 1.0f / s[2][2];
+		return s;
+	}
+
 	mat4 Util::LookAt(const vec3& eye, const vec3& at, const vec3& up)
 	{
 		vec3 n = normalize(eye - at);

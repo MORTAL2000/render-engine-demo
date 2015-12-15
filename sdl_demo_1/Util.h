@@ -102,6 +102,16 @@ namespace Bagnall
 		**********************************************************************/
 		static mat4 RotateZ(float theta);
 
+		static mat4 InverseTranslation(const mat4& translation);
+
+		static mat4 InverseRotateX(const mat4& rotateX);
+
+		static mat4 InverseRotateY(const mat4& rotateY);
+
+		static mat4 InverseRotateZ(const mat4& rotateZ);
+
+		static mat4 InverseScale(const mat4& scale);
+
 		/**********************************************************************
 		Function:		ToString
 		Purpose:		Convert an object to its string representation

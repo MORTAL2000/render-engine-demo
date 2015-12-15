@@ -10,6 +10,7 @@
 #include "UpdateGraph.h"
 #include "ModelGraph.h"
 #include "RenderGraph.h"
+#include "Texture.h"
 #include <vector>
 #include <iostream>
 
@@ -45,7 +46,13 @@ void init(void)
 {
 	Cube::Init();
 	LightSource::Init();
+	Texture::Init();
 	Shader::Init();
+
+	//auto v = Shader::Vertices;
+	//auto n = Shader::Normals;
+	//auto s = Shader::Tangents;
+	//auto t = Shader::Binormals;
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -70,21 +77,36 @@ void init(void)
 	lightSource->ambient = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->specular = vec4(1.0, 1.0, 1.0, 1.0);
-	lightSource->position = vec4(50.0, -250.0, 50.0, 0.0);
+	lightSource->position = vec4(50.0, -250.0, 50.0, 1.0);
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
 	cubeContainer = new Object(rootObject);
 
 	int range = Game::WorldSize - 5.0f;
-	for (int i = 0; i < 25000; ++i)
+	for (int i = 0; i < 10000; ++i)
 	{
 		Cube *cube = new Cube(cubeContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
 		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 		cube->Scale(5.0f);
+		cube->SetTexture(Texture::GetTextureByName("shrek"));
 		cubes.push_back(cube);
 	}
+
+	Cube *cube = new Cube(cubeContainer);
+	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+	cube->Scale(10.0f);
+	cube->SetTexture(Texture::GetTextureByName("ben"));
+	cubes.push_back(cube);
+
+	cube = new Cube(cubeContainer);
+	cube->SetPosition(vec4(50.0, -250.0, 50.0, 1.0));
+	cube->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	cube->SetEmissive(true);
+	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 1.0f, 0.0f, 1.0f)));
+	cube->Scale(100.0f);
+	cubes.push_back(cube);
 }
 
 //----------------------------------------------------------------------------
@@ -152,22 +174,22 @@ int update()
 	/*cubeContainer->RotateX(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
 	cubeContainer->RotateY(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
 	cubeContainer->RotateZ(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());*/
-	cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	/*cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 	cubeContainer->RotateY(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
-	cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());*/
 
-	////for (auto it = cubes.begin(); it != cubes.end(); ++it)
-	//concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
-	//{
-	//	cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-	//	cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-	//	cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-	//});
+	//for (auto it = cubes.begin(); it != cubes.end(); ++it)
+	/*concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
+	{
+		cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+		cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+		cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+	});*/
 	concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
 	{
-		cube->RotateX(1.0f / 1000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateY(1.0f / 1000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateZ(1.0f / 1000.0f * FpsTracker::GetFrameTimeMs());
+		//cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		//cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
 	}, concurrency::static_partitioner());
 
 	rootUpdateNode->Update();

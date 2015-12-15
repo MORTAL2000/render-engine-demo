@@ -26,6 +26,8 @@ namespace Bagnall
 
 		bool GetEmissive() const;
 
+		void SetEmissive(bool e);
+
 		vec4 GetEmissionColor() const;
 
 		virtual void SetEmissionColor(const vec4& color);

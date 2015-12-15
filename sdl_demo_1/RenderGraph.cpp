@@ -1,6 +1,7 @@
 #include "RenderGraph.h"
 #include "DrawableObject.h"
 #include "Shader.h"
+#include "Texture.h"
 
 namespace Bagnall
 {
@@ -8,7 +9,7 @@ namespace Bagnall
 
 	RenderNode* RenderGraph::AddDrawableObject(DrawableObject *o)
 	{
-		// emissive
+		// texture and material
 		if (!o->GetEmissive())
 		{
 			if (textureNodeMap.find(o->GetTexture()) == textureNodeMap.end())
@@ -25,7 +26,7 @@ namespace Bagnall
 
 			return materialNode;
 		}
-		// texture and material
+		// emissive
 		else
 		{
 			if (emissiveNodeMap.find(o->GetEmissionColor()) == emissiveNodeMap.end())
@@ -46,10 +47,15 @@ namespace Bagnall
 			(*it).second->Render();
 		}
 
+		Shader::SetUseTexture(false);
+		Shader::SetEmissive(true);
+
 		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
 		{
 			(*it).second->Render();
 		}
+
+		Shader::SetEmissive(false);
 	}
 
 	// TEXTURENODE PUBLIC
@@ -57,6 +63,27 @@ namespace Bagnall
 	void TextureNode::Render() const
 	{
 		// bind texture
+		if (texture == 0)
+			Shader::SetUseTexture(false);
+		else
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			Shader::SetUseTexture(true);
+
+			// bind bumpmap if it exists
+			GLuint bumpmap = Texture::GetBumpMapByTexture(texture);
+			if (bumpmap != 0)
+			{
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, bumpmap);
+				Shader::SetUseBumpMap(true);
+			}
+			else
+			{
+				Shader::SetUseBumpMap(false);
+			}
+		}
 
 		// render material nodes
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)

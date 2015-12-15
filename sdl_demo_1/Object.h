@@ -86,11 +86,17 @@ namespace Bagnall
 
 		mat4 GetFinalModel() const;
 
+		mat4 GetFinalInverseModel() const;
+
 		mat4 GetRotationMatrix() const;
 
-		void SetParentModel(const mat4& pt);
+		void SetParentModel(const mat4& p);
 
 		void SetParentModel(const mat4& pTranslation, const mat4& pRotationX, const mat4& pRotationY, const mat4& pRotationZ, const mat4& pScale);
+
+		void SetParentInverseModel(const mat4& p);
+
+		void SetParentInverseModel(const mat4& pTranslation, const mat4& pRotationX, const mat4& pRotationY, const mat4& pRotationZ, const mat4& pScale);
 
 		void AddIgnoreParentModelFlag(IgnoreParentModel ignoreFlag);
 
@@ -107,6 +113,7 @@ namespace Bagnall
 		vec4 oldPosition;
 		mat4 translationMatrix; // current translation matrix
 		mat4 oldTranslationMatrix; // previous translation matrix
+		mat4 translationInverseMatrix;
 
 		vec3 theta; // rotation about the three axes
 		mat4 rotationMatrix;
@@ -114,19 +121,28 @@ namespace Bagnall
 		mat4 rotationYMatrix; // current rotationY matrix
 		mat4 rotationZMatrix; // current rotationZ matrix
 
+		mat4 rotationInverseMatrix;
+		mat4 rotationXInverseMatrix;
+		mat4 rotationYInverseMatrix;
+		mat4 rotationZInverseMatrix;
+
 		vec4 centerOfRotation;
 		mat4 centerOfRotationTranslationMatrix;
 		bool useCenterOfRotation;
 
 		vec3 scale; // scale in the three axes
 		mat4 scaleMatrix; // current scale matrix
+		mat4 scaleInverseMatrix;
 
 		unsigned int changedFlags; // flags for tracking changes to the object
 		unsigned int ignoreParentModelFlags;
 		mat4 model; // model-view matrix
+		mat4 inverseModel;
 
 		mat4 parentModel; // the parent transform matrix
+		mat4 parentInverseModel;
 		mat4 finalModel; // the product of parentModel and model
+		mat4 finalInverseModel;
 
 		std::vector<Object*> children; // children of the object
 

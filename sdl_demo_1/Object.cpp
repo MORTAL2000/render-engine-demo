@@ -25,12 +25,14 @@ namespace Bagnall
 			updateNode = new UpdateNode(NULL, this);
 			modelNode = new ModelNode(NULL, this);
 			SetParentModel(mat4(1.0f));
+			SetParentInverseModel(mat4(1.0f));
 		}
 		else
 		{
 			updateNode = new UpdateNode(parent->updateNode, this);
 			modelNode = new ModelNode(parent->modelNode, this);
-			SetParentModel(parent->GetModel());
+			SetParentModel(parent->GetFinalModel());
+			SetParentInverseModel(parent->GetFinalInverseModel());
 		}
 	}
 
@@ -62,9 +64,15 @@ namespace Bagnall
 	void Object::PassDownParentModel(Object *c) const
 	{
 		if (!c->ignoreParentModelFlags)
+		{
 			c->SetParentModel(finalModel);
+			c->SetParentInverseModel(finalInverseModel);
+		}
 		else
+		{
 			c->SetParentModel(translationMatrix, rotationXMatrix, rotationYMatrix, rotationZMatrix, scaleMatrix);
+			c->SetParentInverseModel(translationInverseMatrix, rotationXInverseMatrix, rotationYInverseMatrix, rotationZInverseMatrix, scaleInverseMatrix);
+		}
 	}
 
 	vec4 Object::GetPosition() const
@@ -230,6 +238,11 @@ namespace Bagnall
 		return finalModel;
 	}
 
+	mat4 Object::GetFinalInverseModel() const
+	{
+		return finalInverseModel;
+	}
+
 	mat4 Object::GetRotationMatrix() const
 	{
 		return rotationMatrix;
@@ -255,6 +268,30 @@ namespace Bagnall
 			parentModel = pRotationZ * parentModel;
 		if (!(ignoreParentModelFlags & IGNORE_PARENT_TRANSLATION))
 			parentModel = pTranslation * parentModel;
+
+		changedFlags |= PARENT_CHANGED;
+	}
+
+	void Object::SetParentInverseModel(const mat4& p)
+	{
+		parentInverseModel = p;
+		changedFlags |= PARENT_CHANGED;
+	}
+
+	void Object::SetParentInverseModel(const mat4& pTranslation, const mat4& pRotationX, const mat4& pRotationY, const mat4& pRotationZ, const mat4& pScale)
+	{
+		parentInverseModel = mat4(1.0);
+
+		if (!(ignoreParentModelFlags & IGNORE_PARENT_TRANSLATION))
+			parentInverseModel = pTranslation * parentInverseModel;
+		if (!(ignoreParentModelFlags & IGNORE_PARENT_ROTATIONZ))
+			parentInverseModel = pRotationZ * parentInverseModel;
+		if (!(ignoreParentModelFlags & IGNORE_PARENT_ROTATIONY))
+			parentInverseModel = pRotationY * parentInverseModel;
+		if (!(ignoreParentModelFlags & IGNORE_PARENT_ROTATIONX))
+			parentInverseModel = pRotationX * parentInverseModel;
+		if (!(ignoreParentModelFlags & IGNORE_PARENT_SCALE))
+			parentInverseModel = pScale * parentInverseModel;
 
 		changedFlags |= PARENT_CHANGED;
 	}
@@ -300,38 +337,68 @@ namespace Bagnall
 				if (changedFlags & TRANSLATION_CHANGED)
 				{
 					//oldTranslationMatrix = translationMatrix;
-					if (useCenterOfRotation)
-						translationMatrix = translate(vec3(position - centerOfRotation));
-					else
+					if (!useCenterOfRotation)
 						translationMatrix = translate(vec3(position));
+					else
+						translationMatrix = translate(vec3(position - centerOfRotation));
+
+					//translationInverseMatrix = Util::InverseTranslation(translationMatrix);
+					translationInverseMatrix = translate(-vec3(position));
 				}
 				if (changedFlags & ROTATIONX_CHANGED)
+				{
 					rotationXMatrix = Util::RotateX(theta.x);
+					rotationXInverseMatrix = Util::InverseRotateX(rotationXMatrix);
+					//rotationXInverseMatrix = Util::RotateX(-theta.x);
+				}
 				if (changedFlags & ROTATIONY_CHANGED)
+				{
 					rotationYMatrix = Util::RotateY(theta.y);
+					rotationYInverseMatrix = Util::InverseRotateY(rotationYMatrix);
+					//rotationYInverseMatrix = Util::RotateY(-theta.y);
+				}
 				if (changedFlags & ROTATIONZ_CHANGED)
+				{
 					rotationZMatrix = Util::RotateZ(theta.z);
+					rotationZInverseMatrix = Util::InverseRotateZ(rotationZMatrix);
+					//rotationZInverseMatrix = Util::RotateZ(-theta.z);
+				}
 				if (changedFlags & SCALE_CHANGED)
+				{
 					scaleMatrix = glm::scale(scale);
+					//scaleInverseMatrix = Util::InverseScale(scaleMatrix);
+					scaleInverseMatrix = glm::scale(1.0f / scale);
+				}
 
 				// if only translation change just change the translation instead of computing everything again
-				if (changedFlags == TRANSLATION_CHANGED)
-					//model = translationMatrix * Util::InverseTranslation(oldTranslationMatrix) * model;
-					model = translate(vec3(position - oldPosition)) * model;
-				else
+				//if (changedFlags == TRANSLATION_CHANGED)
+				//{
+				//	//model = translationMatrix * Util::InverseTranslation(oldTranslationMatrix) * model;
+				//	model = translate(vec3(position - oldPosition)) * model;
+				//	inverseModel = translate(vec3(oldPosition - position)) * inverseModel;
+				//}
+				//else
 				{
 					rotationMatrix = rotationZMatrix * rotationYMatrix * rotationXMatrix;
+					rotationInverseMatrix = rotationXInverseMatrix * rotationYInverseMatrix * rotationZInverseMatrix;
+
 					if (!useCenterOfRotation)
+					{
 						model = translationMatrix * rotationMatrix * scaleMatrix;
+						inverseModel = scaleInverseMatrix * rotationInverseMatrix * translationInverseMatrix;
+					}
 					else
+					{
 						model = translationMatrix * rotationMatrix * centerOfRotationTranslationMatrix * scaleMatrix;
+						inverseModel = scaleInverseMatrix * Util::InverseTranslation(centerOfRotationTranslationMatrix) * rotationInverseMatrix * translationInverseMatrix;
+					}
 				}
 			}
 
-			//if (hasParentModel)
-				finalModel = parentModel * model;
-			//else
-			//	finalModel = model;
+			auto I = model * inverseModel;
+
+			finalModel = parentModel * model;
+			finalInverseModel = inverseModel * parentInverseModel;
 
 			oldPosition = position;
 			changedFlags = 0;

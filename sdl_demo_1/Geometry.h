@@ -79,6 +79,10 @@ namespace Bagnall
 		**********************************************************************/
 		static std::vector<vec4> CreateCubeNormals();
 
+		static std::vector<vec4> CreateCubeTangents();
+
+		static std::vector<vec4> CreateCubeBiNormals();
+
 		static std::vector<vec2> CreateCubeTextureCoordinates();
 
 		static std::vector<vec2> CreateSkyboxTextureCoordinates();

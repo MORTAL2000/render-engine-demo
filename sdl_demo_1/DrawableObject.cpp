@@ -34,7 +34,9 @@ namespace Bagnall
 
 	void DrawableObject::Draw() const
 	{
+		auto I = finalInverseModel * finalModel;
 		Shader::SetModel(finalModel);
+		Shader::SetInverseModel(finalInverseModel);
 		/*Shader::SetMaterialAmbient(material.ambient);
 		Shader::SetMaterialDiffuse(material.diffuse);
 		Shader::SetMaterialSpecular(material.specular);
@@ -61,6 +63,12 @@ namespace Bagnall
 	bool DrawableObject::GetEmissive() const
 	{
 		return emissive;
+	}
+
+	void DrawableObject::SetEmissive(bool e)
+	{
+		emissive = e;
+		UpdateRenderNode();
 	}
 
 	vec4 DrawableObject::GetEmissionColor() const

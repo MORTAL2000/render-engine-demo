@@ -11,6 +11,8 @@ namespace Bagnall
 	public:
 		static std::vector<vec4> Vertices;
 		static std::vector<vec4> Normals;
+		static std::vector<vec4> Tangents;
+		static std::vector<vec4> Binormals;
 		static std::vector<vec2> TextureCoordinates;
 
 		static GLuint MaterialAmbientLoc;
@@ -20,6 +22,7 @@ namespace Bagnall
 		static GLuint LightSourceLoc;
 		static GLuint CameraPositionLoc;
 		static GLuint ModelLoc;
+		static GLuint InverseModelLoc;
 		static GLuint CameraLoc;
 		static GLuint ProjectionLoc;
 		static GLuint EmissiveLoc;
@@ -29,7 +32,6 @@ namespace Bagnall
 		static GLuint TexLoc;
 		static GLuint UseBumpMapLoc;
 		static GLuint BumpTexLoc;
-		static GLuint NormalRotationLoc;
 
 		static void Init();
 
@@ -40,6 +42,7 @@ namespace Bagnall
 		static void SetLightSource(const mat4& lightSource);
 		static void SetCameraPosition(const vec4& cameraPosition);
 		static void SetModel(const mat4& model);
+		static void SetInverseModel(const mat4& model);
 		static void SetCamera(const mat4& camera);
 		static void SetProjection(const mat4& projection);
 		static void SetEmissive(bool emissive);
@@ -49,7 +52,6 @@ namespace Bagnall
 		static void SetTex(int tex);
 		static void SetUseBumpMap(bool useBumpMap);
 		static void SetBumpTex(int bumpTex);
-		static void SetNormalRotation(const mat4& normalRotation);
 
 	private:
 		static GLuint buffer;

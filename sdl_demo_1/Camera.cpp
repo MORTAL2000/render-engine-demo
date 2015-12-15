@@ -71,6 +71,12 @@ namespace Bagnall
 			case SDLK_d:
 				holdingD = true;
 				break;
+			case SDLK_z:
+				Translate(vec4(0.0f, 0.0f, -1.0f, 0.0f));
+				break;
+			case SDLK_SPACE:
+				Translate(vec4(0.0f, 0.0f, 1.0f, 0.0f));
+				break;
 			}
 		}
 		else if (ev.type == SDL_KEYUP)

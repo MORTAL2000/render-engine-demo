@@ -8,6 +8,8 @@ namespace Bagnall
 
 	std::vector<vec4> Shader::Vertices;
 	std::vector<vec4> Shader::Normals;
+	std::vector<vec4> Shader::Tangents;
+	std::vector<vec4> Shader::Binormals;
 	std::vector<vec2> Shader::TextureCoordinates;
 
 	GLuint Shader::MaterialAmbientLoc;
@@ -17,6 +19,7 @@ namespace Bagnall
 	GLuint Shader::LightSourceLoc;
 	GLuint Shader::CameraPositionLoc;
 	GLuint Shader::ModelLoc;
+	GLuint Shader::InverseModelLoc;
 	GLuint Shader::CameraLoc;
 	GLuint Shader::ProjectionLoc;
 	GLuint Shader::EmissiveLoc;
@@ -26,7 +29,6 @@ namespace Bagnall
 	GLuint Shader::TexLoc;
 	GLuint Shader::UseBumpMapLoc;
 	GLuint Shader::BumpTexLoc;
-	GLuint Shader::NormalRotationLoc;
 
 	void Shader::Init()
 	{
@@ -39,10 +41,12 @@ namespace Bagnall
 		{
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*TextureCoordinates.size(), NULL, GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size() + sizeof(vec4)*Binormals.size() + sizeof(vec4)*TextureCoordinates.size(), NULL, GL_STATIC_DRAW);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec4)*Vertices.size(), &Vertices[0]);
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size(), sizeof(vec4)*Normals.size(), &Normals[0]);
-			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size(), sizeof(vec2)*TextureCoordinates.size(), &TextureCoordinates[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size(), sizeof(vec4)*Tangents.size(), &Tangents[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size(), sizeof(vec4)*Binormals.size(), &Binormals[0]);
+			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size() + sizeof(vec4)*Binormals.size(), sizeof(vec2)*TextureCoordinates.size(), &TextureCoordinates[0]);
 		}
 
 		// Load shaders and use the resulting shader program
@@ -58,14 +62,26 @@ namespace Bagnall
 		glEnableVertexAttribArray(vNormalLoc);
 		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size()));
 
+		GLuint vTangentLoc = glGetAttribLocation(program, "vTangent");
+		glEnableVertexAttribArray(vTangentLoc);
+		glVertexAttribPointer(vTangentLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size()));
+
+		GLuint vBinormal = glGetAttribLocation(program, "vBinormal");
+		glEnableVertexAttribArray(vBinormal);
+		glVertexAttribPointer(vBinormal, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size()));
+
 		GLuint vTextureCoordinateLoc = glGetAttribLocation(program, "vTextureCoordinate");
 		glEnableVertexAttribArray(vTextureCoordinateLoc);
-		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size()));
+		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size() + sizeof(vec4)*Binormals.size()));
 
 		// Initialize attributes
 		ModelLoc = glGetUniformLocation(program, "model");
 		if (ModelLoc == -1)
 			std::cerr << "Unable to find model parameter" << std::endl;
+
+		InverseModelLoc = glGetUniformLocation(program, "inverseModel");
+		if (InverseModelLoc == -1)
+			std::cerr << "Unable to find inverseModel parameter" << std::endl;
 
 		CameraLoc = glGetUniformLocation(program, "camera");
 		if (CameraLoc == -1)
@@ -126,10 +142,7 @@ namespace Bagnall
 		BumpTexLoc = glGetUniformLocation(program, "BumpTex");
 		if (BumpTexLoc == -1)
 			std::cerr << "Unable to find BumpTex parameter" << std::endl;
-
-		NormalRotationLoc = glGetUniformLocation(program, "normalRotation");
-		if (NormalRotationLoc == -1)
-			std::cerr << "Unable to find normalRotation parameter" << std::endl;
+		
 
 		glUniform1i(EmissiveLoc, 0);
 		glUniform1i(UseTextureLoc, 0);
@@ -172,6 +185,11 @@ namespace Bagnall
 	void Shader::SetModel(const mat4& model)
 	{
 		glUniformMatrix4fv(ModelLoc, 1, GL_FALSE, value_ptr(model));
+	}
+
+	void Shader::SetInverseModel(const mat4& inverseModel)
+	{
+		glUniformMatrix4fv(InverseModelLoc, 1, GL_FALSE, value_ptr(inverseModel));
 	}
 
 	void Shader::SetCamera(const mat4& camera)
@@ -217,11 +235,6 @@ namespace Bagnall
 	void Shader::SetBumpTex(int bumpTex)
 	{
 		glUniform1i(BumpTexLoc, bumpTex);
-	}
-
-	void Shader::SetNormalRotation(const mat4& normalRotation)
-	{
-		glUniformMatrix4fv(NormalRotationLoc, 1, GL_FALSE, value_ptr(normalRotation));
 	}
 
 	// PRIVATE
