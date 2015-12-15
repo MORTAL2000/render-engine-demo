@@ -2,13 +2,13 @@ attribute vec4 vPosition;
 attribute vec4 vNormal;
 attribute vec4 vTangent;
 attribute vec4 vBinormal;
-attribute vec4 vTextureCoordinate;
+attribute vec2 vTextureCoordinate;
 
 varying vec3 N;
 varying vec3 L;
 varying vec3 E;
 varying vec2 fTextureCoord;
-varying mat4 TBN;
+varying mat4 inverseTBN;
 
 uniform mat4 lightSource;
 uniform vec4 cameraPosition;
@@ -20,37 +20,27 @@ uniform bool emissive;
 
 void main()
 {
+	// compute vPosition in world space
+	vec4 vPositionWorld = model * vPosition;
+
 	if (!emissive)
 	{
-		TBN = transpose(mat4(vTangent, vBinormal, vNormal, vec4(0.0, 0.0, 0.0, 0.0)));
+		inverseTBN = mat4(vTangent, vBinormal, vNormal, vec4(0.0, 0.0, 0.0, 0.0));
 
-		// compute normal
-		N = vec3(0.0, 0.0, 1.0);
-
-		// compute camera position in object space
-		vec4 cameraPositionObject = inverseModel * cameraPosition;
+		// compute normal in world space
+		N = (model * vNormal).xyz;
 
 		// compute eye direction
-		vec4 eyeDirection = cameraPositionObject - vPosition;
+		E = (cameraPosition - vPositionWorld).xyz;
 
-		// move eye direction to tangent space
-		E = (TBN * eyeDirection).xyz;
-
-		// compute light position in object space
-		vec4 lightPositionObject = inverseModel * lightSource[3];
-
-		vec4 lightDirection;
-		if (lightPositionObject.w == 0.0)
-			lightDirection = lightPositionObject;
+		if (lightSource[3].w == 0.0)
+			L = (lightSource[3].xyz);
 		else
-			lightDirection = lightPositionObject - vPosition; 
-
-		// move light direction to tangent space
-		L = (TBN * lightDirection).xyz;
+			L = (lightSource[3] - vPositionWorld).xyz; 
 	}
 
 	// compute gl_Position
-	gl_Position = projection * camera * model * vPosition/vPosition.w;
+	gl_Position = projection * camera * vPositionWorld;
 
 	// compute fTextureCoord
 	fTextureCoord = vec2((vTextureCoordinate.x), (vTextureCoordinate.y));

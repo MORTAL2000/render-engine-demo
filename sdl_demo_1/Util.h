@@ -102,8 +102,6 @@ namespace Bagnall
 		**********************************************************************/
 		static mat4 RotateZ(float theta);
 
-		static mat4 InverseTranslation(const mat4& translation);
-
 		static mat4 InverseRotateX(const mat4& rotateX);
 
 		static mat4 InverseRotateY(const mat4& rotateY);
@@ -144,6 +142,8 @@ namespace Bagnall
 		static mat4 LookAt(const vec3& eye, const vec3& at, const vec3& up);
 
 		static mat4 Perspective(const GLfloat fovy, const GLfloat aspect, const GLfloat zNear, const GLfloat zFar);
+
+		static std::vector<vec2> Vec4toVec2(const std::vector<vec4>& v);
 	};
 }
 

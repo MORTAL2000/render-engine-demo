@@ -35,6 +35,17 @@ namespace Bagnall
 		void Render() const;
 	};
 
+	struct TextureBumpNode
+	{
+		GLuint texture;
+		GLuint bumpmap;
+		std::unordered_map<Material, MaterialNode*> materialNodeMap;
+
+		TextureBumpNode(GLuint tex, GLuint bump) { texture = tex; bumpmap = bump; }
+
+		void Render() const;
+	};
+
 	struct TextureNode
 	{
 		GLuint texture;
@@ -48,7 +59,16 @@ namespace Bagnall
 	class RenderGraph
 	{
 	public:
+		// root node for textured objects with bump maps and normal lighting
+		std::unordered_map<GLuint, TextureBumpNode*> textureBumpNodeMap;
+
+		// root node for textured objects without bump maps and normal lighting
 		std::unordered_map<GLuint, TextureNode*> textureNodeMap;
+
+		// root node for non-textured objects with normal lighting
+		std::unordered_map<Material, MaterialNode*> materialNodeMap;
+
+		// root node for emissive objects
 		std::unordered_map<vec4, EmissiveNode*> emissiveNodeMap;
 
 		RenderNode* AddDrawableObject(DrawableObject *o);

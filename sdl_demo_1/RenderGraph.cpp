@@ -9,22 +9,55 @@ namespace Bagnall
 
 	RenderNode* RenderGraph::AddDrawableObject(DrawableObject *o)
 	{
-		// texture and material
+		// non-emissive
 		if (!o->GetEmissive())
 		{
-			if (textureNodeMap.find(o->GetTexture()) == textureNodeMap.end())
-				textureNodeMap.emplace(o->GetTexture(), new TextureNode(o->GetTexture()));
+			auto texture = o->GetTexture();
 
-			auto materialNodeMap = &textureNodeMap[o->GetTexture()]->materialNodeMap;
+			// no texture, only material
+			if (texture == 0)
+			{
+				if (materialNodeMap.find(o->GetMaterial()) == materialNodeMap.end())
+					materialNodeMap.emplace(o->GetMaterial(), new MaterialNode(o->GetMaterial()));
 
-			if (materialNodeMap->find(o->GetMaterial()) == materialNodeMap->end())
-				materialNodeMap->emplace(o->GetMaterial(), new MaterialNode(o->GetMaterial()));
+				auto materialNode = materialNodeMap[o->GetMaterial()];
 
-			auto materialNode = (*materialNodeMap)[o->GetMaterial()];
+				materialNode->objects.push_back(o);
 
-			materialNode->objects.push_back(o);
+				return materialNode;
+			}
+			// texture and material
+			else
+			{
+				std::unordered_map<Material, MaterialNode*> *_materialNodeMap;
 
-			return materialNode;
+				auto bumpmap = Texture::GetBumpMapByTexture(texture);
+				// with bump map
+				if (bumpmap != 0)
+				{
+					if (textureBumpNodeMap.find(texture) == textureBumpNodeMap.end())
+						textureBumpNodeMap.emplace(texture, new TextureBumpNode(texture, bumpmap));
+
+					_materialNodeMap = &textureBumpNodeMap[texture]->materialNodeMap;
+				}
+				// without bump map
+				else
+				{
+					if (textureNodeMap.find(texture) == textureNodeMap.end())
+						textureNodeMap.emplace(texture, new TextureNode(texture));
+
+					_materialNodeMap = &textureNodeMap[texture]->materialNodeMap;
+				}
+
+				if (_materialNodeMap->find(o->GetMaterial()) == _materialNodeMap->end())
+					_materialNodeMap->emplace(o->GetMaterial(), new MaterialNode(o->GetMaterial()));
+
+				auto materialNode = (*_materialNodeMap)[o->GetMaterial()];
+
+				materialNode->objects.push_back(o);
+
+				return materialNode;
+			}
 		}
 		// emissive
 		else
@@ -42,20 +75,54 @@ namespace Bagnall
 
 	void RenderGraph::Render() const
 	{
+		// render objects with texture, bump map, material
+		Shader::SetUseTexture(true);
+		Shader::SetUseBumpMap(true);
+		for (auto it = textureBumpNodeMap.begin(); it != textureBumpNodeMap.end(); ++it)
+		{
+			(*it).second->Render();
+		}
+		Shader::SetUseBumpMap(false);
+
+		// render objects with texture, material
 		for (auto it = textureNodeMap.begin(); it != textureNodeMap.end(); ++it)
 		{
 			(*it).second->Render();
 		}
-
 		Shader::SetUseTexture(false);
-		Shader::SetEmissive(true);
 
-		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
+		// render objects with only material
+		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
 		{
 			(*it).second->Render();
 		}
 
+		// render emissive objects
+		Shader::SetEmissive(true);
+		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
+		{
+			(*it).second->Render();
+		}
 		Shader::SetEmissive(false);
+	}
+
+	// TEXTUREBUMPNODE PUBLIC
+
+	void TextureBumpNode::Render() const
+	{
+		// bind texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		// bind bump map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, bumpmap);
+
+		// render material nodes
+		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
+		{
+			(*it).second->Render();
+		}
 	}
 
 	// TEXTURENODE PUBLIC
@@ -63,27 +130,8 @@ namespace Bagnall
 	void TextureNode::Render() const
 	{
 		// bind texture
-		if (texture == 0)
-			Shader::SetUseTexture(false);
-		else
-		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture);
-			Shader::SetUseTexture(true);
-
-			// bind bumpmap if it exists
-			GLuint bumpmap = Texture::GetBumpMapByTexture(texture);
-			if (bumpmap != 0)
-			{
-				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, bumpmap);
-				Shader::SetUseBumpMap(true);
-			}
-			else
-			{
-				Shader::SetUseBumpMap(false);
-			}
-		}
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
 		// render material nodes
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)

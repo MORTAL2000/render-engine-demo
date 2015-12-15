@@ -34,31 +34,9 @@ namespace Bagnall
 
 	void DrawableObject::Draw() const
 	{
-		auto I = finalInverseModel * finalModel;
 		Shader::SetModel(finalModel);
-		Shader::SetInverseModel(finalInverseModel);
-		/*Shader::SetMaterialAmbient(material.ambient);
-		Shader::SetMaterialDiffuse(material.diffuse);
-		Shader::SetMaterialSpecular(material.specular);
-		Shader::SetMaterialShininess(material.shininess);*/
+		//Shader::SetInverseModel(finalInverseModel);
 	};
-
-	//void Object::DrawRaw() const
-	//{
-	//	glUniformMatrix4fv(Game::ModelLoc, 1, GL_TRUE, finalModel);
-	//}
-
-	//void Object::StartDrawEmissive() const
-	//{
-	//	glUniformMatrix4fv(Game::ModelLoc, 1, GL_TRUE, finalModel);
-	//	glUniform1i(Game::EmissiveLoc, 1);
-	//	glUniform4fv(Game::EmissionColorLoc, 1, color);
-	//};
-
-	//void Object::EndDrawEmissive() const
-	//{
-	//	glUniform1i(Game::EmissiveLoc, 0);
-	//}
 
 	bool DrawableObject::GetEmissive() const
 	{

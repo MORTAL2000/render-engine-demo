@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "FpsTracker.h"
 #include "Camera.h"
+#include "Rectangle.h"
 #include "Cube.h"
 #include "LightSource.h"
 #include "Util.h"
@@ -27,6 +28,8 @@ LightSource *lightSource;
 Object *cubeContainer;
 std::vector<Cube*> cubes;
 
+Object *rectContainer;
+
 UpdateNode *rootUpdateNode;
 ModelNode *rootModelNode;
 
@@ -44,6 +47,7 @@ void updateProjectionMatrixAndViewport()
 
 void init(void)
 {
+	Rectangle::Init();
 	Cube::Init();
 	LightSource::Init();
 	Texture::Init();
@@ -81,32 +85,49 @@ void init(void)
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
+	// CONTAINERS
 	cubeContainer = new Object(rootObject);
+	rectContainer = new Object(rootObject);
 
+	// MANY CUBES
 	int range = Game::WorldSize - 5.0f;
-	for (int i = 0; i < 10000; ++i)
+	for (int i = 0; i < 1000; ++i)
 	{
 		Cube *cube = new Cube(cubeContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		cube->SetTexture(Texture::GetTextureByName("shrek"));
 		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 		cube->Scale(5.0f);
-		cube->SetTexture(Texture::GetTextureByName("shrek"));
 		cubes.push_back(cube);
 	}
 
+	// MIDDLE CUBE
 	Cube *cube = new Cube(cubeContainer);
+	cube->SetTexture(Texture::GetTextureByName("ben"));
 	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	cube->Scale(10.0f);
-	cube->SetTexture(Texture::GetTextureByName("ben"));
 	cubes.push_back(cube);
 
+	// SUN
 	cube = new Cube(cubeContainer);
 	cube->SetPosition(vec4(50.0, -250.0, 50.0, 1.0));
 	cube->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
 	cube->SetEmissive(true);
-	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 1.0f, 0.0f, 1.0f)));
-	cube->Scale(100.0f);
+	cube->Scale(10.0f);
 	cubes.push_back(cube);
+
+	// floor
+	for (int i = 0; i < Game::WorldSize / 10.0f; ++i)
+	{
+		for (int j = 0; j < Game::WorldSize / 10.0f; ++j)
+		{
+			Rectangle *rect = new Rectangle(rectContainer);
+			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + i * 10.0f, -Game::WorldSize / 2.0f + j * 10.0f, -Game::WorldSize / 2.0f, 1.0));
+			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
+			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+			rect->Scale(10.0f);
+		}
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -248,7 +269,6 @@ int main(int argc, char **argv)
 	}
 
 	SDL_GL_DeleteContext(glcontext);
-
 	SDL_Quit();
 	return 0;
 }

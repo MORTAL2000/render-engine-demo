@@ -14,7 +14,6 @@ namespace Bagnall
 		GLuint tex = loadTexture("textures\\Shrek-and-Yoda.jpg");
 		if (tex != 0)
 			textureMap.emplace("shrek", tex);
-
 		GLuint bump = loadTexture("bumpmaps\\Shrek-and-Yoda_NRM.jpg");
 		if (bump != 0)
 			BumpMapMap.emplace(tex, bump);
@@ -22,8 +21,14 @@ namespace Bagnall
 		tex = loadTexture("textures\\ben.jpg");
 		if (tex != 0)
 			textureMap.emplace("ben", tex);
-
 		bump = loadTexture("bumpmaps\\ben_NRM.jpg");
+		if (bump != 0)
+			BumpMapMap.emplace(tex, bump);
+
+		tex = loadTexture("textures\\stone_wall.jpg");
+		if (tex != 0)
+			textureMap.emplace("stone_wall", tex);
+		bump = loadTexture("bumpmaps\\stone_wall_NRM.jpg");
 		if (bump != 0)
 			BumpMapMap.emplace(tex, bump);
 

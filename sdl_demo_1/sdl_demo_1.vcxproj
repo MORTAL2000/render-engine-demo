@@ -135,6 +135,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ModelGraph.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="RenderGraph.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="ModelGraph.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Rectangle.h" />
     <ClInclude Include="RenderGraph.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />

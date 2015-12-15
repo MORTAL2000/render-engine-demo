@@ -95,15 +95,6 @@ namespace Bagnall
 		return c;
 	}
 
-	mat4 Util::InverseTranslation(const mat4& translation)
-	{
-		mat4 t = translation;
-		t[0][3] *= -1;
-		t[1][3] *= -1;
-		t[2][3] *= -1;
-		return t;
-	}
-
 	mat4 Util::InverseRotateX(const mat4& rotateX)
 	{
 		mat4 r = rotateX;
@@ -160,5 +151,13 @@ namespace Bagnall
 		c[3][2] = -1.0;
 		c[3][3] = 0.0;
 		return c;
+	}
+
+	std::vector<vec2> Util::Vec4toVec2(const std::vector<vec4>& v)
+	{
+		std::vector<vec2> v2;
+		for (auto it = v.begin(); it != v.end(); ++it)
+			v2.push_back(vec2((*it).x, (*it).y));
+		return v2;
 	}
 }
