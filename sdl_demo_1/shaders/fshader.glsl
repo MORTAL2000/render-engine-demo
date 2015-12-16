@@ -8,6 +8,7 @@ varying vec4 vPositionWorld;
 uniform vec4 materialAmbient, materialDiffuse, materialSpecular;
 uniform float materialShininess;
 uniform mat4 lightSource;
+uniform vec4 cameraPosition;
 uniform mat4 model;
 uniform bool emissive;
 uniform vec4 emissionColor;
@@ -54,11 +55,15 @@ void main()
 		else if (useCubeMap)
 		{
 			vec3 cubeCoord = (vPositionWorld - model[3]).xyz;
-			//vec3 cubeCoord = (model[3] - vPositionWorld).xyz;
+			//vec3 v = normalize((vPositionWorld - cameraPosition).xyz);
+			//vec3 cubeCoord = v - 2 * dot(v, NN) * NN;
 			vec4 texColor = texture(cubeMap, cubeCoord);
-			objectAmbient = mix(materialAmbient, texColor, 0.5);
+			/*objectAmbient = mix(materialAmbient, texColor, 0.5);
 			objectDiffuse = mix(materialDiffuse, texColor, 0.5);
-			objectSpecular = mix(materialSpecular, texColor, 0.5);
+			objectSpecular = mix(materialSpecular, texColor, 0.5);*/
+			objectAmbient = texColor;
+			objectDiffuse = texColor;
+			objectSpecular = texColor;
 		}
 		else
 		{
