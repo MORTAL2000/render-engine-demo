@@ -32,6 +32,8 @@ namespace Bagnall
 		static GLuint TexLoc;
 		static GLuint UseBumpMapLoc;
 		static GLuint BumpTexLoc;
+		static GLuint UseCubeMapLoc;
+		static GLuint CubeMapLoc;
 
 		static void Init();
 
@@ -52,6 +54,8 @@ namespace Bagnall
 		static void SetTex(int tex);
 		static void SetUseBumpMap(bool useBumpMap);
 		static void SetBumpTex(int bumpTex);
+		static void SetUseCubeMap(bool useCubeMap);
+		static void SetCubeMap(int cubeMap);
 
 	private:
 		static GLuint buffer;

@@ -29,6 +29,8 @@ namespace Bagnall
 	GLuint Shader::TexLoc;
 	GLuint Shader::UseBumpMapLoc;
 	GLuint Shader::BumpTexLoc;
+	GLuint Shader::UseCubeMapLoc;
+	GLuint Shader::CubeMapLoc;
 
 	void Shader::Init()
 	{
@@ -134,6 +136,10 @@ namespace Bagnall
 		UseBumpMapLoc = glGetUniformLocation(program, "useBumpMap");
 		if (UseBumpMapLoc == -1)
 			std::cerr << "Unable to find useBumpMap parameter" << std::endl;
+		
+		UseCubeMapLoc = glGetUniformLocation(program, "useCubeMap");
+		if (UseCubeMapLoc == -1)
+			std::cerr << "Unable to find useCubeMap parameter" << std::endl;
 
 		TexLoc = glGetUniformLocation(program, "Tex");
 		if (TexLoc == -1)
@@ -142,13 +148,19 @@ namespace Bagnall
 		BumpTexLoc = glGetUniformLocation(program, "BumpTex");
 		if (BumpTexLoc == -1)
 			std::cerr << "Unable to find BumpTex parameter" << std::endl;
+
+		CubeMapLoc = glGetUniformLocation(program, "cubeMap");
+		if (CubeMapLoc == -1)
+			std::cerr << "Unable to find cubeMap parameter" << std::endl;
 		
 
 		glUniform1i(EmissiveLoc, 0);
 		glUniform1i(UseTextureLoc, 0);
 		glUniform1i(UseBumpMapLoc, 0);
+		glUniform1i(UseCubeMapLoc, 0);
 		glUniform1i(TexLoc, 0);
 		glUniform1i(BumpTexLoc, 1);
+		glUniform1i(CubeMapLoc, 2);
 		glUniform1f(AlphaOverrideLoc, 0.0f);
 	}
 
@@ -235,6 +247,16 @@ namespace Bagnall
 	void Shader::SetBumpTex(int bumpTex)
 	{
 		glUniform1i(BumpTexLoc, bumpTex);
+	}
+
+	void Shader::SetUseCubeMap(bool useCubeMap)
+	{
+		glUniform1i(UseCubeMapLoc, useCubeMap);
+	}
+
+	void Shader::SetCubeMap(int cubeMap)
+	{
+		glUniform1i(CubeMapLoc, cubeMap);
 	}
 
 	// PRIVATE

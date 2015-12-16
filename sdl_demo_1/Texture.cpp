@@ -79,10 +79,16 @@ namespace Bagnall
 		if (surface->format->BytesPerPixel == 4)
 			mode = GL_RGBA;
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
 		glTexImage2D(GL_TEXTURE_2D, 0, mode, surface->w, surface->h, 0, mode, GL_UNSIGNED_BYTE, surface->pixels);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		// When MAGnifying the image (no bigger mipmap available), use LINEAR filtering
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		// When MINifying the image, use a LINEAR blend of two mipmaps, each filtered LINEARLY too
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		// Generate mipmaps, by the way.
+		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Unbind the texture
 		glBindTexture(GL_TEXTURE_2D, NULL);

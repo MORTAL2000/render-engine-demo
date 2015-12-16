@@ -24,22 +24,27 @@ SDL_Window *window;
 SDL_GLContext glcontext;
 
 Camera *camera;
+Cube *sun;
 LightSource *lightSource;
 Object *cubeContainer;
 std::vector<Cube*> cubes;
 
-Object *rectContainer;
+Object *groundContainer;
 
 UpdateNode *rootUpdateNode;
 ModelNode *rootModelNode;
+
+GLuint frameBuffer;
+GLuint depthTexture;
+GLuint cubemap;
+
+GLuint tempTexture;
 
 void updateProjectionMatrixAndViewport()
 {
 	int w, h;
 	SDL_GetWindowSize(window, &w, &h);
 	Game::Projection = perspective(45.0f, w / static_cast<float>(h), 1.0f, Game::ViewDistance);
-	//Game::Projection = Util::Perspective(45.0f, w/h, 1.0f, Game::ViewDistance);
-	//Game::Projection = ortho(-50.0f, 50.0f, -50.0f, 50.0f, -50.0f, 50.0f);
 	Shader::SetProjection(Game::Projection);
 
 	glViewport(0, 0, w, h);
@@ -52,6 +57,62 @@ void init(void)
 	LightSource::Init();
 	Texture::Init();
 	Shader::Init();
+
+	// SET UP FRAME BUFFER FOR RENDERING TO CUBE MAP
+	frameBuffer = 0;
+	glGenFramebuffers(1, &frameBuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+	//glGenTextures(1, &tempTexture);
+	//glBindTexture(GL_TEXTURE_2D, tempTexture);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glBindTexture(GL_TEXTURE_2D, 0);
+
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tempTexture, 0);
+
+	// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
+	/*glGenTextures(1, &depthTexture);
+	glBindTexture(GL_TEXTURE_2D, depthTexture);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+
+	glDrawBuffer(GL_NONE); // No color buffer is drawn to.*/
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// SET UP CUBE MAP
+	glGenTextures(1, &cubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
+
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, cubemap, 0);
+
+	// Always check that our framebuffer is ok
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	{
+		std::cerr << "frame buffer error\n";
+	}
 
 	//auto v = Shader::Vertices;
 	//auto n = Shader::Normals;
@@ -81,17 +142,18 @@ void init(void)
 	lightSource->ambient = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->specular = vec4(1.0, 1.0, 1.0, 1.0);
-	lightSource->position = vec4(50.0, -250.0, 50.0, 1.0);
+	lightSource->position = vec4(50.0, -250.0, 50.0, 0.0);
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
 	// CONTAINERS
 	cubeContainer = new Object(rootObject);
-	rectContainer = new Object(rootObject);
+	groundContainer = new Object(rootObject);
+	groundContainer->Translate(vec4(0.0f, 0.0f, -Game::WorldSize / 2.0f, 0.0f));
 
 	// MANY CUBES
 	int range = Game::WorldSize - 5.0f;
-	for (int i = 0; i < 1000; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
 		Cube *cube = new Cube(cubeContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
@@ -103,29 +165,31 @@ void init(void)
 
 	// MIDDLE CUBE
 	Cube *cube = new Cube(cubeContainer);
-	cube->SetTexture(Texture::GetTextureByName("ben"));
+	//cube->SetTexture(Texture::GetTextureByName("ben"));
+	cube->SetTexture(tempTexture);
 	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	cube->Scale(10.0f);
 	cubes.push_back(cube);
 
 	// SUN
-	cube = new Cube(cubeContainer);
-	cube->SetPosition(vec4(50.0, -250.0, 50.0, 1.0));
-	cube->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
-	cube->SetEmissive(true);
-	cube->Scale(10.0f);
-	cubes.push_back(cube);
+	sun = new Cube(rootObject);
+	sun->SetPosition(vec4(50.0, -250.0, 50.0, 1.0));
+	sun->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	sun->SetEmissive(true);
+	sun->Scale(10.0f);
+	//cubes.push_back(cube);
 
 	// floor
-	for (int i = 0; i < Game::WorldSize / 10.0f; ++i)
+	float floorScale = Game::WorldSize / 50.0f;
+	for (int i = 0; i < Game::WorldSize / floorScale; ++i)
 	{
-		for (int j = 0; j < Game::WorldSize / 10.0f; ++j)
+		for (int j = 0; j < Game::WorldSize / floorScale; ++j)
 		{
-			Rectangle *rect = new Rectangle(rectContainer);
-			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + i * 10.0f, -Game::WorldSize / 2.0f + j * 10.0f, -Game::WorldSize / 2.0f, 1.0));
+			Rectangle *rect = new Rectangle(groundContainer);
+			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0, 1.0));
 			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
 			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-			rect->Scale(10.0f);
+			rect->Scale(floorScale);
 		}
 	}
 }
@@ -195,9 +259,11 @@ int update()
 	/*cubeContainer->RotateX(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
 	cubeContainer->RotateY(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
 	cubeContainer->RotateZ(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());*/
-	/*cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
-	cubeContainer->RotateY(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
-	cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());*/
+	//cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	//cubeContainer->RotateY(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	//cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+
+	//groundContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 
 	//for (auto it = cubes.begin(); it != cubes.end(); ++it)
 	/*concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
@@ -210,16 +276,90 @@ int update()
 	{
 		//cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
 		//cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		//cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
 	}, concurrency::static_partitioner());
 
 	rootUpdateNode->Update();
 
 	rootModelNode->Update();
 
+	sun->SetPosition(camera->GetPosition() - camera->GetLookDirection() * 10.0f);
 	//camera->Update();
 
 	return 0;
+}
+
+void renderToCubeMap()
+{
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
+	//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
+
+	glViewport(0, 0, 1024, 1024);
+
+	//glCullFace(GL_FRONT);
+
+	//for (int i = 0; i < 1; ++i)
+	//{
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//	//glActiveTexture(GL_TEXTURE0);
+	//	//glBindTexture(GL_TEXTURE_2D, Texture::GetTextureByName("ben"));
+
+	//	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap, 0);
+	//	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Texture::GetTextureByName("ben"), 0);
+	//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tempTexture, 0);
+	//	glViewport(0, 0, 800, 600);
+	//	Game::Projection = perspective(45.0f, 800.0f / 600.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, -1, 1));
+	//	Shader::SetProjection(Game::Projection);
+	//	Shader::SetCamera(lookAt(vec3(camera->GetPosition()), vec3(camera->GetPosition() - camera->GetLookDirection()), vec3(0.0f, 0.0f, 1.0f)));
+	//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//	Game::GameRenderGraph->Render();
+	//}
+
+	//Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, -1, 1)));
+
+	vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, cubemap, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
+	Game::GameRenderGraph->Render();
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, cubemap, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(-1, -1, 1)));
+	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
+	Game::GameRenderGraph->Render();
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, cubemap, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	Shader::SetCamera(lookAt(projPos, projPos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
+	Game::GameRenderGraph->Render();
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, cubemap, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	Shader::SetCamera(lookAt(projPos, projPos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
+	Game::GameRenderGraph->Render();
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, cubemap, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
+	Game::GameRenderGraph->Render();
+
+	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, cubemap, 0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
+	Game::GameRenderGraph->Render();
+
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+	updateProjectionMatrixAndViewport();
 }
 
 void draw()
@@ -227,10 +367,20 @@ void draw()
 	// clear the window
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	Shader::SetUseCubeMap(true);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
+
 	// draw stuff
 	Game::GameRenderGraph->Render();
 
-	//cube->Draw();
+	Shader::SetUseCubeMap(false);
+
+	//glBindTexture(GL_TEXTURE_2D, Texture::GetTextureByName("ben"));
+	////glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 960, 960, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+	//glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 960, 960, 0);
+
+	renderToCubeMap();
 
 	SDL_GL_SwapWindow(window);
 	glFlush();
@@ -246,12 +396,19 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
+	// 4x AA
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
 	window = SDL_CreateWindow(
 		"SDL2/OpenGL Demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480,
 		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
 
 	// Create an OpenGL context associated with the window.
 	glcontext = SDL_GL_CreateContext(window);
+
+	// enable AA
+	glEnable(GL_MULTISAMPLE);
 
 	//SDL_GL_MakeCurrent(window, glcontext);
 	glewInit();
@@ -269,6 +426,7 @@ int main(int argc, char **argv)
 	}
 
 	SDL_GL_DeleteContext(glcontext);
+	SDL_DestroyWindow(window);
 	SDL_Quit();
 	return 0;
 }

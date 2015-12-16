@@ -9,6 +9,7 @@ varying vec3 L;
 varying vec3 E;
 varying vec2 fTextureCoord;
 varying mat4 inverseTBN;
+varying vec4 vPositionWorld;
 
 uniform mat4 lightSource;
 uniform vec4 cameraPosition;
@@ -21,7 +22,7 @@ uniform bool emissive;
 void main()
 {
 	// compute vPosition in world space
-	vec4 vPositionWorld = model * vPosition;
+	vPositionWorld = model * vPosition;
 
 	if (!emissive)
 	{

@@ -3,6 +3,7 @@ varying vec3 L;
 varying vec3 E;
 varying vec2 fTextureCoord;
 varying mat4 inverseTBN;
+varying vec4 vPositionWorld;
 
 uniform vec4 materialAmbient, materialDiffuse, materialSpecular;
 uniform float materialShininess;
@@ -15,6 +16,8 @@ uniform bool useTexture;
 uniform sampler2D Tex;
 uniform bool useBumpMap;
 uniform sampler2D BumpTex;
+uniform bool useCubeMap;
+uniform samplerCube cubeMap;
 
 void main()
 {
@@ -44,6 +47,15 @@ void main()
 		if (useTexture)
 		{
 			vec4 texColor = texture2D(Tex, fTextureCoord);
+			objectAmbient = mix(materialAmbient, texColor, 0.5);
+			objectDiffuse = mix(materialDiffuse, texColor, 0.5);
+			objectSpecular = mix(materialSpecular, texColor, 0.5);
+		}
+		else if (useCubeMap)
+		{
+			vec3 cubeCoord = (vPositionWorld - model[3]).xyz;
+			//vec3 cubeCoord = (model[3] - vPositionWorld).xyz;
+			vec4 texColor = texture(cubeMap, cubeCoord);
 			objectAmbient = mix(materialAmbient, texColor, 0.5);
 			objectDiffuse = mix(materialDiffuse, texColor, 0.5);
 			objectSpecular = mix(materialSpecular, texColor, 0.5);

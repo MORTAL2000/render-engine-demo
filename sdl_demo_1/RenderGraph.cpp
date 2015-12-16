@@ -90,6 +90,7 @@ namespace Bagnall
 			(*it).second->Render();
 		}
 		Shader::SetUseTexture(false);
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// render objects with only material
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
@@ -110,13 +111,13 @@ namespace Bagnall
 
 	void TextureBumpNode::Render() const
 	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		//// bind texture
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, texture);
 
-		// bind bump map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, bumpmap);
+		//// bind bump map
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE_2D, bumpmap);
 
 		// render material nodes
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)

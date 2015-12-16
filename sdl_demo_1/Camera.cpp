@@ -72,10 +72,10 @@ namespace Bagnall
 				holdingD = true;
 				break;
 			case SDLK_z:
-				Translate(vec4(0.0f, 0.0f, -5.0f, 0.0f));
+				Translate(vec4(0.0f, 0.0f, -Game::WorldSize / 100.0f, 0.0f));
 				break;
 			case SDLK_SPACE:
-				Translate(vec4(0.0f, 0.0f, 5.0f, 0.0f));
+				Translate(vec4(0.0f, 0.0f, Game::WorldSize / 100.0f, 0.0f));
 				break;
 			}
 		}
@@ -127,7 +127,7 @@ namespace Bagnall
 			return;
 
 		moveDirection = normalize(vec4(moveDirection.x, moveDirection.y, 0.0, 0.0));
-		vec4 finalMove = moveDirection * 0.1f * static_cast<float>(FpsTracker::GetFrameTimeMs());
+		vec4 finalMove = moveDirection * Game::WorldSize / 10000.0f * static_cast<float>(FpsTracker::GetFrameTimeMs());
 
 		Translate(finalMove);
 	}
