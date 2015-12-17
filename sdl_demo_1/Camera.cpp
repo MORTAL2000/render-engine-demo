@@ -28,6 +28,11 @@ namespace Bagnall
 		updateGameCamera();
 	}
 
+	float Camera::GetZoomOut() const
+	{
+		return zoomOut;
+	}
+
 	void Camera::SetZoomOut(float z)
 	{
 		zoomOut = z;

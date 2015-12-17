@@ -9,10 +9,12 @@ namespace Bagnall
 
 	RenderNode* RenderGraph::AddDrawableObject(DrawableObject *o)
 	{
+		auto texture = o->GetTexture();
+
 		// non-emissive
 		if (!o->GetEmissive())
 		{
-			auto texture = o->GetTexture();
+			MaterialNode *materialNode;
 
 			// no texture, only material
 			if (texture == 0)
@@ -20,11 +22,7 @@ namespace Bagnall
 				if (materialNodeMap.find(o->GetMaterial()) == materialNodeMap.end())
 					materialNodeMap.emplace(o->GetMaterial(), new MaterialNode(o->GetMaterial()));
 
-				auto materialNode = materialNodeMap[o->GetMaterial()];
-
-				materialNode->objects.push_back(o);
-
-				return materialNode;
+				materialNode = materialNodeMap[o->GetMaterial()];
 			}
 			// texture and material
 			else
@@ -33,7 +31,7 @@ namespace Bagnall
 
 				auto bumpmap = Texture::GetBumpMapByTexture(texture);
 				// with bump map
-				if (bumpmap != 0)
+				if (bumpmap != 0 && o->GetBumpMapEnabled())
 				{
 					if (textureBumpNodeMap.find(texture) == textureBumpNodeMap.end())
 						textureBumpNodeMap.emplace(texture, new TextureBumpNode(texture, bumpmap));
@@ -52,31 +50,62 @@ namespace Bagnall
 				if (_materialNodeMap->find(o->GetMaterial()) == _materialNodeMap->end())
 					_materialNodeMap->emplace(o->GetMaterial(), new MaterialNode(o->GetMaterial()));
 
-				auto materialNode = (*_materialNodeMap)[o->GetMaterial()];
-
-				materialNode->objects.push_back(o);
-
-				return materialNode;
+				materialNode = (*_materialNodeMap)[o->GetMaterial()];
 			}
+
+			materialNode->objects.push_back(o);
+			return materialNode;
 		}
 		// emissive
 		else
 		{
-			if (emissiveNodeMap.find(o->GetEmissionColor()) == emissiveNodeMap.end())
-				emissiveNodeMap.emplace(o->GetEmissionColor(), new EmissiveNode(o->GetEmissionColor()));
+			EmissiveNode *emissiveNode;
 
-			auto emissiveNode = emissiveNodeMap[o->GetEmissionColor()];
+			// no texture
+			if (texture == 0)
+			{
+				if (emissiveNodeMap.find(o->GetEmissionColor()) == emissiveNodeMap.end())
+					emissiveNodeMap.emplace(o->GetEmissionColor(), new EmissiveNode(o->GetEmissionColor()));
+
+				emissiveNode = emissiveNodeMap[o->GetEmissionColor()];
+			}
+			// with texture
+			else
+			{
+				if (textureEmissiveNodeMap.find(texture) == textureEmissiveNodeMap.end())
+					textureEmissiveNodeMap.emplace(texture, new TextureEmissiveNode(texture));
+
+				auto _emissiveNodeMap = &textureEmissiveNodeMap[texture]->emissiveNodeMap;
+
+				if (_emissiveNodeMap->find(o->GetEmissionColor()) == _emissiveNodeMap->end())
+					_emissiveNodeMap->emplace(o->GetEmissionColor(), new EmissiveNode(o->GetEmissionColor()));
+
+				emissiveNode = (*_emissiveNodeMap)[o->GetEmissionColor()];
+			}
 
 			emissiveNode->objects.push_back(o);
-
 			return emissiveNode;
 		}
 	}
 
 	void RenderGraph::Render() const
 	{
-		// render objects with texture, bump map, material
+		// render emissive objects
+		Shader::SetEmissive(true);
+		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
+		{
+			(*it).second->Render();
+		}
+
+		// render emissive objects with texture
 		Shader::SetUseTexture(true);
+		for (auto it = textureEmissiveNodeMap.begin(); it != textureEmissiveNodeMap.end(); ++it)
+		{
+			(*it).second->Render();
+		}
+		Shader::SetEmissive(false);
+
+		// render objects with texture, bump map, material
 		Shader::SetUseBumpMap(true);
 		for (auto it = textureBumpNodeMap.begin(); it != textureBumpNodeMap.end(); ++it)
 		{
@@ -97,14 +126,6 @@ namespace Bagnall
 		{
 			(*it).second->Render();
 		}
-
-		// render emissive objects
-		Shader::SetEmissive(true);
-		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-		Shader::SetEmissive(false);
 	}
 
 	// TEXTUREBUMPNODE PUBLIC
@@ -112,12 +133,12 @@ namespace Bagnall
 	void TextureBumpNode::Render() const
 	{
 		//// bind texture
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, texture);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
-		//// bind bump map
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, bumpmap);
+		// bind bump map
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, bumpmap);
 
 		// render material nodes
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
@@ -141,6 +162,21 @@ namespace Bagnall
 		}
 	}
 
+	// TEXTUREEMISSIVENODE PUBLIC
+
+	void TextureEmissiveNode::Render() const
+	{
+		// bind texture
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		// render material nodes
+		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
+		{
+			(*it).second->Render();
+		}
+	}
+
 	// MATERIALNODE PUBLIC
 
 	void MaterialNode::Render() const
@@ -152,10 +188,7 @@ namespace Bagnall
 		Shader::SetMaterialShininess(material.shininess);
 
 		// render objects
-		for (auto it = objects.begin(); it != objects.end(); ++it)
-		{
-			(*it)->Draw();
-		}
+		RenderNode::Render();
 	}
 
 	// EMISSIVENODE PUBLIC
@@ -166,9 +199,19 @@ namespace Bagnall
 		Shader::SetEmissionColor(emissionColor);
 
 		// render objects
+		RenderNode::Render();
+	}
+
+	// RENDERNODE PUBLIC
+
+	void RenderNode::Render() const
+	{
+		// render objects
 		for (auto it = objects.begin(); it != objects.end(); ++it)
 		{
-			(*it)->Draw();
+			auto o = *it;
+			if (o->GetRenderEnabled())
+				o->Draw();
 		}
 	}
 }

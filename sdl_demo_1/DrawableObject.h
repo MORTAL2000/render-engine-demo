@@ -46,15 +46,29 @@ namespace Bagnall
 
 		static void UseMaterial(const Material& m);
 
-		void UpdateRenderNode();
+		void EnableRender();
+
+		void DisableRender();
+
+		void Cull();
+
+		bool GetRenderEnabled() const;
+
+		bool GetBumpMapEnabled() const;
 
 	private:
 		bool emissive;
 		vec4 emissionColor;
 		bool blend; // blend material with texture?
+		bool bumpMapEnabled;
+		bool renderEnabled;
 		Material material;
 		GLuint texture;
 		RenderNode *renderNode;
+
+		void init();
+
+		void updateRenderNode();
 	};
 }
 

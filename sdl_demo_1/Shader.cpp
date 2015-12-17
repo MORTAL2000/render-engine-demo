@@ -31,6 +31,11 @@ namespace Bagnall
 	GLuint Shader::BumpTexLoc;
 	GLuint Shader::UseCubeMapLoc;
 	GLuint Shader::CubeMapLoc;
+	GLuint Shader::UseShadowMapLoc;
+	GLuint Shader::ShadowMapLoc;
+	GLuint Shader::ShadowZRangeLoc;
+	GLuint Shader::CubeMapPerspectiveLoc;
+	GLuint Shader::OnlyDepthLoc;
 
 	void Shader::Init()
 	{
@@ -141,6 +146,10 @@ namespace Bagnall
 		if (UseCubeMapLoc == -1)
 			std::cerr << "Unable to find useCubeMap parameter" << std::endl;
 
+		UseShadowMapLoc = glGetUniformLocation(program, "useShadowMap");
+		if (UseShadowMapLoc == -1)
+			std::cerr << "Unable to find useShadowMap parameter" << std::endl;
+
 		TexLoc = glGetUniformLocation(program, "Tex");
 		if (TexLoc == -1)
 			std::cerr << "Unable to find Tex parameter" << std::endl;
@@ -152,15 +161,33 @@ namespace Bagnall
 		CubeMapLoc = glGetUniformLocation(program, "cubeMap");
 		if (CubeMapLoc == -1)
 			std::cerr << "Unable to find cubeMap parameter" << std::endl;
+
+		ShadowMapLoc = glGetUniformLocation(program, "shadowMap");
+		if (ShadowMapLoc == -1)
+			std::cerr << "Unable to find shadowMap parameter" << std::endl;
+
+		ShadowZRangeLoc = glGetUniformLocation(program, "shadowZRange");
+		if (ShadowZRangeLoc == -1)
+			std::cerr << "Unable to find shadowZRange parameter" << std::endl;
+
+		CubeMapPerspectiveLoc = glGetUniformLocation(program, "cubeMapPerspective");
+		if (CubeMapPerspectiveLoc == -1)
+			std::cerr << "Unable to find cubeMapPerspective parameter" << std::endl;
+
+		OnlyDepthLoc = glGetUniformLocation(program, "onlyDepth");
+		if (OnlyDepthLoc == -1)
+			std::cerr << "Unable to find onlyDepth parameter" << std::endl;
 		
 
 		glUniform1i(EmissiveLoc, 0);
 		glUniform1i(UseTextureLoc, 0);
 		glUniform1i(UseBumpMapLoc, 0);
 		glUniform1i(UseCubeMapLoc, 0);
+		glUniform1i(UseShadowMapLoc, 0);
 		glUniform1i(TexLoc, 0);
 		glUniform1i(BumpTexLoc, 1);
 		glUniform1i(CubeMapLoc, 2);
+		glUniform1i(ShadowMapLoc, 3);
 		glUniform1f(AlphaOverrideLoc, 0.0f);
 	}
 
@@ -257,6 +284,31 @@ namespace Bagnall
 	void Shader::SetCubeMap(int cubeMap)
 	{
 		glUniform1i(CubeMapLoc, cubeMap);
+	}
+
+	void Shader::SetUseShadowMap(bool useShadowMap)
+	{
+		glUniform1i(UseShadowMapLoc, useShadowMap);
+	}
+
+	void Shader::SetShadowMap(int shadowMap)
+	{
+		glUniform1i(ShadowMapLoc, shadowMap);
+	}
+
+	void Shader::SetShadowZRange(const vec2& shadowZRange)
+	{
+		glUniform2fv(ShadowZRangeLoc, 1, value_ptr(shadowZRange));
+	}
+
+	void Shader::SetCubeMapPerspective(const mat4& cubeMapPerspective)
+	{
+		glUniformMatrix4fv(CubeMapPerspectiveLoc, 1, GL_FALSE, value_ptr(cubeMapPerspective));
+	}
+
+	void Shader::SetOnlyDepth(bool d)
+	{
+		glUniform1i(OnlyDepthLoc, d);
 	}
 
 	// PRIVATE

@@ -34,6 +34,11 @@ namespace Bagnall
 		static GLuint BumpTexLoc;
 		static GLuint UseCubeMapLoc;
 		static GLuint CubeMapLoc;
+		static GLuint UseShadowMapLoc;
+		static GLuint ShadowMapLoc;
+		static GLuint ShadowZRangeLoc;
+		static GLuint CubeMapPerspectiveLoc;
+		static GLuint OnlyDepthLoc;
 
 		static void Init();
 
@@ -56,6 +61,11 @@ namespace Bagnall
 		static void SetBumpTex(int bumpTex);
 		static void SetUseCubeMap(bool useCubeMap);
 		static void SetCubeMap(int cubeMap);
+		static void SetUseShadowMap(bool useShadowMap);
+		static void SetShadowMap(int shadowMap);
+		static void SetShadowZRange(const vec2& shadowZRange);
+		static void SetCubeMapPerspective(const mat4& cubeMapPerspective);
+		static void SetOnlyDepth(bool d);
 
 	private:
 		static GLuint buffer;

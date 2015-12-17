@@ -22,6 +22,8 @@ namespace Bagnall
 		**********************************************************************/
 		void Update();
 
+		float GetZoomOut() const;
+
 		/**********************************************************************
 		Function:		SetZoomOut
 		Purpose:		Set the zoom out value.

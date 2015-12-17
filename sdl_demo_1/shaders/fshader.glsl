@@ -4,6 +4,8 @@ varying vec3 E;
 varying vec2 fTextureCoord;
 varying mat4 inverseTBN;
 varying vec4 vPositionWorld;
+varying vec4 shadowMapLightDirDepth;
+varying vec3 cubeMapCoord;
 
 uniform vec4 materialAmbient, materialDiffuse, materialSpecular;
 uniform float materialShininess;
@@ -20,16 +22,37 @@ uniform sampler2D BumpTex;
 uniform bool useCubeMap;
 uniform samplerCube cubeMap;
 
+uniform bool useShadowMap;
+uniform samplerCubeShadow shadowMap;
+
+uniform bool onlyDepth;
+
+uniform mat4 cubeMapPerspective;
+
 void main()
 {
-	if (useTexture && emissive)
+	if (onlyDepth)
 	{
-		gl_FragColor = texture2D(Tex, fTextureCoord);
+		gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+		return;
 	}
-	// if emissive then just do use the emission color
-	else if (emissive)
+	if (emissive)
 	{
-		gl_FragColor = emissionColor;
+		if (useTexture)
+		{
+			gl_FragColor = texture2D(Tex, fTextureCoord);
+		}
+		else if (useCubeMap)
+		{
+			vec3 cubeCoord = (cubeMapPerspective * (vPositionWorld - model[3])).xyz;
+			gl_FragColor = texture(cubeMap, cubeCoord);
+			//gl_FragColor = texture(cubeMap, cubeMapCoord);
+			//gl_FragColor.xyz = vec3(pow(gl_FragColor.x, 64.0), pow(gl_FragColor.y, 64.0), pow(gl_FragColor.z, 64.0)); 
+		}
+		else
+		{
+			gl_FragColor = emissionColor;
+		}
 	}
 	else
 	{
@@ -54,16 +77,21 @@ void main()
 		}
 		else if (useCubeMap)
 		{
-			vec3 cubeCoord = (vPositionWorld - model[3]).xyz;
+			//vec3 cubeCoord = (vPositionWorld - model[3]).xyz;
+
+			// REFLECTIVE STUFF
 			//vec3 v = normalize((vPositionWorld - cameraPosition).xyz);
 			//vec3 cubeCoord = v - 2 * dot(v, NN) * NN;
+
+			vec3 cubeCoord = (cubeMapPerspective * (vPositionWorld - model[3])).xyz;
 			vec4 texColor = texture(cubeMap, cubeCoord);
-			/*objectAmbient = mix(materialAmbient, texColor, 0.5);
+			objectAmbient = mix(materialAmbient, texColor, 0.5);
 			objectDiffuse = mix(materialDiffuse, texColor, 0.5);
-			objectSpecular = mix(materialSpecular, texColor, 0.5);*/
-			objectAmbient = texColor;
-			objectDiffuse = texColor;
-			objectSpecular = texColor;
+			objectSpecular = mix(materialSpecular, texColor, 0.5);
+
+			/*objectAmbient.xyz = vec3(pow(texColor.x, 64.0), pow(texColor.y, 64.0), pow(texColor.z, 64.0)); 
+			objectDiffuse.xyz = vec3(pow(texColor.x, 64.0), pow(texColor.y, 64.0), pow(texColor.z, 64.0)); 
+			objectSpecular.xyz = vec3(pow(texColor.x, 64.0), pow(texColor.y, 64.0), pow(texColor.z, 64.0));*/
 		}
 		else
 		{
@@ -106,8 +134,21 @@ void main()
 		else
 			specular = Ks*specularProduct;
 
+		if (useShadowMap)
+		{
+			//vec3 lightL = (lightPerspective * vec4(-L, 0.0)).xyz;
+			//vec3 lightL = -L;
+
+			//vec3 lightDir = shadowMapLightDirDepth.xyz;
+			//float lightDepth = shadowMapLightDirDepth.w;
+			//float shadowVal = texture(shadowMap, vec4(lightL, LDepth - 0.0001));
+			float shadowVal = texture(shadowMap, shadowMapLightDirDepth);
+			diffuse = diffuse * shadowVal;
+			specular = specular * shadowVal;
+		}
+
 		gl_FragColor = vec4((ambient + diffuse + specular).xyz, 1.0);
-		//gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+		//gl_FragColor = vec4((objectAmbient - 0.5 + objectDiffuse - 0.5 + objectSpecular - 0.5).xyz, 1.0);
 	}
 
 	if (alphaOverride != 0.0)

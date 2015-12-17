@@ -14,7 +14,7 @@ namespace Bagnall
 		SetTexture(0);
 		emissive = false;
 		SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-		UpdateRenderNode();
+		init();
 	}
 
 	DrawableObject::DrawableObject(Object *par, GLuint tex, const Material& mat) : Object(par)
@@ -22,14 +22,14 @@ namespace Bagnall
 		SetTexture(tex);
 		SetMaterial(mat);
 		blend = true;
-		UpdateRenderNode();
+		init();
 	}
 
 	DrawableObject::DrawableObject(Object *par, const vec4& emissionCol) : Object(par)
 	{
 		emissive = true;
 		SetEmissionColor(emissionCol);
-		UpdateRenderNode();
+		init();
 	}
 
 	void DrawableObject::Draw() const
@@ -46,7 +46,7 @@ namespace Bagnall
 	void DrawableObject::SetEmissive(bool e)
 	{
 		emissive = e;
-		UpdateRenderNode();
+		updateRenderNode();
 	}
 
 	vec4 DrawableObject::GetEmissionColor() const
@@ -67,7 +67,7 @@ namespace Bagnall
 	void DrawableObject::SetEmissionColor(const vec4& c)
 	{
 		emissionColor = c;
-		UpdateRenderNode();
+		updateRenderNode();
 	}
 
 	Material DrawableObject::GetMaterial() const
@@ -77,7 +77,7 @@ namespace Bagnall
 	void DrawableObject::SetMaterial(const Material& m)
 	{
 		material = m;
-		UpdateRenderNode();
+		updateRenderNode();
 	}
 
 	GLuint DrawableObject::GetTexture() const
@@ -88,7 +88,7 @@ namespace Bagnall
 	void DrawableObject::SetTexture(GLuint tex)
 	{
 		texture = tex;
-		UpdateRenderNode();
+		updateRenderNode();
 	}
 
 	void DrawableObject::UseMaterial(const Material& m)
@@ -103,7 +103,44 @@ namespace Bagnall
 		Shader::SetMaterialShininess(m.shininess);
 	}
 
-	void DrawableObject::UpdateRenderNode()
+	void DrawableObject::EnableRender()
+	{
+		renderEnabled = true;
+		updateRenderNode();
+	}
+
+	void DrawableObject::DisableRender()
+	{
+		renderEnabled = false;
+	}
+
+	void DrawableObject::Cull()
+	{
+		if (renderNode != NULL)
+			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));
+		renderNode = NULL;
+	}
+
+	bool DrawableObject::GetRenderEnabled() const
+	{
+		return renderEnabled;
+	}
+
+	bool DrawableObject::GetBumpMapEnabled() const
+	{
+		return bumpMapEnabled;
+	}
+
+	// PRIVATE
+
+	void DrawableObject::init()
+	{
+		bumpMapEnabled = true;
+		renderEnabled = true;
+		updateRenderNode();
+	}
+
+	void DrawableObject::updateRenderNode()
 	{
 		if (renderNode != NULL)
 			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));

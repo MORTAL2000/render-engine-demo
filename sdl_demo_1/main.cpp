@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Rectangle.h"
 #include "Cube.h"
+#include "Sphere.h"
 #include "LightSource.h"
 #include "Util.h"
 #include "UpdateGraph.h"
@@ -25,6 +26,8 @@ SDL_GLContext glcontext;
 
 Camera *camera;
 Cube *sun;
+//Cube *cameraCube;
+Sphere *player;
 LightSource *lightSource;
 Object *cubeContainer;
 std::vector<Cube*> cubes;
@@ -35,11 +38,14 @@ UpdateNode *rootUpdateNode;
 ModelNode *rootModelNode;
 
 GLuint frameBuffer;
-GLuint depthTexture;
+GLuint depthBuffer;
 GLuint colorCubemap;
 GLuint depthCubemap;
 
 GLuint tempTexture;
+
+const int ENVIRONMENT_MAP_SIZE = 1024;
+const int SHADOW_MAP_SIZE = 1024;
 
 void updateProjectionMatrixAndViewport()
 {
@@ -53,8 +59,11 @@ void updateProjectionMatrixAndViewport()
 
 void init(void)
 {
+	srand(time(NULL));
+
 	Rectangle::Init();
 	Cube::Init();
+	Sphere::Init();
 	LightSource::Init();
 	Texture::Init();
 	Shader::Init();
@@ -63,8 +72,9 @@ void init(void)
 	frameBuffer = 0;
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	glDrawBuffer(GL_NONE);
-	glReadBuffer(GL_NONE);
+	//glDrawBuffer(GL_NONE);
+	//glReadBuffer(GL_NONE);
+	glEnable(GL_DEPTH_TEST);
 
 	//glGenTextures(1, &tempTexture);
 	//glBindTexture(GL_TEXTURE_2D, tempTexture);
@@ -79,7 +89,7 @@ void init(void)
 	/*glGenTextures(1, &depthTexture);
 	glBindTexture(GL_TEXTURE_2D, depthTexture);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -88,8 +98,6 @@ void init(void)
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
 
 	glDrawBuffer(GL_NONE); // No color buffer is drawn to.*/
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	// SET UP COLOR CUBE MAP
 	glGenTextures(1, &colorCubemap);
@@ -100,22 +108,29 @@ void init(void)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, 1024, 1024, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, colorCubemap, 0);
+	// SET UP DEPTH BUFFER FOR FBO
+	glGenRenderbuffers(1, &depthBuffer);
+	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+		SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-	// Always check that our framebuffer is ok
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		std::cerr << "frame buffer error after color cube map initialiation\n";
-	}
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, colorCubemap, 0);
+
+	//// Always check that our framebuffer is ok
+	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	//{
+	//	std::cerr << "frame buffer error after color cube map initialiation\n";
+	//}
 
 	// SET UP DEPTH CUBE MAP
 	glGenTextures(1, &depthCubemap);
@@ -125,26 +140,30 @@ void init(void)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	//glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
 
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_DEPTH_COMPONENT16, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubemap, 0);
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubemap, 0);
 
-	// Always check that our framebuffer is ok
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	{
-		std::cerr << "frame buffer error after depth cube map initialiation\n";
-	}
+	//// Always check that our framebuffer is ok
+	//if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	//{
+	//	std::cerr << "frame buffer error after depth cube map initialiation\n";
+	//}
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//auto v = Shader::Vertices;
 	//auto n = Shader::Normals;
@@ -169,12 +188,13 @@ void init(void)
 	camera = new Camera(rootObject);
 	camera->SetPosition(vec4(0.0f, -25.0f, 0.0f, 1.0f));
 	camera->LookAt(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	camera->SetZoomOut(10.0f);
 
 	lightSource = LightSource::ObtainLightSource();
 	lightSource->ambient = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->specular = vec4(1.0, 1.0, 1.0, 1.0);
-	lightSource->position = vec4(50.0, -250.0, 50.0, 0.0);
+	lightSource->position = vec4(0.0f, 0.0f, Game::WorldSize * 0.25f, 1.0);
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
@@ -197,19 +217,37 @@ void init(void)
 
 	// MIDDLE CUBE
 	Cube *cube = new Cube(cubeContainer);
-	//cube->SetTexture(Texture::GetTextureByName("ben"));
-	cube->SetTexture(tempTexture);
+	cube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
+	cube->SetTexture(Texture::GetTextureByName("ben"));
+	//cube->SetTexture(tempTexture);
+	//cube->SetEmissive(true);
 	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	cube->Scale(10.0f);
 	cubes.push_back(cube);
 
 	// SUN
 	sun = new Cube(rootObject);
-	sun->SetPosition(vec4(50.0, -250.0, 50.0, 1.0));
+	sun->SetPosition(lightSource->position);
 	sun->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
 	sun->SetEmissive(true);
-	sun->Scale(10.0f);
+	sun->Scale(1.0f);
 	//cubes.push_back(cube);
+
+	//// CAMERA CUBE
+	//cameraCube = new Cube(camera);
+	//cameraCube->SetMaterial(Material::Chrome());
+	//cameraCube->SetPosition(vec4(0.0, 5.0f, 0.0, 1.0));
+	////cameraCube->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
+	////cameraCube->SetEmissive(true);
+	//cameraCube->Scale(1.0f);
+
+	// PLAYER
+	player = new Sphere(camera);
+	player->SetMaterial(Material::Chrome());
+	//player->SetPosition(vec4(0.0, 5.0f, 0.0, 1.0));
+	//player->SetEmissionColor(vec4(0.2f, 0.5f, 0.3f, 1.0f));
+	//player->SetEmissive(true);
+	player->Scale(1.0f);
 
 	// floor
 	float floorScale = Game::WorldSize / 50.0f;
@@ -306,16 +344,17 @@ int update()
 	});*/
 	concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
 	{
-		//cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-		//cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-		//cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		/*cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());*/
 	}, concurrency::static_partitioner());
 
 	rootUpdateNode->Update();
 
 	rootModelNode->Update();
 
-	sun->SetPosition(camera->GetPosition() - camera->GetLookDirection() * 10.0f);
+	//sun->SetPosition(camera->GetPosition() - camera->GetLookDirection() * 10.0f);
+	//cameraCube->SetPosition(camera->GetPosition() - camera->GetLookDirection() * 10.0f);
 	//camera->Update();
 
 	return 0;
@@ -325,12 +364,22 @@ void renderToColorCubeMap()
 {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
 	//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
+	//glDrawBuffer(GL_BACK);
+	//glReadBuffer(GL_BACK);
 
-	glViewport(0, 0, 1024, 1024);
+	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
 
-	//glCullFace(GL_FRONT);
+	//vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
+	vec3 projPos = vec3(camera->GetPosition() + camera->GetLookDirection() * camera->GetZoomOut());
+	player->DisableRender();
 
-	vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
+	float zNear = 2.0f;
+	float zFar = Game::ViewDistance;
+	mat4 projection = perspective(90.0f, 1.0f, zNear, zFar);
+	Shader::SetProjection(projection);
+
+	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubemap, 0);
+	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, colorCubemap, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -368,84 +417,111 @@ void renderToColorCubeMap()
 	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
 	Game::GameRenderGraph->Render();
 
+	//glDrawBuffer(GL_NONE);
+	//glReadBuffer(GL_NONE);
+
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
+	glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
+	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+	player->EnableRender();
+
+	Shader::SetCamera(Game::Camera);
 	updateProjectionMatrixAndViewport();
 }
 
 void renderToDepthCubeMap()
 {
+	sun->DisableRender();
+
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
 	//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
 
-	glViewport(0, 0, 1024, 1024);
+	glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
-	//glCullFace(GL_FRONT);
+	//glCullFace(GL_BACK);
 
-	vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
+	Shader::SetOnlyDepth(true);
+
+	float zNear = 2.0f;
+	float zFar = Game::ViewDistance;
+	mat4 projection = perspective(90.0f, 1.0f, zNear, zFar);
+	Shader::SetProjection(projection);
+	Shader::SetCubeMapPerspective(projection * scale(vec3(1, 1, -1)));
+	Shader::SetShadowZRange(vec2(zNear, zFar));
+
+	//vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
+	vec3 projPos = vec3(lightSource->position);
 
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubemap, 0);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	//Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
 	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
 	Game::GameRenderGraph->Render();
 
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, depthCubemap, 0);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(-1, -1, 1)));
+	//Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(-1, -1, 1)));
 	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
 	Game::GameRenderGraph->Render();
 
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, depthCubemap, 0);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	//Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
 	Shader::SetCamera(lookAt(projPos, projPos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
 	Game::GameRenderGraph->Render();
 
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, depthCubemap, 0);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	//Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
 	Shader::SetCamera(lookAt(projPos, projPos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
 	Game::GameRenderGraph->Render();
 
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, depthCubemap, 0);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	//Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
 	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
 	Game::GameRenderGraph->Render();
 
 	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, depthCubemap, 0);
 	glClear(GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
+	//Shader::SetProjection(perspective(90.0f, 1.0f, 1.0f, Game::ViewDistance) * scale(vec3(1, 1, 1)));
 	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
 	Game::GameRenderGraph->Render();
 
+	//glDrawBuffer(GL_BACK);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	//glDrawBuffer(GL_FRONT);
 
+	Shader::SetOnlyDepth(false);
+	Shader::SetCamera(Game::Camera);
 	updateProjectionMatrixAndViewport();
+
+	sun->EnableRender();
 }
 
 void draw()
 {
+	renderToColorCubeMap();
+	renderToDepthCubeMap();
+
 	// clear the window
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	Shader::SetUseShadowMap(true);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+
 	Shader::SetUseCubeMap(true);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
 
 	// draw stuff
 	Game::GameRenderGraph->Render();
 
+	Shader::SetUseShadowMap(false);
 	Shader::SetUseCubeMap(false);
-
-	//glBindTexture(GL_TEXTURE_2D, Texture::GetTextureByName("ben"));
-	////glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 960, 960, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	//glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 0, 0, 960, 960, 0);
-
-	//renderToColorCubeMap();
-	renderToDepthCubeMap();
 
 	SDL_GL_SwapWindow(window);
 	glFlush();
