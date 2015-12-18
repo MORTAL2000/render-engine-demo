@@ -13,7 +13,8 @@ namespace Bagnall
 	{
 		SetTexture(0);
 		emissive = false;
-		SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		//SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		SetMaterial(Material::None());
 		init();
 	}
 

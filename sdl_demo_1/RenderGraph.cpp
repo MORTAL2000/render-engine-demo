@@ -2,14 +2,22 @@
 #include "DrawableObject.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Shadow.h"
 
 namespace Bagnall
 {
 	// RENDERGRAPH PUBLIC
 
+	RenderGraph::RenderGraph()
+	{
+		shadowsEnabled = false;
+	}
+
 	RenderNode* RenderGraph::AddDrawableObject(DrawableObject *o)
 	{
 		auto texture = o->GetTexture();
+		auto material = o->GetMaterial();
+		auto bumpmap = Texture::GetBumpMapByTexture(texture);
 
 		// non-emissive
 		if (!o->GetEmissive())
@@ -24,12 +32,37 @@ namespace Bagnall
 
 				materialNode = materialNodeMap[o->GetMaterial()];
 			}
+			// no material, texture only
+			else if (material == Material::None())
+			{
+				// with bump map
+				if (bumpmap != 0 && o->GetBumpMapEnabled())
+				{
+					if (textureBumpNodeMap.find(texture) == textureBumpNodeMap.end())
+						textureBumpNodeMap.emplace(texture, new TextureBumpNode(texture, bumpmap));
+
+					auto *textureBumpNode = textureBumpNodeMap[texture];
+
+					textureBumpNode->objects.push_back(o);
+					return textureBumpNode;
+				}
+				// without bump map
+				else
+				{
+					if (textureNodeMap.find(texture) == textureNodeMap.end())
+						textureNodeMap.emplace(texture, new TextureNode(texture));
+
+					auto *textureNode = textureNodeMap[texture];
+
+					textureNode->objects.push_back(o);
+					return textureNode;
+				}
+			}
 			// texture and material
 			else
 			{
 				std::unordered_map<Material, MaterialNode*> *_materialNodeMap;
 
-				auto bumpmap = Texture::GetBumpMapByTexture(texture);
 				// with bump map
 				if (bumpmap != 0 && o->GetBumpMapEnabled())
 				{
@@ -105,6 +138,13 @@ namespace Bagnall
 		}
 		Shader::SetEmissive(false);
 
+		// activate shadows if enabled
+		if (shadowsEnabled)
+		{
+			Shadow::SendToGPU();
+			Shader::SetUseShadowMap(true);
+		}
+
 		// render objects with texture, bump map, material
 		Shader::SetUseBumpMap(true);
 		for (auto it = textureBumpNodeMap.begin(); it != textureBumpNodeMap.end(); ++it)
@@ -126,6 +166,22 @@ namespace Bagnall
 		{
 			(*it).second->Render();
 		}
+		
+		// deactivate shadows
+		if (shadowsEnabled)
+		{
+			Shader::SetUseShadowMap(false);
+		}
+	}
+
+	void RenderGraph::SetShadowsEnabled(bool s)
+	{
+		shadowsEnabled = s;
+	}
+
+	bool RenderGraph::GetShadowsEnabled() const
+	{
+		return shadowsEnabled;
 	}
 
 	// TEXTUREBUMPNODE PUBLIC
@@ -139,6 +195,11 @@ namespace Bagnall
 		// bind bump map
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, bumpmap);
+
+		// render objects without materials
+		Shader::SetTextureBlend(false);
+		RenderNode::Render();
+		Shader::SetTextureBlend(true);
 
 		// render material nodes
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
@@ -154,6 +215,11 @@ namespace Bagnall
 		// bind texture
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
+
+		// render objects without materials
+		Shader::SetTextureBlend(false);
+		RenderNode::Render();
+		Shader::SetTextureBlend(true);
 
 		// render material nodes
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)

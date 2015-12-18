@@ -160,4 +160,10 @@ namespace Bagnall
 			v2.push_back(vec2((*it).x, (*it).y));
 		return v2;
 	}
+
+	void Util::Apply(std::vector<vec4>& vecs, vec4(*func)(const vec4&))
+	{
+		for (int i = 0; i < vecs.size(); ++i)
+			vecs[i] = func(vecs[i]);
+	}
 }

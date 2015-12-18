@@ -138,6 +138,8 @@
     <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="RenderGraph.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Shadow.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UpdateGraph.cpp" />
@@ -164,6 +166,8 @@
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="RenderGraph.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Shadow.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="Sphere.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="UpdateGraph.h" />

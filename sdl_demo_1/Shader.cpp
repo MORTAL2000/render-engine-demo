@@ -27,6 +27,7 @@ namespace Bagnall
 	GLuint Shader::AlphaOverrideLoc;
 	GLuint Shader::UseTextureLoc;
 	GLuint Shader::TexLoc;
+	GLuint Shader::TextureBlendLoc;
 	GLuint Shader::UseBumpMapLoc;
 	GLuint Shader::BumpTexLoc;
 	GLuint Shader::UseCubeMapLoc;
@@ -34,7 +35,6 @@ namespace Bagnall
 	GLuint Shader::UseShadowMapLoc;
 	GLuint Shader::ShadowMapLoc;
 	GLuint Shader::ShadowZRangeLoc;
-	GLuint Shader::CubeMapPerspectiveLoc;
 	GLuint Shader::OnlyDepthLoc;
 
 	void Shader::Init()
@@ -154,6 +154,10 @@ namespace Bagnall
 		if (TexLoc == -1)
 			std::cerr << "Unable to find Tex parameter" << std::endl;
 
+		TextureBlendLoc = glGetUniformLocation(program, "textureBlend");
+		if (TextureBlendLoc == -1)
+			std::cerr << "Unable to find textureBlend parameter" << std::endl;
+
 		BumpTexLoc = glGetUniformLocation(program, "BumpTex");
 		if (BumpTexLoc == -1)
 			std::cerr << "Unable to find BumpTex parameter" << std::endl;
@@ -170,10 +174,6 @@ namespace Bagnall
 		if (ShadowZRangeLoc == -1)
 			std::cerr << "Unable to find shadowZRange parameter" << std::endl;
 
-		CubeMapPerspectiveLoc = glGetUniformLocation(program, "cubeMapPerspective");
-		if (CubeMapPerspectiveLoc == -1)
-			std::cerr << "Unable to find cubeMapPerspective parameter" << std::endl;
-
 		OnlyDepthLoc = glGetUniformLocation(program, "onlyDepth");
 		if (OnlyDepthLoc == -1)
 			std::cerr << "Unable to find onlyDepth parameter" << std::endl;
@@ -185,6 +185,7 @@ namespace Bagnall
 		glUniform1i(UseCubeMapLoc, 0);
 		glUniform1i(UseShadowMapLoc, 0);
 		glUniform1i(TexLoc, 0);
+		glUniform1i(TextureBlendLoc, 1);
 		glUniform1i(BumpTexLoc, 1);
 		glUniform1i(CubeMapLoc, 2);
 		glUniform1i(ShadowMapLoc, 3);
@@ -266,6 +267,11 @@ namespace Bagnall
 		glUniform1i(TexLoc, tex);
 	}
 
+	void Shader::SetTextureBlend(bool b)
+	{
+		glUniform1i(TextureBlendLoc, b);
+	}
+
 	void Shader::SetUseBumpMap(bool useBumpMap)
 	{
 		glUniform1i(UseBumpMapLoc, useBumpMap);
@@ -299,11 +305,6 @@ namespace Bagnall
 	void Shader::SetShadowZRange(const vec2& shadowZRange)
 	{
 		glUniform2fv(ShadowZRangeLoc, 1, value_ptr(shadowZRange));
-	}
-
-	void Shader::SetCubeMapPerspective(const mat4& cubeMapPerspective)
-	{
-		glUniformMatrix4fv(CubeMapPerspectiveLoc, 1, GL_FALSE, value_ptr(cubeMapPerspective));
 	}
 
 	void Shader::SetOnlyDepth(bool d)

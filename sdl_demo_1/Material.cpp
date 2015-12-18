@@ -27,6 +27,17 @@ namespace Bagnall
 		return m;
 	}
 
+	Material Material::None()
+	{
+		Material m;
+		m.ambient = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		m.diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		m.specular = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		m.emission = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		m.shininess = 0.0f;
+		return m;
+	}
+
 	Material Material::Pewter()
 	{
 		Material m;

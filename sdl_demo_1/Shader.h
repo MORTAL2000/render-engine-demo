@@ -30,6 +30,7 @@ namespace Bagnall
 		static GLuint AlphaOverrideLoc;
 		static GLuint UseTextureLoc;
 		static GLuint TexLoc;
+		static GLuint TextureBlendLoc;
 		static GLuint UseBumpMapLoc;
 		static GLuint BumpTexLoc;
 		static GLuint UseCubeMapLoc;
@@ -37,7 +38,6 @@ namespace Bagnall
 		static GLuint UseShadowMapLoc;
 		static GLuint ShadowMapLoc;
 		static GLuint ShadowZRangeLoc;
-		static GLuint CubeMapPerspectiveLoc;
 		static GLuint OnlyDepthLoc;
 
 		static void Init();
@@ -57,6 +57,7 @@ namespace Bagnall
 		static void SetAlphaOverride(const vec4& alphaOverride);
 		static void SetUseTexture(bool useTexture);
 		static void SetTex(int tex);
+		static void SetTextureBlend(bool b);
 		static void SetUseBumpMap(bool useBumpMap);
 		static void SetBumpTex(int bumpTex);
 		static void SetUseCubeMap(bool useCubeMap);
@@ -64,7 +65,6 @@ namespace Bagnall
 		static void SetUseShadowMap(bool useShadowMap);
 		static void SetShadowMap(int shadowMap);
 		static void SetShadowZRange(const vec2& shadowZRange);
-		static void SetCubeMapPerspective(const mat4& cubeMapPerspective);
 		static void SetOnlyDepth(bool d);
 
 	private:

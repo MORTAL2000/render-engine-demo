@@ -29,6 +29,7 @@ namespace Bagnall
 		static Material Rubber(const vec4& color);
 
 		// BUILT IN MATERIALS
+		static Material None();
 		static Material Pewter();
 		static Material Chrome();
 		static Material Obsidian();

@@ -144,6 +144,8 @@ namespace Bagnall
 		static mat4 Perspective(const GLfloat fovy, const GLfloat aspect, const GLfloat zNear, const GLfloat zFar);
 
 		static std::vector<vec2> Vec4toVec2(const std::vector<vec4>& v);
+
+		static void Apply(std::vector<vec4>& vecs, vec4(*func)(const vec4&));
 	};
 }
 
