@@ -75,7 +75,7 @@ void init(void)
 	EnvironmentMap::Init();
 
 	// ENABLE SHADOWS
-	Game::GameRenderGraph->SetShadowsEnabled(true);
+	Game::MainRenderGraph->SetShadowsEnabled(true);
 
 	colorCubemap = EnvironmentMap::GenerateCubeMap();
 
@@ -211,21 +211,23 @@ void init(void)
 
 	// MANY CUBES
 	int range = Game::WorldSize - 5.0f;
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 1000; ++i)
 	{
 		Cube *cube = new Cube(cubeContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
-		cube->SetTexture(Texture::GetTextureByName("shrek"));
+		//cube->SetTexture(Texture::GetTextureByName("shrek"));
+		cube->SetTexture(Texture::GetTextureByName("dowm_furry"));
 		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 		cube->Scale(5.0f);
 		cubes.push_back(cube);
+		//cube->Cull();
 	}
 
 	// MIDDLE CUBE
 	Cube *cube = new Cube(cubeContainer);
 	cube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
-	cube->SetTexture(Texture::GetTextureByName("ben"));
+	cube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
 	//cube->SetTexture(tempTexture);
 	//cube->SetEmissive(true);
 	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
@@ -252,8 +254,8 @@ void init(void)
 	// PLAYER
 	player = new Sphere(camera);
 	//player->SetMaterial(Material::Chrome());
-	player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-	player->SetCubeMap(colorCubemap);
+	player->SetMaterial(Material::Plastic(vec4(0.25f, 0.25f, 0.25f, 1.0f)));
+	//player->SetCubeMap(colorCubemap);
 	//player->SetPosition(vec4(0.0, 5.0f, 0.0, 1.0));
 	//player->SetEmissionColor(vec4(0.2f, 0.5f, 0.3f, 1.0f));
 	//player->SetEmissive(true);
@@ -594,8 +596,8 @@ int update()
 void draw()
 {
 	//renderToColorCubeMap();
-	EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 2.0f, Game::ViewDistance);
-	Shadow::Render(vec3(lightSource->position), sun, 2.0, Game::ViewDistance);
+	//EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 2.0f, Game::ViewDistance);
+	Shadow::RenderShadowMap(vec3(lightSource->position), sun, 2.0, Game::ViewDistance);
 
 	updateProjectionMatrixAndViewport();
 
@@ -607,7 +609,7 @@ void draw()
 	//glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
 
 	// draw stuff
-	Game::GameRenderGraph->Render();
+	Game::MainRenderGraph->Render();
 
 	SDL_GL_SwapWindow(window);
 	glFlush();

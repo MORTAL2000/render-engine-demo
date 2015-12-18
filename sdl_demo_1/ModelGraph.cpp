@@ -27,28 +27,31 @@ namespace Bagnall
 
 	void ModelNode::Update()
 	{
-		if (object->UpdateModel())
+		if (!object->GetCulled())
 		{
-			concurrency::parallel_for_each(begin(children), end(children), [&](ModelNode *child)
+			if (object->UpdateModel())
 			{
-				object->PassDownParentModel(child->object);
-				child->Update();
-			}, concurrency::static_partitioner());
+				concurrency::parallel_for_each(begin(children), end(children), [&](ModelNode *child)
+				{
+					object->PassDownParentModel(child->object);
+					child->Update();
+				}, concurrency::static_partitioner());
 
-			/*for (auto it = children.begin(); it != children.end(); ++it)
+				/*for (auto it = children.begin(); it != children.end(); ++it)
+				{
+					auto child = *it;
+					object->PassDownParentModel(child->object);
+					child->Update();
+				}*/
+			}
+			else
 			{
-				auto child = *it;
-				object->PassDownParentModel(child->object);
-				child->Update();
-			}*/
-		}
-		else
-		{
-			concurrency::parallel_for_each(begin(children), end(children), [&](ModelNode *child) {
-				child->Update();
-			}, concurrency::static_partitioner());
-			/*for (auto it = children.begin(); it != children.end(); ++it)
-				(*it)->Update();*/
+				concurrency::parallel_for_each(begin(children), end(children), [&](ModelNode *child) {
+					child->Update();
+				}, concurrency::static_partitioner());
+				/*for (auto it = children.begin(); it != children.end(); ++it)
+					(*it)->Update();*/
+			}
 		}
 	}
 

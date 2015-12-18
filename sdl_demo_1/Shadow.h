@@ -6,6 +6,7 @@
 
 #include <GL/glew.h>
 #include <glm/vec3.hpp>
+#include <vector>
 
 namespace Bagnall
 {
@@ -16,13 +17,21 @@ namespace Bagnall
 	public:
 		static void Init();
 
-		static void Render(const glm::vec3& sourcePos, DrawableObject* source, float zNear, float zFar);
+		static void RenderShadowMap(const glm::vec3& sourcePos, DrawableObject* source, float zNear, float zFar);
 
 		static void SendToGPU();
+
+		static void AddToDepthRenderList(DrawableObject *o);
+
+		static void RemoveFromDepthRenderList(DrawableObject *o);
 
 	private:
 		static GLuint frameBuffer;
 		static GLuint depthCubeMap;
+
+		static std::vector<DrawableObject*> depthRenderList;
+
+		static void renderDepthRenderList();
 	};
 }
 

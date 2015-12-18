@@ -108,6 +108,12 @@ namespace Bagnall
 
 		ModelNode* GetModelNode() const;
 
+		virtual void Cull();
+
+		virtual void UnCull();
+
+		bool GetCulled() const;
+
 	protected:
 		vec4 position; // position of the object in world space
 		vec4 oldPosition;
@@ -148,6 +154,8 @@ namespace Bagnall
 
 		ModelNode *modelNode;
 		UpdateNode *updateNode;
+
+		bool culled;
 
 		int updateModel();
 	};

@@ -4,6 +4,7 @@
 #include "Material.h"
 #include "RenderGraph.h"
 #include "Game.h"
+#include "Shadow.h"
 
 namespace Bagnall
 {
@@ -118,11 +119,17 @@ namespace Bagnall
 	{
 		renderEnabled = true;
 		updateRenderNode();
+
+		for (auto it = children.begin(); it != children.end(); ++it)
+			static_cast<DrawableObject*>(*it)->EnableRender();
 	}
 
 	void DrawableObject::DisableRender()
 	{
 		renderEnabled = false;
+
+		for (auto it = children.begin(); it != children.end(); ++it)
+			static_cast<DrawableObject*>(*it)->DisableRender();
 	}
 
 	void DrawableObject::Cull()
@@ -130,6 +137,19 @@ namespace Bagnall
 		if (renderNode != NULL)
 			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));
 		renderNode = NULL;
+
+		Shadow::RemoveFromDepthRenderList(this);
+
+		Object::Cull();
+	}
+
+	void DrawableObject::UnCull()
+	{
+		updateRenderNode();
+
+		Shadow::AddToDepthRenderList(this);
+
+		Object::UnCull();
 	}
 
 	bool DrawableObject::GetRenderEnabled() const
@@ -150,12 +170,13 @@ namespace Bagnall
 		renderEnabled = true;
 		cubeMap = 0;
 		updateRenderNode();
+		Shadow::AddToDepthRenderList(this);
 	}
 
 	void DrawableObject::updateRenderNode()
 	{
 		if (renderNode != NULL)
 			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));
-		renderNode = Game::GameRenderGraph->AddDrawableObject(this);
+		renderNode = Game::MainRenderGraph->AddDrawableObject(this);
 	}
 }

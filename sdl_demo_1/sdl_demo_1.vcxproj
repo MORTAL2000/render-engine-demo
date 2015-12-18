@@ -177,9 +177,17 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="bumpmaps\ben_NRM.jpg" />
+    <Image Include="bumpmaps\costanza_NRM.jpg" />
+    <Image Include="bumpmaps\dowm furry_NRM.jpg" />
+    <Image Include="bumpmaps\finalformsquare_NRM.jpg" />
     <Image Include="bumpmaps\Shrek-and-Yoda_NRM.jpg" />
+    <Image Include="bumpmaps\stone_wall_NRM.jpg" />
     <Image Include="textures\ben.jpg" />
+    <Image Include="textures\costanza.jpg" />
+    <Image Include="textures\dowm furry.jpg" />
+    <Image Include="textures\finalformsquare.jpg" />
     <Image Include="textures\Shrek-and-Yoda.jpg" />
+    <Image Include="textures\stone_wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

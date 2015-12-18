@@ -56,6 +56,8 @@ namespace Bagnall
 
 		void Cull();
 
+		void UnCull();
+
 		bool GetRenderEnabled() const;
 
 		bool GetBumpMapEnabled() const;

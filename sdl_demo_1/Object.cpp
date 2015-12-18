@@ -19,6 +19,7 @@ namespace Bagnall
 		scale = vec3(1.0, 1.0, 1.0);
 		changedFlags = INT_MAX;
 		ignoreParentModelFlags = 0;
+		culled = false;
 
 		if (parent == NULL)
 		{
@@ -323,6 +324,25 @@ namespace Bagnall
 	ModelNode* Object::GetModelNode() const
 	{
 		return modelNode;
+	}
+
+	void Object::Cull()
+	{
+		culled = true;
+		for (auto it = children.begin(); it != children.end(); ++it)
+			(*it)->Cull();
+	}
+
+	void Object::UnCull()
+	{
+		culled = false;
+		for (auto it = children.begin(); it != children.end(); ++it)
+			(*it)->UnCull();
+	}
+
+	bool Object::GetCulled() const
+	{
+		return culled;
 	}
 
 	// PROTECTED

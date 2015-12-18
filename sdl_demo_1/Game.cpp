@@ -12,5 +12,5 @@ namespace Bagnall
 	mat4 Game::Camera;
 	vec4 Game::CameraPosition;
 
-	RenderGraph* Game::GameRenderGraph = new RenderGraph();
+	RenderGraph* Game::MainRenderGraph = new RenderGraph();
 }

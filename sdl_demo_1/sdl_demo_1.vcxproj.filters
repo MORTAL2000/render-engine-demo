@@ -186,5 +186,29 @@
     <Image Include="bumpmaps\ben_NRM.jpg">
       <Filter>Resource Files\bumpmaps</Filter>
     </Image>
+    <Image Include="textures\costanza.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\finalformsquare.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="bumpmaps\costanza_NRM.jpg">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="bumpmaps\dowm furry_NRM.jpg">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="bumpmaps\finalformsquare_NRM.jpg">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="bumpmaps\stone_wall_NRM.jpg">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="textures\dowm furry.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\stone_wall.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
   </ItemGroup>
 </Project>

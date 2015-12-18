@@ -51,7 +51,7 @@ namespace Bagnall
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Shadow::Render(const vec3& sourcePos, DrawableObject* source, float zNear, float zFar)
+	void Shadow::RenderShadowMap(const vec3& sourcePos, DrawableObject* source, float zNear, float zFar)
 	{
 		if (source != NULL)
 			source->DisableRender();
@@ -69,32 +69,38 @@ namespace Bagnall
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
-		Game::GameRenderGraph->Render();
+		//Game::MainRenderGraph->Render();
+		renderDepthRenderList();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)));
-		Game::GameRenderGraph->Render();
+		//Game::MainRenderGraph->Render();
+		renderDepthRenderList();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-		Game::GameRenderGraph->Render();
+		//Game::MainRenderGraph->Render();
+		renderDepthRenderList();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-		Game::GameRenderGraph->Render();
+		//Game::MainRenderGraph->Render();
+		renderDepthRenderList();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
-		Game::GameRenderGraph->Render();
+		//Game::MainRenderGraph->Render();
+		renderDepthRenderList();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
-		Game::GameRenderGraph->Render();
+		//Game::MainRenderGraph->Render();
+		renderDepthRenderList();
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
@@ -111,8 +117,34 @@ namespace Bagnall
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
 	}
 
+	void Shadow::AddToDepthRenderList(DrawableObject *o)
+	{
+		auto it = std::find(depthRenderList.begin(), depthRenderList.end(), o);
+		if (it == depthRenderList.end())
+			depthRenderList.push_back(o);
+	}
+
+	void Shadow::RemoveFromDepthRenderList(DrawableObject *o)
+	{
+		auto it = std::find(depthRenderList.begin(), depthRenderList.end(), o);
+		if (it != depthRenderList.end())
+			depthRenderList.erase(it);
+	}
+
 	// PRIVATE
 
 	GLuint Shadow::frameBuffer;
 	GLuint Shadow::depthCubeMap;
+
+	std::vector<DrawableObject*> Shadow::depthRenderList;
+
+	void Shadow::renderDepthRenderList()
+	{
+		for (auto it = depthRenderList.begin(); it != depthRenderList.end(); ++it)
+		{
+			auto o = *it;
+			if (o->GetRenderEnabled())
+				o->Draw();
+		}
+	}
 }

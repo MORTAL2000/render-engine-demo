@@ -11,6 +11,7 @@ namespace Bagnall
 	{
 		IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 
+		// SHREK
 		GLuint tex = loadTexture("textures\\Shrek-and-Yoda.jpg");
 		if (tex != 0)
 			textureMap.emplace("shrek", tex);
@@ -18,6 +19,7 @@ namespace Bagnall
 		if (bump != 0)
 			BumpMapMap.emplace(tex, bump);
 
+		// BEN
 		tex = loadTexture("textures\\ben.jpg");
 		if (tex != 0)
 			textureMap.emplace("ben", tex);
@@ -25,10 +27,35 @@ namespace Bagnall
 		if (bump != 0)
 			BumpMapMap.emplace(tex, bump);
 
+		// STONE WALL
 		tex = loadTexture("textures\\stone_wall.jpg");
 		if (tex != 0)
 			textureMap.emplace("stone_wall", tex);
 		bump = loadTexture("bumpmaps\\stone_wall_NRM.jpg");
+		if (bump != 0)
+			BumpMapMap.emplace(tex, bump);
+
+		// COSTANZA
+		tex = loadTexture("textures\\costanza.jpg");
+		if (tex != 0)
+			textureMap.emplace("costanza", tex);
+		bump = loadTexture("bumpmaps\\costanza_NRM.jpg");
+		if (bump != 0)
+			BumpMapMap.emplace(tex, bump);
+
+		// DOWM FURRY
+		tex = loadTexture("textures\\dowm furry.jpg");
+		if (tex != 0)
+			textureMap.emplace("dowm_furry", tex);
+		bump = loadTexture("bumpmaps\\dowm furry_NRM.jpg");
+		if (bump != 0)
+			BumpMapMap.emplace(tex, bump);
+
+		// ISAAC FINAL FORM
+		tex = loadTexture("textures\\finalformsquare.jpg");
+		if (tex != 0)
+			textureMap.emplace("isaac_final_form", tex);
+		bump = loadTexture("bumpmaps\\finalformsquare_NRM.jpg");
 		if (bump != 0)
 			BumpMapMap.emplace(tex, bump);
 

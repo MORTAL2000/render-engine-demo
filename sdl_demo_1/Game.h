@@ -17,7 +17,7 @@ namespace Bagnall
 		static mat4 Camera;
 		static vec4 CameraPosition;
 
-		static RenderGraph *GameRenderGraph;
+		static RenderGraph *MainRenderGraph;
 	};
 }
 
