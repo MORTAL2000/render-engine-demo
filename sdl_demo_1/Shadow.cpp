@@ -71,35 +71,28 @@ namespace Bagnall
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
 		Game::GameRenderGraph->Render();
 
-		Shader::SetProjection(projection);
-
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		//Shader::SetProjection(projection * scale(vec3(-1, -1, 1)));
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)));
 		Game::GameRenderGraph->Render();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
 		Game::GameRenderGraph->Render();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
 		Game::GameRenderGraph->Render();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
 		Game::GameRenderGraph->Render();
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
 		Shader::SetCamera(lookAt(sourcePos, sourcePos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
 		Game::GameRenderGraph->Render();
 

@@ -15,6 +15,7 @@
 #include "RenderGraph.h"
 #include "Texture.h"
 #include "Shadow.h"
+#include "EnvironmentMap.h"
 #include <vector>
 #include <iostream>
 
@@ -27,7 +28,7 @@ SDL_Window *window;
 SDL_GLContext glcontext;
 
 Camera *camera;
-Cube *sun;
+Sphere *sun;
 //Cube *cameraCube;
 Sphere *player;
 LightSource *lightSource;
@@ -39,14 +40,14 @@ Object *groundContainer;
 UpdateNode *rootUpdateNode;
 ModelNode *rootModelNode;
 
-GLuint frameBuffer;
-GLuint depthBuffer;
+//GLuint frameBuffer;
+//GLuint depthBuffer;
 GLuint colorCubemap;
 //GLuint depthCubemap;
 
 GLuint tempTexture;
 
-const int ENVIRONMENT_MAP_SIZE = 1024;
+//const int ENVIRONMENT_MAP_SIZE = 1024;
 //const int SHADOW_MAP_SIZE = 1024;
 
 void updateProjectionMatrixAndViewport()
@@ -71,15 +72,18 @@ void init(void)
 	Texture::Init();
 	Shader::Init();
 	Shadow::Init();
+	EnvironmentMap::Init();
 
 	// ENABLE SHADOWS
 	Game::GameRenderGraph->SetShadowsEnabled(true);
 
+	colorCubemap = EnvironmentMap::GenerateCubeMap();
+
 	// SET UP FRAME BUFFER FOR RENDERING TO CUBE MAP
-	frameBuffer = 0;
+	/*frameBuffer = 0;
 	glGenFramebuffers(1, &frameBuffer);
 	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);*/
 
 	//glGenTextures(1, &tempTexture);
 	//glBindTexture(GL_TEXTURE_2D, tempTexture);
@@ -105,28 +109,28 @@ void init(void)
 	glDrawBuffer(GL_NONE); // No color buffer is drawn to.*/
 
 	// SET UP COLOR CUBE MAP
-	glGenTextures(1, &colorCubemap);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
+	//glGenTextures(1, &colorCubemap);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
 
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
-	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	//glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
+	//glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	// SET UP DEPTH BUFFER FOR FBO
-	glGenRenderbuffers(1, &depthBuffer);
-	glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	//// SET UP DEPTH BUFFER FOR FBO
+	//glGenRenderbuffers(1, &depthBuffer);
+	//glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+	//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+	//glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
 	////glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, colorCubemap, 0);
 
@@ -164,7 +168,7 @@ void init(void)
 	//	std::cerr << "frame buffer error after depth cube map initialiation\n";
 	//}
 
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	//glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	//auto v = Shader::Vertices;
 	//auto n = Shader::Normals;
@@ -207,12 +211,13 @@ void init(void)
 
 	// MANY CUBES
 	int range = Game::WorldSize - 5.0f;
-	for (int i = 0; i < 1; ++i)
+	for (int i = 0; i < 100; ++i)
 	{
 		Cube *cube = new Cube(cubeContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
 		cube->SetTexture(Texture::GetTextureByName("shrek"));
 		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 		cube->Scale(5.0f);
 		cubes.push_back(cube);
 	}
@@ -228,7 +233,8 @@ void init(void)
 	cubes.push_back(cube);
 
 	// SUN
-	sun = new Cube(rootObject);
+	//sun = new Cube(rootObject);
+	sun = new Sphere(rootObject);
 	sun->SetPosition(lightSource->position);
 	sun->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
 	sun->SetEmissive(true);
@@ -245,7 +251,9 @@ void init(void)
 
 	// PLAYER
 	player = new Sphere(camera);
-	player->SetMaterial(Material::Chrome());
+	//player->SetMaterial(Material::Chrome());
+	player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	player->SetCubeMap(colorCubemap);
 	//player->SetPosition(vec4(0.0, 5.0f, 0.0, 1.0));
 	//player->SetEmissionColor(vec4(0.2f, 0.5f, 0.3f, 1.0f));
 	//player->SetEmissive(true);
@@ -420,23 +428,23 @@ int update()
 	cubeContainer->RotateZ(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());*/
 	//cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 	//cubeContainer->RotateY(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
-	//cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 
 	//groundContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 
 	//for (auto it = cubes.begin(); it != cubes.end(); ++it)
-	/*concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
+	concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
 	{
 		cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
 		cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
 		cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-	});*/
-	concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
-	{
-		/*cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());*/
-	}, concurrency::static_partitioner());
+	});
+	//concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
+	//{
+	//	cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+	//	cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+	//	cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+	//}, concurrency::static_partitioner());
 
 	rootUpdateNode->Update();
 
@@ -449,73 +457,66 @@ int update()
 	return 0;
 }
 
-void renderToColorCubeMap()
-{
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
-	//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
-
-	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
-
-	//vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
-	//vec3 projPos = vec3(camera->GetPosition() + camera->GetLookDirection() * camera->GetZoomOut());
-	vec3 projPos = vec3(camera->GetPosition());
-	player->DisableRender();
-
-	float zNear = 1.0f;
-	float zFar = Game::ViewDistance;
-	mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zNear, zFar);
-	Shader::SetProjection(projection);
-
-	//glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubemap, 0);
-	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
-
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, colorCubemap, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
-	Game::GameRenderGraph->Render();
-
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, colorCubemap, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(projection * scale(vec3(-1, -1, 1)));
-	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
-	Game::GameRenderGraph->Render();
-
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, colorCubemap, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-	Shader::SetCamera(lookAt(projPos, projPos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-	Game::GameRenderGraph->Render();
-
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, colorCubemap, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-	Shader::SetCamera(lookAt(projPos, projPos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-	Game::GameRenderGraph->Render();
-
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, colorCubemap, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
-	Game::GameRenderGraph->Render();
-
-	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, colorCubemap, 0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
-	Game::GameRenderGraph->Render();
-
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
-	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-
-	player->EnableRender();
-
-	Shader::SetCamera(Game::Camera);
-	updateProjectionMatrixAndViewport();
-}
+//void renderToColorCubeMap()
+//{
+//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
+//	//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
+//
+//	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
+//
+//	//vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
+//	//vec3 projPos = vec3(camera->GetPosition() + camera->GetLookDirection() * camera->GetZoomOut());
+//	vec3 projPos = vec3(camera->GetPosition());
+//	player->DisableRender();
+//
+//	float zNear = 1.0f;
+//	float zFar = Game::ViewDistance;
+//	mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zNear, zFar);
+//	Shader::SetProjection(projection);
+//
+//	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+//
+//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, colorCubemap, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
+//	Game::GameRenderGraph->Render();
+//
+//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, colorCubemap, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)));
+//	Game::GameRenderGraph->Render();
+//
+//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, colorCubemap, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	Shader::SetCamera(lookAt(projPos, projPos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
+//	Game::GameRenderGraph->Render();
+//
+//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, colorCubemap, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	Shader::SetCamera(lookAt(projPos, projPos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
+//	Game::GameRenderGraph->Render();
+//
+//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, colorCubemap, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
+//	Game::GameRenderGraph->Render();
+//
+//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, colorCubemap, 0);
+//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
+//	Game::GameRenderGraph->Render();
+//
+//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//
+//	glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
+//	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+//	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+//
+//	player->EnableRender();
+//
+//	Shader::SetCamera(Game::Camera);
+//	updateProjectionMatrixAndViewport();
+//}
 
 //void renderToDepthCubeMap()
 //{
@@ -593,6 +594,7 @@ void renderToColorCubeMap()
 void draw()
 {
 	//renderToColorCubeMap();
+	EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 2.0f, Game::ViewDistance);
 	Shadow::Render(vec3(lightSource->position), sun, 2.0, Game::ViewDistance);
 
 	updateProjectionMatrixAndViewport();
@@ -606,8 +608,6 @@ void draw()
 
 	// draw stuff
 	Game::GameRenderGraph->Render();
-
-	Shader::SetUseCubeMap(false);
 
 	SDL_GL_SwapWindow(window);
 	glFlush();

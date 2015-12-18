@@ -44,6 +44,10 @@ namespace Bagnall
 
 		void SetTexture(GLuint tex);
 
+		GLuint GetCubeMap() const;
+
+		void SetCubeMap (GLuint cm);
+
 		static void UseMaterial(const Material& m);
 
 		void EnableRender();
@@ -64,6 +68,7 @@ namespace Bagnall
 		bool renderEnabled;
 		Material material;
 		GLuint texture;
+		GLuint cubeMap;
 		RenderNode *renderNode;
 
 		void init();

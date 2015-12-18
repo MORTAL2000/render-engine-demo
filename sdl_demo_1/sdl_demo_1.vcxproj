@@ -126,6 +126,7 @@
     <ClCompile Include="CRSpline.cpp" />
     <ClCompile Include="Cube.cpp" />
     <ClCompile Include="DrawableObject.cpp" />
+    <ClCompile Include="EnvironmentMap.cpp" />
     <ClCompile Include="FpsTracker.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Geometry.cpp" />
@@ -155,6 +156,7 @@
     <ClInclude Include="CRSpline.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="DrawableObject.h" />
+    <ClInclude Include="EnvironmentMap.h" />
     <ClInclude Include="FpsTracker.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Geometry.h" />

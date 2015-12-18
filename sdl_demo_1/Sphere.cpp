@@ -24,7 +24,7 @@ namespace Bagnall
 
 	void Sphere::createPrototypeVertices()
 	{
-		std::vector<vec4> sphere = Geometry::CreateSphere(10.0f);
+		std::vector<vec4> sphere = Geometry::CreateSphere(15.0f);
 		std::vector<vec4> normals = Geometry::CreateSphereNormals(sphere);
 
 		// garbage values for these

@@ -13,7 +13,6 @@ namespace Bagnall
 	{
 		SetTexture(0);
 		emissive = false;
-		//SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 		SetMaterial(Material::None());
 		init();
 	}
@@ -92,6 +91,17 @@ namespace Bagnall
 		updateRenderNode();
 	}
 
+	GLuint DrawableObject::GetCubeMap() const
+	{
+		return cubeMap;
+	}
+
+	void DrawableObject::SetCubeMap(GLuint cm)
+	{
+		cubeMap = cm;
+		updateRenderNode();
+	}
+
 	void DrawableObject::UseMaterial(const Material& m)
 	{
 		/*glUniform4fv(Game::MaterialAmbientLoc, 1, m.ambient);
@@ -138,6 +148,7 @@ namespace Bagnall
 	{
 		bumpMapEnabled = true;
 		renderEnabled = true;
+		cubeMap = 0;
 		updateRenderNode();
 	}
 

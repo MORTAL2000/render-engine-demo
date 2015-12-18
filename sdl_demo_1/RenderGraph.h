@@ -66,10 +66,38 @@ namespace Bagnall
 		void Render() const;
 	};
 
+	struct CubeMapNode : public RenderNode
+	{
+		GLuint cubeMap;
+
+		std::unordered_map<Material, MaterialNode*> materialNodeMap;
+
+		CubeMapNode(GLuint cubeM) { cubeMap = cubeM; }
+
+		void Render() const;
+	};
+
+	struct CubeMapEmissiveNode : public RenderNode
+	{
+		GLuint cubeMap;
+		std::unordered_map<vec4, EmissiveNode*> emissiveNodeMap;
+
+		CubeMapEmissiveNode(GLuint cubeM) { cubeMap = cubeM; }
+
+		void Render() const;
+	};
+
 	class RenderGraph
 	{
 	public:
+		// constructor
 		RenderGraph();
+
+		// root node for objects with cube map without bump maps and normal lighting
+		std::unordered_map<GLuint, CubeMapNode*> cubeMapNodeMap;
+
+		// root node for emissive objects with cube map
+		std::unordered_map<GLuint, CubeMapEmissiveNode*> cubeMapEmissiveNodeMap;
 
 		// root node for textured objects with bump maps and normal lighting
 		std::unordered_map<GLuint, TextureBumpNode*> textureBumpNodeMap;
@@ -86,12 +114,14 @@ namespace Bagnall
 		// root node for emissive objects
 		std::unordered_map<vec4, EmissiveNode*> emissiveNodeMap;
 
+		// add an object to the graph
 		RenderNode* AddDrawableObject(DrawableObject *o);
 
+		// render everything
 		void Render() const;
 
+		// shadowsEnabled getter/setter
 		void SetShadowsEnabled(bool s);
-
 		bool GetShadowsEnabled() const;
 
 	private:

@@ -5,7 +5,7 @@
 //#define SHADOW_MAP_SIZE 2048
 
 #include <GL/glew.h>
-#include <glm/vec4.hpp>
+#include <glm/vec3.hpp>
 
 namespace Bagnall
 {

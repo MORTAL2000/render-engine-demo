@@ -11,7 +11,6 @@ namespace Bagnall
 		vec4 ambient; // ambient color
 		vec4 diffuse; // diffuse color
 		vec4 specular; // specular color
-		vec4 emission; // emission color
 		float shininess; // shininess coefficient
 
 		/**********************************************************************
