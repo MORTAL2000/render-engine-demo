@@ -84,7 +84,7 @@ namespace Bagnall {
 			GLint  linked;
 			glGetProgramiv(program, GL_LINK_STATUS, &linked);
 			if (!linked) {
-				std::cerr << "Shader program failed to link" << std::endl;
+				std::cerr << "Shader program " << vShaderFile << ", " << fShaderFile << " failed to link" << std::endl;
 				GLint  logSize;
 				glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logSize);
 				char* logMsg = new char[logSize];

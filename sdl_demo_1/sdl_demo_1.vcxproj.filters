@@ -22,6 +22,12 @@
     <Filter Include="Resource Files\bumpmaps">
       <UniqueIdentifier>{98f11d16-5a6b-4d38-b2e1-a07b7b998369}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\shaders\vertex">
+      <UniqueIdentifier>{0f8ea5d4-7e3f-41a6-9d76-6ca9daeec4c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shaders\fragment">
+      <UniqueIdentifier>{0c15c50d-9864-4dbc-a791-5886c0cad289}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -100,6 +106,54 @@
     </None>
     <None Include="shaders\vshader.glsl">
       <Filter>Source Files\shaders</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_cubemap.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_depth.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_emissive_color.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_emissive_cubemap.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_emissive_texture.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_material.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_texture.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_texture_bump.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_cubemap.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_depth.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_emissive_color.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_emissive_cubemap.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_emissive_texture.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_material.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_texture.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_texture_bump.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

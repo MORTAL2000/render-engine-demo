@@ -12,42 +12,13 @@ namespace Bagnall
 	std::vector<vec4> Shader::Binormals;
 	std::vector<vec2> Shader::TextureCoordinates;
 
-	GLuint Shader::MaterialAmbientLoc;
-	GLuint Shader::MaterialDiffuseLoc;
-	GLuint Shader::MaterialSpecularLoc;
-	GLuint Shader::MaterialShininessLoc;
-	GLuint Shader::LightSourceLoc;
-	GLuint Shader::CameraPositionLoc;
-	GLuint Shader::ModelLoc;
-	GLuint Shader::InverseModelLoc;
-	GLuint Shader::CameraLoc;
-	GLuint Shader::ProjectionLoc;
-	GLuint Shader::EmissiveLoc;
-	GLuint Shader::EmissionColorLoc;
-	GLuint Shader::AlphaOverrideLoc;
-	GLuint Shader::UseTextureLoc;
-	GLuint Shader::TexLoc;
-	GLuint Shader::TextureBlendLoc;
-	GLuint Shader::UseBumpMapLoc;
-	GLuint Shader::BumpTexLoc;
-	GLuint Shader::UseCubeMapLoc;
-	GLuint Shader::CubeMapLoc;
-	GLuint Shader::UseShadowMapLoc;
-	GLuint Shader::ShadowMapLoc;
-	GLuint Shader::ShadowZRangeLoc;
-	GLuint Shader::OnlyDepthLoc;
-
 	void Shader::Init()
 	{
-		// Create a vertex array object
-		glGenVertexArrays(1, &vao);
-		glBindVertexArray(vao);
-
 		// set up vertex buffer
 		if (Vertices.size())
 		{
-			glGenBuffers(1, &buffer);
-			glBindBuffer(GL_ARRAY_BUFFER, buffer);
+			glGenBuffers(1, &vertexBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size() + sizeof(vec4)*Binormals.size() + sizeof(vec4)*TextureCoordinates.size(), NULL, GL_STATIC_DRAW);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec4)*Vertices.size(), &Vertices[0]);
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size(), sizeof(vec4)*Normals.size(), &Normals[0]);
@@ -56,9 +27,269 @@ namespace Bagnall
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size() + sizeof(vec4)*Binormals.size(), sizeof(vec2)*TextureCoordinates.size(), &TextureCoordinates[0]);
 		}
 
-		// Load shaders and use the resulting shader program
-		GLuint program = InitShader("shaders\\vshader.glsl", "shaders\\fshader.glsl");
+		// EMISSIVE COLOR PROGRAM
+		initEmissiveColorProgram();
+
+		// EMISSIVE TEXTURE PROGRAM
+		initEmissiveTextureProgram();
+
+		// EMISSIVE CUBEMAP PROGRAM
+		initEmissiveCubeMapProgram();
+
+		// DEPTH PROGRAM
+		initDepthProgram();
+
+		// MATERIAL PROGRAM
+		initMaterialProgram();
+
+		// TEXTURE PROGRAM
+		initTextureProgram();
+
+		// TEXTURE BUMP PROGRAM
+		initTextureBumpProgram();
+
+		// CUBEMAP PROGRAM
+		initCubeMapProgram();
+	}
+
+	void Shader::SetProgram(const char* programName)
+	{
+		GLuint program = nameToProgramMap[programName];
+		if (program == 0)
+			std::cerr << "unable to bind shader program: " << programName << std::endl;
+		else
+		{
+			currentProgram = nameToProgramMap[programName];
+			glUseProgram(currentProgram);
+			SetCamera(camera);
+			SetProjection(projection);
+		}
+	}
+
+	void Shader::SetMaterialAmbient(const vec4& materialAmbient)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["materialAmbient"];
+		glUniform4fv(loc, 1, value_ptr(materialAmbient));
+	}
+
+	void Shader::SetMaterialDiffuse(const vec4& materialDiffuse)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["materialDiffuse"];
+		glUniform4fv(loc, 1, value_ptr(materialDiffuse));
+	}
+
+	void Shader::SetMaterialSpecular(const vec4& materialSpecular)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["materialSpecular"];
+		glUniform4fv(loc, 1, value_ptr(materialSpecular));
+	}
+
+	void Shader::SetMaterialShininess(float materialShininess)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["materialShininess"];
+		glUniform1f(loc, materialShininess);
+	}
+
+	void Shader::SetLightSource(const mat4& lightSource)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["lightSource"];
+		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lightSource));
+	}
+
+	void Shader::SetCameraPosition(const vec4& cameraPosition)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["cameraPosition"];
+		glUniform4fv(loc, 1, value_ptr(cameraPosition));
+	}
+
+	void Shader::SetModel(const mat4& model)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["model"];
+		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(model));
+	}
+
+	void Shader::SetCamera(const mat4& cam)
+	{
+		camera = cam;
+
+		GLuint loc = programToUniformMap[currentProgram]["camera"];
+		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(cam));
+	}
+
+	void Shader::SetProjection(const mat4& proj)
+	{
+		projection = proj;
+
+		GLuint loc = programToUniformMap[currentProgram]["projection"];
+		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(proj));
+	}
+
+	void Shader::SetEmissionColor(const vec4& emissionColor)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["emissionColor"];
+		glUniform4fv(loc, 1, value_ptr(emissionColor));
+	}
+
+	void Shader::SetTextureBlend(bool textureBlend)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["textureBlend"];
+		glUniform1i(loc, textureBlend);
+	}
+
+	void Shader::SetUseShadowCubeMap(bool useShadowCubeMap)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["useShadowCubeMap"];
+		glUniform1i(loc, useShadowCubeMap);
+	}
+
+	void Shader::SetShadowZRange(const vec2& shadowZRange)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["shadowZRange"];
+		glUniform2fv(loc, 1, value_ptr(shadowZRange));
+	}
+
+	// PRIVATE
+
+	GLuint Shader::vertexBuffer;
+	GLuint Shader::currentProgram;
+
+	mat4 Shader::camera;
+	mat4 Shader::projection;
+
+	std::unordered_map<const char*, GLuint> Shader::nameToProgramMap;
+	std::unordered_map<GLuint, GLuint> Shader::programToVaoMap;
+	std::unordered_map<GLuint, std::unordered_map<const char*, GLuint>> Shader::programToUniformMap;
+
+	void Shader::initEmissiveColorProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_emissive_color.glsl", "shaders\\fragment\\fshader_emissive_color.glsl");
+		nameToProgramMap.emplace("emissive_color", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("emissionColor", getUniform(program, "emissionColor"));
+
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+	}
+
+	void Shader::initEmissiveTextureProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_emissive_texture.glsl", "shaders\\fragment\\fshader_emissive_texture.glsl");
+		nameToProgramMap.emplace("emissive_texture", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		GLuint vTextureCoordinateLoc = glGetAttribLocation(program, "vTextureCoordinate");
+		glEnableVertexAttribArray(vTextureCoordinateLoc);
+		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("tex", getUniform(program, "tex"));
+
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+
+		// initialize uniforms
 		glUseProgram(program);
+		glUniform1i(uniformMap["cubeMap"], 0);
+	}
+
+	void Shader::initEmissiveCubeMapProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_emissive_cubemap.glsl", "shaders\\fragment\\fshader_emissive_cubemap.glsl");
+		nameToProgramMap.emplace("emissive_cubemap", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("cubeMap", getUniform(program, "cubeMap"));
+
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+
+		// initialize uniforms
+		glUseProgram(program);
+		glUniform1i(uniformMap["cubeMap"], 2);
+	}
+
+	void Shader::initDepthProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_depth.glsl", "shaders\\fragment\\fshader_depth.glsl");
+		nameToProgramMap.emplace("depth", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+
+		// copy uniform map to program uniform map
+		glUseProgram(program);
+		programToUniformMap.emplace(program, uniformMap);
+	}
+
+	void Shader::initMaterialProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_material.glsl", "shaders\\fragment\\fshader_material.glsl");
+		nameToProgramMap.emplace("material", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -67,253 +298,200 @@ namespace Bagnall
 
 		GLuint vNormalLoc = glGetAttribLocation(program, "vNormal");
 		glEnableVertexAttribArray(vNormalLoc);
-		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size()));
+		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
 
-		GLuint vTangentLoc = glGetAttribLocation(program, "vTangent");
-		glEnableVertexAttribArray(vTangentLoc);
-		glVertexAttribPointer(vTangentLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size()));
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("lightSource", getUniform(program, "lightSource"));
+		uniformMap.emplace("cameraPosition", getUniform(program, "cameraPosition"));
+		uniformMap.emplace("shadowZRange", getUniform(program, "shadowZRange"));
+		uniformMap.emplace("materialAmbient", getUniform(program, "materialAmbient"));
+		uniformMap.emplace("materialDiffuse", getUniform(program, "materialDiffuse"));
+		uniformMap.emplace("materialSpecular", getUniform(program, "materialSpecular"));
+		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
+		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 
-		GLuint vBinormal = glGetAttribLocation(program, "vBinormal");
-		glEnableVertexAttribArray(vBinormal);
-		glVertexAttribPointer(vBinormal, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size()));
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+
+		// initialize uniforms
+		glUseProgram(program);
+		glUniform1i(uniformMap["useShadowCubeMap"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], 3);
+	}
+
+	void Shader::initTextureProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_texture.glsl", "shaders\\fragment\\fshader_texture.glsl");
+		nameToProgramMap.emplace("texture", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		GLuint vNormalLoc = glGetAttribLocation(program, "vNormal");
+		glEnableVertexAttribArray(vNormalLoc);
+		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
 
 		GLuint vTextureCoordinateLoc = glGetAttribLocation(program, "vTextureCoordinate");
 		glEnableVertexAttribArray(vTextureCoordinateLoc);
-		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size() + sizeof(vec4)*Binormals.size()));
+		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
 
-		// Initialize attributes
-		ModelLoc = glGetUniformLocation(program, "model");
-		if (ModelLoc == -1)
-			std::cerr << "Unable to find model parameter" << std::endl;
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("lightSource", getUniform(program, "lightSource"));
+		uniformMap.emplace("cameraPosition", getUniform(program, "cameraPosition"));
+		uniformMap.emplace("shadowZRange", getUniform(program, "shadowZRange"));
+		uniformMap.emplace("materialAmbient", getUniform(program, "materialAmbient"));
+		uniformMap.emplace("materialDiffuse", getUniform(program, "materialDiffuse"));
+		uniformMap.emplace("materialSpecular", getUniform(program, "materialSpecular"));
+		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
+		uniformMap.emplace("tex", getUniform(program, "tex"));
+		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
+		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 
-		InverseModelLoc = glGetUniformLocation(program, "inverseModel");
-		if (InverseModelLoc == -1)
-			std::cerr << "Unable to find inverseModel parameter" << std::endl;
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
 
-		CameraLoc = glGetUniformLocation(program, "camera");
-		if (CameraLoc == -1)
-			std::cerr << "Unable to find camera parameter" << std::endl;
-
-		ProjectionLoc = glGetUniformLocation(program, "projection");
-		if (ProjectionLoc == -1)
-			std::cerr << "Unable to find projection parameter" << std::endl;
-
-		CameraPositionLoc = glGetUniformLocation(program, "cameraPosition");
-		if (CameraPositionLoc == -1)
-			std::cerr << "Unable to find cameraPosition parameter" << std::endl;
-
-		LightSourceLoc = glGetUniformLocation(program, "lightSource");
-		if (LightSourceLoc == -1)
-			std::cerr << "Unable to find lightSource parameter" << std::endl;
-
-		MaterialAmbientLoc = glGetUniformLocation(program, "materialAmbient");
-		if (MaterialAmbientLoc == -1)
-			std::cerr << "Unable to find materialAmbient parameter" << std::endl;
-
-		MaterialDiffuseLoc = glGetUniformLocation(program, "materialDiffuse");
-		if (MaterialDiffuseLoc == -1)
-			std::cerr << "Unable to find diffuseProductLoc parameter" << std::endl;
-
-		MaterialSpecularLoc = glGetUniformLocation(program, "materialSpecular");
-		if (MaterialSpecularLoc == -1)
-			std::cerr << "Unable to find specularProductLoc parameter" << std::endl;
-
-		MaterialShininessLoc = glGetUniformLocation(program, "materialShininess");
-		if (MaterialShininessLoc == -1)
-			std::cerr << "Unable to find materialShininess parameter" << std::endl;
-
-		EmissiveLoc = glGetUniformLocation(program, "emissive");
-		if (EmissiveLoc == -1)
-			std::cerr << "Unable to find emissive parameter" << std::endl;
-
-		EmissionColorLoc = glGetUniformLocation(program, "emissionColor");
-		if (EmissionColorLoc == -1)
-			std::cerr << "Unable to find emissionColor parameter" << std::endl;
-
-		AlphaOverrideLoc = glGetUniformLocation(program, "alphaOverride");
-		if (AlphaOverrideLoc == -1)
-			std::cerr << "Unable to find alphaOverride parameter" << std::endl;
-
-		UseTextureLoc = glGetUniformLocation(program, "useTexture");
-		if (UseTextureLoc == -1)
-			std::cerr << "Unable to find useTexture parameter" << std::endl;
-
-		UseBumpMapLoc = glGetUniformLocation(program, "useBumpMap");
-		if (UseBumpMapLoc == -1)
-			std::cerr << "Unable to find useBumpMap parameter" << std::endl;
-		
-		UseCubeMapLoc = glGetUniformLocation(program, "useCubeMap");
-		if (UseCubeMapLoc == -1)
-			std::cerr << "Unable to find useCubeMap parameter" << std::endl;
-
-		UseShadowMapLoc = glGetUniformLocation(program, "useShadowMap");
-		if (UseShadowMapLoc == -1)
-			std::cerr << "Unable to find useShadowMap parameter" << std::endl;
-
-		TexLoc = glGetUniformLocation(program, "Tex");
-		if (TexLoc == -1)
-			std::cerr << "Unable to find Tex parameter" << std::endl;
-
-		TextureBlendLoc = glGetUniformLocation(program, "textureBlend");
-		if (TextureBlendLoc == -1)
-			std::cerr << "Unable to find textureBlend parameter" << std::endl;
-
-		BumpTexLoc = glGetUniformLocation(program, "BumpTex");
-		if (BumpTexLoc == -1)
-			std::cerr << "Unable to find BumpTex parameter" << std::endl;
-
-		CubeMapLoc = glGetUniformLocation(program, "cubeMap");
-		if (CubeMapLoc == -1)
-			std::cerr << "Unable to find cubeMap parameter" << std::endl;
-
-		ShadowMapLoc = glGetUniformLocation(program, "shadowMap");
-		if (ShadowMapLoc == -1)
-			std::cerr << "Unable to find shadowMap parameter" << std::endl;
-
-		ShadowZRangeLoc = glGetUniformLocation(program, "shadowZRange");
-		if (ShadowZRangeLoc == -1)
-			std::cerr << "Unable to find shadowZRange parameter" << std::endl;
-
-		OnlyDepthLoc = glGetUniformLocation(program, "onlyDepth");
-		if (OnlyDepthLoc == -1)
-			std::cerr << "Unable to find onlyDepth parameter" << std::endl;
-		
-
-		glUniform1i(EmissiveLoc, 0);
-		glUniform1i(UseTextureLoc, 0);
-		glUniform1i(UseBumpMapLoc, 0);
-		glUniform1i(UseCubeMapLoc, 0);
-		glUniform1i(UseShadowMapLoc, 0);
-		glUniform1i(TexLoc, 0);
-		glUniform1i(TextureBlendLoc, 1);
-		glUniform1i(BumpTexLoc, 1);
-		glUniform1i(CubeMapLoc, 2);
-		glUniform1i(ShadowMapLoc, 3);
-		glUniform1f(AlphaOverrideLoc, 0.0f);
+		// initialize uniforms
+		glUseProgram(program);
+		glUniform1i(uniformMap["tex"], 0);
+		glUniform1i(uniformMap["textureBlend"], 1);
+		glUniform1i(uniformMap["useShadowCubeMap"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], 3);
 	}
 
-	void Shader::SetMaterialAmbient(const vec4& materialAmbient)
+	void Shader::initTextureBumpProgram()
 	{
-		glUniform4fv(MaterialAmbientLoc, 1, value_ptr(materialAmbient));
+		GLuint program = InitShader("shaders\\vertex\\vshader_texture_bump.glsl", "shaders\\fragment\\fshader_texture_bump.glsl");
+		nameToProgramMap.emplace("texture_bump", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		GLuint vNormalLoc = glGetAttribLocation(program, "vNormal");
+		glEnableVertexAttribArray(vNormalLoc);
+		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
+
+		GLuint vTangentLoc = glGetAttribLocation(program, "vTangent");
+		glEnableVertexAttribArray(vTangentLoc);
+		glVertexAttribPointer(vTangentLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size()));
+
+		GLuint vBinormalLoc = glGetAttribLocation(program, "vBinormal");
+		glEnableVertexAttribArray(vBinormalLoc);
+		glVertexAttribPointer(vBinormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size()));
+
+		GLuint vTextureCoordinateLoc = glGetAttribLocation(program, "vTextureCoordinate");
+		glEnableVertexAttribArray(vTextureCoordinateLoc);
+		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("lightSource", getUniform(program, "lightSource"));
+		uniformMap.emplace("cameraPosition", getUniform(program, "cameraPosition"));
+		uniformMap.emplace("shadowZRange", getUniform(program, "shadowZRange"));
+		uniformMap.emplace("materialAmbient", getUniform(program, "materialAmbient"));
+		uniformMap.emplace("materialDiffuse", getUniform(program, "materialDiffuse"));
+		uniformMap.emplace("materialSpecular", getUniform(program, "materialSpecular"));
+		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
+		uniformMap.emplace("tex", getUniform(program, "tex"));
+		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
+		uniformMap.emplace("bumpTex", getUniform(program, "bumpTex"));
+		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+
+		// initialize uniforms
+		glUseProgram(program);
+		glUniform1i(uniformMap["tex"], 0);
+		glUniform1i(uniformMap["textureBlend"], 1);
+		glUniform1i(uniformMap["bumpTex"], 1);
+		glUniform1i(uniformMap["useShadowCubeMap"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], 3);
 	}
 
-	void Shader::SetMaterialDiffuse(const vec4& materialDiffuse)
+	void Shader::initCubeMapProgram()
 	{
-		glUniform4fv(MaterialDiffuseLoc, 1, value_ptr(materialDiffuse));
+		GLuint program = InitShader("shaders\\vertex\\vshader_cubemap.glsl", "shaders\\fragment\\fshader_cubemap.glsl");
+		nameToProgramMap.emplace("cubemap", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		GLuint vNormalLoc = glGetAttribLocation(program, "vNormal");
+		glEnableVertexAttribArray(vNormalLoc);
+		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("lightSource", getUniform(program, "lightSource"));
+		uniformMap.emplace("cameraPosition", getUniform(program, "cameraPosition"));
+		uniformMap.emplace("shadowZRange", getUniform(program, "shadowZRange"));
+		uniformMap.emplace("materialAmbient", getUniform(program, "materialAmbient"));
+		uniformMap.emplace("materialDiffuse", getUniform(program, "materialDiffuse"));
+		uniformMap.emplace("materialSpecular", getUniform(program, "materialSpecular"));
+		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
+		uniformMap.emplace("cubeMap", getUniform(program, "cubeMap"));
+		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
+		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+
+		// initialize uniforms
+		glUseProgram(program);
+		glUniform1i(uniformMap["cubeMap"], 2);
+		glUniform1i(uniformMap["textureBlend"], 1);
+		glUniform1i(uniformMap["bumpTex"], 1);
+		glUniform1i(uniformMap["useShadowCubeMap"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], 3);
 	}
 
-	void Shader::SetMaterialSpecular(const vec4& materialSpecular)
+	GLuint Shader::getUniform(GLuint program, const char* name)
 	{
-		glUniform4fv(MaterialSpecularLoc, 1, value_ptr(materialSpecular));
+		GLuint loc = glGetUniformLocation(program, name);
+		if (loc == -1)
+			std::cerr << "unable to get " << name << " parameter from shader program\n";
+		return loc;
 	}
-
-	void Shader::SetMaterialShininess(float materialShininess)
-	{
-		glUniform1f(MaterialShininessLoc, materialShininess);
-	}
-
-	void Shader::SetLightSource(const mat4& lightSource)
-	{
-		glUniformMatrix4fv(LightSourceLoc, 1, GL_FALSE, value_ptr(lightSource));
-	}
-
-	void Shader::SetCameraPosition(const vec4& cameraPosition)
-	{
-		glUniform4fv(CameraPositionLoc, 1, value_ptr(cameraPosition));
-	}
-
-	void Shader::SetModel(const mat4& model)
-	{
-		glUniformMatrix4fv(ModelLoc, 1, GL_FALSE, value_ptr(model));
-	}
-
-	void Shader::SetInverseModel(const mat4& inverseModel)
-	{
-		glUniformMatrix4fv(InverseModelLoc, 1, GL_FALSE, value_ptr(inverseModel));
-	}
-
-	void Shader::SetCamera(const mat4& camera)
-	{
-		glUniformMatrix4fv(CameraLoc, 1, GL_FALSE, value_ptr(camera));
-	}
-
-	void Shader::SetProjection(const mat4& projection)
-	{
-		glUniformMatrix4fv(ProjectionLoc, 1, GL_FALSE, value_ptr(projection));
-	}
-
-	void Shader::SetEmissive(bool emissive)
-	{
-		glUniform1i(EmissiveLoc, emissive);
-	}
-
-	void Shader::SetEmissionColor(const vec4& emissionColor)
-	{
-		glUniform4fv(EmissionColorLoc, 1, value_ptr(emissionColor));
-	}
-
-	void Shader::SetAlphaOverride(const vec4& alphaOverride)
-	{
-		glUniform4fv(AlphaOverrideLoc, 1, value_ptr(alphaOverride));
-	}
-
-	void Shader::SetUseTexture(bool useTexture)
-	{
-		glUniform1i(UseTextureLoc, useTexture);
-	}
-
-	void Shader::SetTex(int tex)
-	{
-		glUniform1i(TexLoc, tex);
-	}
-
-	void Shader::SetTextureBlend(bool b)
-	{
-		glUniform1i(TextureBlendLoc, b);
-	}
-
-	void Shader::SetUseBumpMap(bool useBumpMap)
-	{
-		glUniform1i(UseBumpMapLoc, useBumpMap);
-	}
-
-	void Shader::SetBumpTex(int bumpTex)
-	{
-		glUniform1i(BumpTexLoc, bumpTex);
-	}
-
-	void Shader::SetUseCubeMap(bool useCubeMap)
-	{
-		glUniform1i(UseCubeMapLoc, useCubeMap);
-	}
-
-	void Shader::SetCubeMap(int cubeMap)
-	{
-		glUniform1i(CubeMapLoc, cubeMap);
-	}
-
-	void Shader::SetUseShadowMap(bool useShadowMap)
-	{
-		glUniform1i(UseShadowMapLoc, useShadowMap);
-	}
-
-	void Shader::SetShadowMap(int shadowMap)
-	{
-		glUniform1i(ShadowMapLoc, shadowMap);
-	}
-
-	void Shader::SetShadowZRange(const vec2& shadowZRange)
-	{
-		glUniform2fv(ShadowZRangeLoc, 1, value_ptr(shadowZRange));
-	}
-
-	void Shader::SetOnlyDepth(bool d)
-	{
-		glUniform1i(OnlyDepthLoc, d);
-	}
-
-	// PRIVATE
-
-	GLuint Shader::vao;
-	GLuint Shader::buffer;
 }

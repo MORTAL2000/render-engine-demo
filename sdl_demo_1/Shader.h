@@ -3,6 +3,7 @@
 
 #include "Bagnall.h"
 #include <vector>
+#include <unordered_map>
 
 namespace Bagnall
 {
@@ -15,32 +16,9 @@ namespace Bagnall
 		static std::vector<vec4> Binormals;
 		static std::vector<vec2> TextureCoordinates;
 
-		static GLuint MaterialAmbientLoc;
-		static GLuint MaterialDiffuseLoc;
-		static GLuint MaterialSpecularLoc;
-		static GLuint MaterialShininessLoc;
-		static GLuint LightSourceLoc;
-		static GLuint CameraPositionLoc;
-		static GLuint ModelLoc;
-		static GLuint InverseModelLoc;
-		static GLuint CameraLoc;
-		static GLuint ProjectionLoc;
-		static GLuint EmissiveLoc;
-		static GLuint EmissionColorLoc;
-		static GLuint AlphaOverrideLoc;
-		static GLuint UseTextureLoc;
-		static GLuint TexLoc;
-		static GLuint TextureBlendLoc;
-		static GLuint UseBumpMapLoc;
-		static GLuint BumpTexLoc;
-		static GLuint UseCubeMapLoc;
-		static GLuint CubeMapLoc;
-		static GLuint UseShadowMapLoc;
-		static GLuint ShadowMapLoc;
-		static GLuint ShadowZRangeLoc;
-		static GLuint OnlyDepthLoc;
-
 		static void Init();
+
+		static void SetProgram(const char* programName);
 
 		static void SetMaterialAmbient(const vec4& materialAmbient);
 		static void SetMaterialDiffuse(const vec4& materialDiffuse);
@@ -49,27 +27,34 @@ namespace Bagnall
 		static void SetLightSource(const mat4& lightSource);
 		static void SetCameraPosition(const vec4& cameraPosition);
 		static void SetModel(const mat4& model);
-		static void SetInverseModel(const mat4& model);
 		static void SetCamera(const mat4& camera);
 		static void SetProjection(const mat4& projection);
-		static void SetEmissive(bool emissive);
 		static void SetEmissionColor(const vec4& emissionColor);
-		static void SetAlphaOverride(const vec4& alphaOverride);
-		static void SetUseTexture(bool useTexture);
-		static void SetTex(int tex);
-		static void SetTextureBlend(bool b);
-		static void SetUseBumpMap(bool useBumpMap);
-		static void SetBumpTex(int bumpTex);
-		static void SetUseCubeMap(bool useCubeMap);
-		static void SetCubeMap(int cubeMap);
-		static void SetUseShadowMap(bool useShadowMap);
-		static void SetShadowMap(int shadowMap);
+		static void SetTextureBlend(bool textureBlendb);
+		static void SetUseShadowCubeMap(bool useShadowCubeMap);
 		static void SetShadowZRange(const vec2& shadowZRange);
-		static void SetOnlyDepth(bool d);
 
 	private:
-		static GLuint buffer;
-		static GLuint vao;
+		static GLuint vertexBuffer;
+		static GLuint currentProgram;
+
+		static mat4 camera;
+		static mat4 projection;
+
+		static std::unordered_map<const char*, GLuint> nameToProgramMap;
+		static std::unordered_map<GLuint, GLuint> programToVaoMap;
+		static std::unordered_map<GLuint, std::unordered_map<const char*, GLuint>> programToUniformMap;
+
+		static void initEmissiveColorProgram();
+		static void initEmissiveTextureProgram();
+		static void initEmissiveCubeMapProgram();
+		static void initDepthProgram();
+		static void initMaterialProgram();
+		static void initTextureProgram();
+		static void initTextureBumpProgram();
+		static void initCubeMapProgram();
+
+		static GLuint getUniform(GLuint program, const char* name);
 	};
 }
 

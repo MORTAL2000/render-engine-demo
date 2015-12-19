@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "Texture.h"
 #include "Shadow.h"
+#include "Game.h"
 
 namespace Bagnall
 {
@@ -159,61 +160,64 @@ namespace Bagnall
 	void RenderGraph::Render() const
 	{
 		// render emissive objects
-		Shader::SetEmissive(true);
+		Shader::SetProgram("emissive_color");
 		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
 			(*it).second->Render();
 
 		// render emissive objects with cubemap
-		Shader::SetUseCubeMap(true);
+		Shader::SetProgram("emissive_cubemap");
 		for (auto it = cubeMapEmissiveNodeMap.begin(); it != cubeMapEmissiveNodeMap.end(); ++it)
 			(*it).second->Render();
-		Shader::SetUseCubeMap(false);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 		// render emissive objects with texture
-		Shader::SetUseTexture(true);
+		Shader::SetProgram("emissive_texture");
 		for (auto it = textureEmissiveNodeMap.begin(); it != textureEmissiveNodeMap.end(); ++it)
 			(*it).second->Render();
-		Shader::SetEmissive(false);
-
-		// activate shadows if enabled
-		if (shadowsEnabled)
-		{
-			Shadow::SendToGPU();
-			Shader::SetUseShadowMap(true);
-		}
 
 		// render objects with texture, bump map, material
-		Shader::SetUseBumpMap(true);
+		Shader::SetProgram("texture_bump");
 		for (auto it = textureBumpNodeMap.begin(); it != textureBumpNodeMap.end(); ++it)
 			(*it).second->Render();
-		Shader::SetUseBumpMap(false);
 
 		// render objects with texture, material
+		Shader::SetProgram("texture");
 		for (auto it = textureNodeMap.begin(); it != textureNodeMap.end(); ++it)
 			(*it).second->Render();
-		Shader::SetUseTexture(false);
-		glBindTexture(GL_TEXTURE_2D, 0);
 
 		// render objects with only material
+		Shader::SetProgram("material");
 		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
 			(*it).second->Render();
 
 		// render objects with cubemap
-		Shader::SetUseCubeMap(true);
+		Shader::SetProgram("cubemap");
 		for (auto it = cubeMapNodeMap.begin(); it != cubeMapNodeMap.end(); ++it)
 			(*it).second->Render();
-		Shader::SetUseCubeMap(false);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-		
-		// deactivate shadows
-		if (shadowsEnabled)
-			Shader::SetUseShadowMap(false);
 	}
 
 	void RenderGraph::SetShadowsEnabled(bool s)
 	{
 		shadowsEnabled = s;
+
+		Shader::SetProgram("material");
+		Shader::SetUseShadowCubeMap(s);
+		if (shadowsEnabled)
+			Shadow::BindToGPU();
+
+		Shader::SetProgram("texture");
+		Shader::SetUseShadowCubeMap(s);
+		if (shadowsEnabled)
+			Shadow::BindToGPU();
+
+		Shader::SetProgram("texture_bump");
+		Shader::SetUseShadowCubeMap(s);
+		if (shadowsEnabled)
+			Shadow::BindToGPU();
+
+		Shader::SetProgram("cubemap");
+		Shader::SetUseShadowCubeMap(s);
+		if (shadowsEnabled)
+			Shadow::BindToGPU();
 	}
 
 	bool RenderGraph::GetShadowsEnabled() const

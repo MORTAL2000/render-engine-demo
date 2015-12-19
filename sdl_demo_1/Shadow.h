@@ -19,7 +19,7 @@ namespace Bagnall
 
 		static void RenderShadowMap(const glm::vec3& sourcePos, DrawableObject* source, float zNear, float zFar);
 
-		static void SendToGPU();
+		static void BindToGPU();
 
 		static void AddToDepthRenderList(DrawableObject *o);
 

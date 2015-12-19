@@ -53,6 +53,8 @@ namespace Bagnall
 
 	void Shadow::RenderShadowMap(const vec3& sourcePos, DrawableObject* source, float zNear, float zFar)
 	{
+		Shader::SetProgram("depth");
+
 		if (source != NULL)
 			source->DisableRender();
 
@@ -60,7 +62,7 @@ namespace Bagnall
 
 		glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
-		Shader::SetOnlyDepth(true);
+		//Shader::SetOnlyDepth(true);
 
 		mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zNear, zFar);
 		Shader::SetProjection(projection);
@@ -104,14 +106,14 @@ namespace Bagnall
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		Shader::SetOnlyDepth(false);
-		Shader::SetCamera(Game::Camera);
+		//Shader::SetOnlyDepth(false);
+		//Shader::SetCamera(Game::Camera);
 
 		if (source != NULL)
 			source->EnableRender();
 	}
 
-	void Shadow::SendToGPU()
+	void Shadow::BindToGPU()
 	{
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
