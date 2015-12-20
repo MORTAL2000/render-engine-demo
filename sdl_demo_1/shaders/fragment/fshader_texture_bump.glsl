@@ -35,7 +35,7 @@ void main()
 	}
 	else
 	{
-		ambientProduct = texColor * lightSource[0];
+		ambientProduct = 0.5 * texColor * lightSource[0];
 		diffuseProduct = texColor * lightSource[1];
 		specularProduct = texColor * lightSource[2];
 	}

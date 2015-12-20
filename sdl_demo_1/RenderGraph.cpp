@@ -131,7 +131,9 @@ namespace Bagnall
 				if (cubeMapEmissiveNodeMap.find(cubeMap) == cubeMapEmissiveNodeMap.end())
 					cubeMapEmissiveNodeMap.emplace(cubeMap, new CubeMapEmissiveNode(cubeMap));
 
-				_emissiveNodeMap = &cubeMapEmissiveNodeMap[cubeMap]->emissiveNodeMap;
+				auto cubeMapEmissiveNode = cubeMapEmissiveNodeMap[cubeMap];
+				cubeMapEmissiveNode->objects.push_back(o);
+				return cubeMapEmissiveNode;
 			}
 			// texture
 			else if (texture != 0)
@@ -139,7 +141,9 @@ namespace Bagnall
 				if (textureEmissiveNodeMap.find(texture) == textureEmissiveNodeMap.end())
 					textureEmissiveNodeMap.emplace(texture, new TextureEmissiveNode(texture));
 
-				_emissiveNodeMap = &textureEmissiveNodeMap[texture]->emissiveNodeMap;
+				auto textureEmissiveNode = textureEmissiveNodeMap[texture];
+				textureEmissiveNode->objects.push_back(o);
+				return textureEmissiveNode;
 			}
 			// no texture
 			else
@@ -253,11 +257,8 @@ namespace Bagnall
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
 
-		// render emissive nodes
-		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
+		// render objects
+		RenderNode::Render();
 	}
 
 	// TEXTUREBUMPNODE PUBLIC
@@ -312,11 +313,8 @@ namespace Bagnall
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
-		// render emissive nodes
-		for (auto it = emissiveNodeMap.begin(); it != emissiveNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
+		// render objects
+		RenderNode::Render();
 	}
 
 	// MATERIALNODE PUBLIC

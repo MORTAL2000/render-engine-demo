@@ -50,6 +50,8 @@ namespace Bagnall
 
 		// CUBEMAP PROGRAM
 		initCubeMapProgram();
+
+		glUseProgram(nameToProgramMap["emissive_color"]);
 	}
 
 	void Shader::SetProgram(const char* programName)
@@ -61,91 +63,129 @@ namespace Bagnall
 		{
 			currentProgram = nameToProgramMap[programName];
 			glUseProgram(currentProgram);
+			glBindVertexArray(programToVaoMap[currentProgram]);
+
 			SetCamera(camera);
 			SetProjection(projection);
+
+			GLuint loc = getUniformFromCurrentProgram("lightSource");
+			if (loc != -1)
+				glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lightSource));
+			loc = getUniformFromCurrentProgram("cameraPosition");
+			if (loc != -1)
+				glUniform4fv(loc, 1, value_ptr(cameraPosition));
 		}
 	}
 
 	void Shader::SetMaterialAmbient(const vec4& materialAmbient)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("materialAmbient");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["materialAmbient"];
-		glUniform4fv(loc, 1, value_ptr(materialAmbient));
+			glUniform4fv(loc, 1, value_ptr(materialAmbient));
 	}
 
 	void Shader::SetMaterialDiffuse(const vec4& materialDiffuse)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("materialDiffuse");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["materialDiffuse"];
-		glUniform4fv(loc, 1, value_ptr(materialDiffuse));
+			glUniform4fv(loc, 1, value_ptr(materialDiffuse));
 	}
 
 	void Shader::SetMaterialSpecular(const vec4& materialSpecular)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("materialSpecular");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["materialSpecular"];
-		glUniform4fv(loc, 1, value_ptr(materialSpecular));
+			glUniform4fv(loc, 1, value_ptr(materialSpecular));
 	}
 
 	void Shader::SetMaterialShininess(float materialShininess)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("materialShininess");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["materialShininess"];
-		glUniform1f(loc, materialShininess);
+			glUniform1f(loc, materialShininess);
 	}
 
-	void Shader::SetLightSource(const mat4& lightSource)
+	void Shader::SetLightSource(const mat4& lSource)
 	{
+		lightSource = lSource;
+
+		//GLuint loc = getUniformFromCurrentProgram("lightSource");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["lightSource"];
-		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lightSource));
+			glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lSource));
 	}
 
-	void Shader::SetCameraPosition(const vec4& cameraPosition)
+	void Shader::SetCameraPosition(const vec4& camPos)
 	{
+		cameraPosition = camPos;
+		//GLuint loc = getUniformFromCurrentProgram("cameraPosition");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["cameraPosition"];
-		glUniform4fv(loc, 1, value_ptr(cameraPosition));
+			glUniform4fv(loc, 1, value_ptr(camPos));
 	}
 
 	void Shader::SetModel(const mat4& model)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("model");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["model"];
-		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(model));
+			glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(model));
 	}
 
 	void Shader::SetCamera(const mat4& cam)
 	{
 		camera = cam;
 
+		//GLuint loc = getUniformFromCurrentProgram("camera");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["camera"];
-		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(cam));
+			glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(cam));
 	}
 
 	void Shader::SetProjection(const mat4& proj)
 	{
 		projection = proj;
 
+		//GLuint loc = getUniformFromCurrentProgram("projection");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["projection"];
-		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(proj));
+			glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(proj));
 	}
 
 	void Shader::SetEmissionColor(const vec4& emissionColor)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("emissionColor");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["emissionColor"];
-		glUniform4fv(loc, 1, value_ptr(emissionColor));
+			glUniform4fv(loc, 1, value_ptr(emissionColor));
 	}
 
 	void Shader::SetTextureBlend(bool textureBlend)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("textureBlend");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["textureBlend"];
-		glUniform1i(loc, textureBlend);
+			glUniform1i(loc, textureBlend);
 	}
 
 	void Shader::SetUseShadowCubeMap(bool useShadowCubeMap)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("useShadowCubeMap");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["useShadowCubeMap"];
-		glUniform1i(loc, useShadowCubeMap);
+			glUniform1i(loc, useShadowCubeMap);
 	}
 
 	void Shader::SetShadowZRange(const vec2& shadowZRange)
 	{
+		//GLuint loc = getUniformFromCurrentProgram("shadowZRange");
+		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["shadowZRange"];
-		glUniform2fv(loc, 1, value_ptr(shadowZRange));
+			glUniform2fv(loc, 1, value_ptr(shadowZRange));
 	}
 
 	// PRIVATE
@@ -154,7 +194,9 @@ namespace Bagnall
 	GLuint Shader::currentProgram;
 
 	mat4 Shader::camera;
+	vec4 Shader::cameraPosition;
 	mat4 Shader::projection;
+	mat4 Shader::lightSource;
 
 	std::unordered_map<const char*, GLuint> Shader::nameToProgramMap;
 	std::unordered_map<GLuint, GLuint> Shader::programToVaoMap;
@@ -219,7 +261,7 @@ namespace Bagnall
 
 		// initialize uniforms
 		glUseProgram(program);
-		glUniform1i(uniformMap["cubeMap"], 0);
+		glUniform1i(uniformMap["tex"], 0);
 	}
 
 	void Shader::initEmissiveCubeMapProgram()
@@ -276,7 +318,6 @@ namespace Bagnall
 		uniformMap.emplace("projection", getUniform(program, "projection"));
 
 		// copy uniform map to program uniform map
-		glUseProgram(program);
 		programToUniformMap.emplace(program, uniformMap);
 	}
 
@@ -493,5 +534,14 @@ namespace Bagnall
 		if (loc == -1)
 			std::cerr << "unable to get " << name << " parameter from shader program\n";
 		return loc;
+	}
+
+	int Shader::getUniformFromCurrentProgram(const char* uniformName)
+	{
+		auto it = programToUniformMap[currentProgram].find(uniformName);
+		if (it != programToUniformMap[currentProgram].end())
+			return programToUniformMap[currentProgram][uniformName];
+		else
+			return -1;
 	}
 }

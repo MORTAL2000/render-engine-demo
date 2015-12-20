@@ -14,6 +14,7 @@ Date:				December 9, 2015
 #include "LightSource.h"
 #include "Game.h"
 #include "Shader.h"
+#include "RenderGraph.h"
 #include <cstring>
 
 namespace Bagnall
@@ -72,6 +73,7 @@ namespace Bagnall
 		mat4 lightSource;
 		memcpy(&lightSource[0], lightSourceMatrices, sizeof(lightSourceMatrices));
 		Shader::SetLightSource(lightSource);
+		//Game::MainRenderGraph->SetLightSourceInAll(lightSource);
 	}
 
 	void LightSource::UpdateMatrix()

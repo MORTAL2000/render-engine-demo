@@ -56,10 +56,9 @@ namespace Bagnall
 		void Render() const;
 	};
 
-	struct TextureEmissiveNode
+	struct TextureEmissiveNode : public RenderNode
 	{
 		GLuint texture;
-		std::unordered_map<vec4, EmissiveNode*> emissiveNodeMap;
 
 		TextureEmissiveNode(GLuint tex) { texture = tex; }
 
@@ -80,7 +79,6 @@ namespace Bagnall
 	struct CubeMapEmissiveNode : public RenderNode
 	{
 		GLuint cubeMap;
-		std::unordered_map<vec4, EmissiveNode*> emissiveNodeMap;
 
 		CubeMapEmissiveNode(GLuint cubeM) { cubeMap = cubeM; }
 

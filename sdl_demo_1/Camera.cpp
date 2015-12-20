@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "Shader.h"
 #include "FpsTracker.h"
+#include "RenderGraph.h"
 
 namespace Bagnall
 {
@@ -146,6 +147,7 @@ namespace Bagnall
 		Game::Camera = lookAt(vec3(position + zoomOffset), vec3(lookPos), vec3(0.0f, 0.0f, 1.0f));
 		//Game::Camera = Util::LookAt(vec3(position + zoomOffset), vec3(lookPos), vec3(0.0f, 0.0f, 1.0f));
 		Shader::SetCamera(Game::Camera);
+		//Game::MainRenderGraph->SetCameraInAll(Game::Camera);
 
 		Game::CameraPosition = position + zoomOffset;
 		Shader::SetCameraPosition(Game::CameraPosition);

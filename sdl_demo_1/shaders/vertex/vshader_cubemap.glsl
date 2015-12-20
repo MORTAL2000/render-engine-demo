@@ -58,7 +58,7 @@ void main()
 	cubeMapCoord = v - 2 * dot(v, N) * N;
 	
 	// non reflective
-	cubeMapCoord = (vPositionWorld - model[3]).xyz;
+	//cubeMapCoord = (vPositionWorld - model[3]).xyz;
 	
 	// compute gl_Position
 	gl_Position = projection * camera * vPositionWorld;

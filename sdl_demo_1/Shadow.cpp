@@ -51,7 +51,7 @@ namespace Bagnall
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Shadow::RenderShadowMap(const vec3& sourcePos, DrawableObject* source, float zNear, float zFar)
+	void Shadow::RenderShadowMap(const vec3& sourcePos, DrawableObject* source)
 	{
 		Shader::SetProgram("depth");
 
@@ -64,9 +64,8 @@ namespace Bagnall
 
 		//Shader::SetOnlyDepth(true);
 
-		mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zNear, zFar);
+		mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zRange.x, zRange.y);
 		Shader::SetProjection(projection);
-		Shader::SetShadowZRange(vec2(zNear, zFar));
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubeMap, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -107,7 +106,7 @@ namespace Bagnall
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		//Shader::SetOnlyDepth(false);
-		//Shader::SetCamera(Game::Camera);
+		Shader::SetCamera(Game::Camera);
 
 		if (source != NULL)
 			source->EnableRender();
@@ -133,10 +132,28 @@ namespace Bagnall
 			depthRenderList.erase(it);
 	}
 
+	void Shadow::SetNearAndFarPlanes(float zNear, float zFar)
+	{
+		zRange = vec2(zNear, zFar);
+
+		Shader::SetProgram("material");
+		Shader::SetShadowZRange(zRange);
+
+		Shader::SetProgram("texture");
+		Shader::SetShadowZRange(zRange);
+
+		Shader::SetProgram("texture_bump");
+		Shader::SetShadowZRange(zRange);
+
+		Shader::SetProgram("cubemap");
+		Shader::SetShadowZRange(zRange);
+	}
+
 	// PRIVATE
 
 	GLuint Shadow::frameBuffer;
 	GLuint Shadow::depthCubeMap;
+	vec2 Shadow::zRange = vec2(1.0f, 2.0f);
 
 	std::vector<DrawableObject*> Shadow::depthRenderList;
 

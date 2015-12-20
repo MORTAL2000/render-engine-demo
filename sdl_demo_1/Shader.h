@@ -39,7 +39,9 @@ namespace Bagnall
 		static GLuint currentProgram;
 
 		static mat4 camera;
+		static vec4 cameraPosition;
 		static mat4 projection;
+		static mat4 lightSource;
 
 		static std::unordered_map<const char*, GLuint> nameToProgramMap;
 		static std::unordered_map<GLuint, GLuint> programToVaoMap;
@@ -55,6 +57,8 @@ namespace Bagnall
 		static void initCubeMapProgram();
 
 		static GLuint getUniform(GLuint program, const char* name);
+
+		static int getUniformFromCurrentProgram(const char* uniformName);
 	};
 }
 
