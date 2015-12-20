@@ -1,6 +1,7 @@
 #ifndef SHADOW_H
 #define SHADOW_H
 
+//#define SHADOW_MAP_SIZE 512
 #define SHADOW_MAP_SIZE 1024
 //#define SHADOW_MAP_SIZE 2048
 

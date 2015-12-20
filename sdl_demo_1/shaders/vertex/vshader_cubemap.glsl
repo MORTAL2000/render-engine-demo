@@ -14,6 +14,7 @@ uniform mat4 lightSource;
 uniform vec4 cameraPosition;
 uniform vec2 shadowZRange;
 uniform bool useShadowCubeMap;
+uniform bool reflective;
 
 // http://stackoverflow.com/questions/21293726/opengl-project-shadow-cubemap-onto-scene
 float vecToDepth (vec3 Vec)
@@ -54,11 +55,17 @@ void main()
 	}
 	
 	// reflective
-	vec3 v = normalize(-E);
-	cubeMapCoord = v - 2 * dot(v, N) * N;
-	
+	if (reflective)
+	{
+		vec3 v = normalize(-E);
+		cubeMapCoord = v - 2 * dot(v, N) * N;
+	}
 	// non reflective
-	//cubeMapCoord = (vPositionWorld - model[3]).xyz;
+	else
+	{
+		//cubeMapCoord = (vPositionWorld - model[3]).xyz;
+		cubeMapCoord = vPosition.xyz;
+	}
 	
 	// compute gl_Position
 	gl_Position = projection * camera * vPositionWorld;

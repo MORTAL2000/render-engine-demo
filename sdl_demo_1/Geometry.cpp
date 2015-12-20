@@ -56,6 +56,22 @@ namespace Bagnall
 		return vertices;
 	}
 
+	std::vector<vec4> Geometry::CreateCircle(int numberOfVertices, std::vector<vec4>& tangents)
+	{
+		tangents.clear();
+		vec4 tangent = vec4(0.0, 1.0, 0.0, 0.0);
+		std::vector<vec4> vertices;
+		float increment = (2 * M_PI) / (numberOfVertices - 1);
+		for (float theta = 0.0f; theta <= 2 * M_PI; theta += increment)
+		{
+			vertices.push_back(vec4(cos(theta), sin(theta), 0, 1));
+			tangents.push_back(vec4(Util::RotateZ(theta) * tangent));
+		}
+		vertices.push_back(vec4(1.0, 0, 0, 1));
+		tangents.push_back(tangent);
+		return vertices;
+	}
+
 	std::vector<vec4> Geometry::CreateSphere(int definition)
 	{
 		float deltaTheta = M_PI / definition;
@@ -91,6 +107,54 @@ namespace Bagnall
 		}
 		sphere.push_back(originalRing[0]);
 		sphere.push_back(ring2[0]);*/
+
+		return sphere;
+	}
+
+	std::vector<vec4> Geometry::CreateSphere(int definition, std::vector<vec4>& tangents, std::vector<vec4>& binormals)
+	{
+		tangents.clear();
+		binormals.clear();
+
+		float deltaTheta = M_PI / definition;
+		float theta = 0;
+		std::vector<vec4> sphere;
+
+		std::vector<vec4> originalTangents;
+		std::vector<vec4> originalRing = Geometry::CreateCircle(definition * 2, originalTangents);
+		std::vector<vec4> ring1 = originalRing;
+		std::vector<vec4> ring2;
+		std::vector<vec4> ring1Tangents = originalTangents;
+		std::vector<vec4> ring2Tangents;
+
+		for (int i = 0; i < definition + 1; i++)
+		{
+			theta += deltaTheta;
+			ring2 = Util::TransformVertices(originalRing, Util::RotateY(theta));
+			ring2Tangents = Util::TransformVertices(originalTangents, Util::RotateY(theta));
+
+			for (int j = 0; j < ring1.size(); j++)
+			{
+				sphere.push_back(ring1[j]);
+				sphere.push_back(ring2[j]);
+				tangents.push_back(ring1Tangents[j]);
+				tangents.push_back(ring2Tangents[j]);
+				binormals.push_back(vec4(normalize(cross(vec3(ring1[j]), vec3(ring1Tangents[j]))), 0.0f));
+				binormals.push_back(vec4(normalize(cross(vec3(ring2[j]), vec3(ring2Tangents[j]))), 0.0f));
+			}
+
+			sphere.push_back(ring1[0]);
+			sphere.push_back(ring2[0]);
+			tangents.push_back(ring1Tangents[0]);
+			tangents.push_back(ring2Tangents[0]);
+			binormals.push_back(vec4(normalize(cross(vec3(ring1[0]), vec3(ring1Tangents[0]))), 0.0f));
+			binormals.push_back(vec4(normalize(cross(vec3(ring2[0]), vec3(ring2Tangents[0]))), 0.0f));
+
+			ring1 = ring2;
+			ring1Tangents = ring2Tangents;
+			ring2 = Util::TransformVertices(originalRing, Util::RotateY(theta));
+			ring2Tangents = Util::TransformVertices(originalTangents, Util::RotateY(theta));
+		}
 
 		return sphere;
 	}

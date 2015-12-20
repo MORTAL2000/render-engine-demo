@@ -62,6 +62,10 @@ namespace Bagnall
 
 		bool GetBumpMapEnabled() const;
 
+		bool GetReflectiveCubeMap() const;
+
+		void SetReflectiveCubeMap(bool b);
+
 	private:
 		bool emissive;
 		vec4 emissionColor;
@@ -71,6 +75,7 @@ namespace Bagnall
 		Material material;
 		GLuint texture;
 		GLuint cubeMap;
+		bool reflectiveCubeMap;
 		RenderNode *renderNode;
 
 		void init();

@@ -36,7 +36,8 @@ namespace Bagnall
 	void DrawableObject::Draw() const
 	{
 		Shader::SetModel(finalModel);
-		//Shader::SetInverseModel(finalInverseModel);
+		if (cubeMap != 0)
+			Shader::SetReflectiveCubeMap(reflectiveCubeMap);
 	};
 
 	bool DrawableObject::GetEmissive() const
@@ -162,6 +163,16 @@ namespace Bagnall
 		return bumpMapEnabled;
 	}
 
+	bool DrawableObject::GetReflectiveCubeMap() const
+	{
+		return reflectiveCubeMap;
+	}
+
+	void DrawableObject::SetReflectiveCubeMap(bool b)
+	{
+		reflectiveCubeMap = b;
+	}
+
 	// PRIVATE
 
 	void DrawableObject::init()
@@ -169,6 +180,7 @@ namespace Bagnall
 		bumpMapEnabled = true;
 		renderEnabled = true;
 		cubeMap = 0;
+		reflectiveCubeMap = false;
 		updateRenderNode();
 		Shadow::AddToDepthRenderList(this);
 	}

@@ -51,6 +51,9 @@ namespace Bagnall
 		// CUBEMAP PROGRAM
 		initCubeMapProgram();
 
+		// CUBEMAP BUMP PROGRAM
+		initCubeMapBumpProgram();
+
 		glUseProgram(nameToProgramMap["emissive_color"]);
 	}
 
@@ -188,6 +191,12 @@ namespace Bagnall
 			glUniform2fv(loc, 1, value_ptr(shadowZRange));
 	}
 
+	void Shader::SetReflectiveCubeMap(bool b)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["reflectiveCubeMap"];
+		glUniform1i(loc, b);
+	}
+
 	// PRIVATE
 
 	GLuint Shader::vertexBuffer;
@@ -280,12 +289,18 @@ namespace Bagnall
 		glEnableVertexAttribArray(vPositionLoc);
 		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
+		GLuint vNormalLoc = glGetAttribLocation(program, "vNormal");
+		glEnableVertexAttribArray(vNormalLoc);
+		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
+
 		// get uniform locations
 		std::unordered_map<const char*, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("cameraPosition", getUniform(program, "cameraPosition"));
 		uniformMap.emplace("cubeMap", getUniform(program, "cubeMap"));
+		uniformMap.emplace("reflectiveCubeMap", getUniform(program, "reflective"));
 
 		// copy uniform map to program uniform map
 		programToUniformMap.emplace(program, uniformMap);
@@ -293,6 +308,7 @@ namespace Bagnall
 		// initialize uniforms
 		glUseProgram(program);
 		glUniform1i(uniformMap["cubeMap"], 2);
+		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
 	}
 
 	void Shader::initDepthProgram()
@@ -515,6 +531,7 @@ namespace Bagnall
 		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
 		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+		uniformMap.emplace("reflectiveCubeMap", getUniform(program, "reflective"));
 
 		// copy uniform map to program uniform map
 		programToUniformMap.emplace(program, uniformMap);
@@ -526,6 +543,67 @@ namespace Bagnall
 		glUniform1i(uniformMap["bumpTex"], 1);
 		glUniform1i(uniformMap["useShadowCubeMap"], 0);
 		glUniform1i(uniformMap["shadowCubeMap"], 3);
+		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
+	}
+
+	void Shader::initCubeMapBumpProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_cubemap_bump.glsl", "shaders\\fragment\\fshader_cubemap_bump.glsl");
+		nameToProgramMap.emplace("cubemap_bump", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		GLuint vNormalLoc = glGetAttribLocation(program, "vNormal");
+		glEnableVertexAttribArray(vNormalLoc);
+		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
+
+		GLuint vTangentLoc = glGetAttribLocation(program, "vTangent");
+		glEnableVertexAttribArray(vTangentLoc);
+		glVertexAttribPointer(vTangentLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size()));
+
+		GLuint vBinormalLoc = glGetAttribLocation(program, "vBinormal");
+		glEnableVertexAttribArray(vBinormalLoc);
+		glVertexAttribPointer(vBinormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size()));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("lightSource", getUniform(program, "lightSource"));
+		uniformMap.emplace("cameraPosition", getUniform(program, "cameraPosition"));
+		uniformMap.emplace("shadowZRange", getUniform(program, "shadowZRange"));
+		uniformMap.emplace("materialAmbient", getUniform(program, "materialAmbient"));
+		uniformMap.emplace("materialDiffuse", getUniform(program, "materialDiffuse"));
+		uniformMap.emplace("materialSpecular", getUniform(program, "materialSpecular"));
+		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
+		uniformMap.emplace("cubeMap", getUniform(program, "cubeMap"));
+		uniformMap.emplace("bumpCubeMap", getUniform(program, "bumpCubeMap"));
+		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
+		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+		uniformMap.emplace("reflectiveCubeMap", getUniform(program, "reflective"));
+
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+
+		// initialize uniforms
+		glUseProgram(program);
+		glUniform1i(uniformMap["cubeMap"], 2);
+		glUniform1i(uniformMap["textureBlend"], 1);
+		glUniform1i(uniformMap["bumpCubeMap"], 4);
+		glUniform1i(uniformMap["useShadowCubeMap"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], 3);
+		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
 	}
 
 	GLuint Shader::getUniform(GLuint program, const char* name)

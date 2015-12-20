@@ -24,13 +24,20 @@ namespace Bagnall
 
 	void Sphere::createPrototypeVertices()
 	{
-		std::vector<vec4> sphere = Geometry::CreateSphere(15.0f);
+		std::vector<vec4> tangents;
+		std::vector<vec4> binormals;
+		std::vector<vec4> sphere = Geometry::CreateSphere(15.0f, tangents, binormals);
 		std::vector<vec4> normals = Geometry::CreateSphereNormals(sphere);
 
-		// garbage values for these
-		std::vector<vec4> tangents(sphere);
-		std::vector<vec4> binormals(sphere);
-		std::vector<vec2> texCoords = Util::Vec4toVec2(sphere);
+		// sphere texture coordinates
+		std::vector<vec2> texCoords;
+		for (auto it = normals.begin(); it != normals.end(); ++it)
+		{
+			auto n = *it;
+			float u = asin(n.x) / M_PI + 0.5f;
+			float v = asin(n.y) / M_PI + 0.5f;
+			texCoords.push_back(vec2(u, v));
+		}
 
 		vertexCount = sphere.size();
 		globalVertexOffset = Shader::Vertices.size();

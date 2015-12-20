@@ -76,6 +76,17 @@ namespace Bagnall
 		void Render() const;
 	};
 
+	struct CubeMapBumpNode : public RenderNode
+	{
+		GLuint cubeMap;
+		GLuint bumpMap;
+		std::unordered_map<Material, MaterialNode*> materialNodeMap;
+
+		CubeMapBumpNode(GLuint cubeM, GLuint bump) { cubeMap = cubeM; bumpMap = bump; }
+
+		void Render() const;
+	};
+
 	struct CubeMapEmissiveNode : public RenderNode
 	{
 		GLuint cubeMap;
@@ -93,6 +104,9 @@ namespace Bagnall
 
 		// root node for objects with cube map without bump maps and normal lighting
 		std::unordered_map<GLuint, CubeMapNode*> cubeMapNodeMap;
+
+		// root node for objects with cube map with bump maps and normal lighting
+		std::unordered_map<GLuint, CubeMapBumpNode*> cubeMapBumpNodeMap;
 
 		// root node for emissive objects with cube map
 		std::unordered_map<GLuint, CubeMapEmissiveNode*> cubeMapEmissiveNodeMap;
