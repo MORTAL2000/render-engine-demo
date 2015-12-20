@@ -15,13 +15,13 @@ namespace Bagnall
 		**********************************************************************/
 		static void Init();
 
-		Cube(Object *par) : DrawableObject(par) {}
+		Cube(Object *par);
 
 		/**********************************************************************
 		Function:		Draw
 		Purpose:		Draw the cube
 		**********************************************************************/
-		void Draw() const;
+		//void Draw() const;
 
 		/*void DrawRaw() const;
 

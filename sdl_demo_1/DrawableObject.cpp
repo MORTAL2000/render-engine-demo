@@ -5,6 +5,7 @@
 #include "RenderGraph.h"
 #include "Game.h"
 #include "Shadow.h"
+#include "VertexMesh.h"
 
 namespace Bagnall
 {
@@ -38,8 +39,10 @@ namespace Bagnall
 		Shader::SetModel(finalModel);
 		if (cubeMap != 0)
 			Shader::SetReflectiveCubeMap(reflectiveCubeMap);
+		if (vertexMesh != nullptr)
+			vertexMesh->Draw();
 	};
-
+	
 	bool DrawableObject::GetEmissive() const
 	{
 		return emissive;
@@ -181,6 +184,7 @@ namespace Bagnall
 		renderEnabled = true;
 		cubeMap = 0;
 		reflectiveCubeMap = false;
+		vertexMesh = nullptr;
 		updateRenderNode();
 		Shadow::AddToDepthRenderList(this);
 	}

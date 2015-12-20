@@ -145,6 +145,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UpdateGraph.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="VertexMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment\fshader_cubemap.glsl" />
@@ -190,6 +191,7 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="UpdateGraph.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="VertexMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="bumpmaps\ben_NRM.jpg" />
