@@ -104,12 +104,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fshader.glsl">
-      <Filter>Source Files\shaders</Filter>
-    </None>
-    <None Include="shaders\vshader.glsl">
-      <Filter>Source Files\shaders</Filter>
-    </None>
     <None Include="shaders\vertex\vshader_cubemap.glsl">
       <Filter>Source Files\shaders\vertex</Filter>
     </None>
