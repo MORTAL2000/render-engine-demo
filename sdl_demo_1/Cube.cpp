@@ -15,6 +15,7 @@ Date:				December 9, 2015
 #include "Geometry.h"
 #include "Util.h"
 #include "Shader.h"
+#include "VertexMesh.h"
 
 namespace Bagnall
 {
@@ -25,11 +26,16 @@ namespace Bagnall
 		createPrototypeVertices();
 	}
 
-	void Cube::Draw() const
+	Cube::Cube(Object *par) : DrawableObject(par)
 	{
-		DrawableObject::Draw();
-		glDrawArrays(GL_TRIANGLES, globalVertexOffset, vertexCount);
+		vertexMesh = VertexMesh::GetVertexMeshByName("cube");
 	}
+
+	//void Cube::Draw() const
+	//{
+	//	DrawableObject::Draw();
+	//	glDrawArrays(GL_TRIANGLES, globalVertexOffset, vertexCount);
+	//}
 
 	bool Cube::ContainsPoint(const vec4& p) const
 	{
@@ -63,5 +69,7 @@ namespace Bagnall
 		//std::vector<vec2> texCoords = Util::Vec4toVec2(cube);
 		std::vector<vec2> texCoords = Geometry::CreateCubeTextureCoordinates();
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), texCoords.begin(), texCoords.end());
+
+		VertexMesh::AddVertexMesh("cube", globalVertexOffset, vertexCount, false);
 	}
 }

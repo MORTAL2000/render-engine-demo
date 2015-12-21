@@ -145,6 +145,7 @@
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UpdateGraph.cpp" />
     <ClCompile Include="Util.cpp" />
+    <ClCompile Include="VertexMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment\fshader_cubemap.glsl" />
@@ -188,16 +189,19 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="UpdateGraph.h" />
     <ClInclude Include="Util.h" />
+    <ClInclude Include="VertexMesh.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="bumpmaps\ben_NRM.jpg" />
     <Image Include="bumpmaps\costanza_NRM.jpg" />
+    <Image Include="bumpmaps\cubemap_test_1_NRM.jpg" />
     <Image Include="bumpmaps\dowm furry_NRM.jpg" />
     <Image Include="bumpmaps\finalformsquare_NRM.jpg" />
     <Image Include="bumpmaps\Shrek-and-Yoda_NRM.jpg" />
     <Image Include="bumpmaps\stone_wall_NRM.jpg" />
     <Image Include="textures\ben.jpg" />
     <Image Include="textures\costanza.jpg" />
+    <Image Include="textures\cubemap_test_1.jpg" />
     <Image Include="textures\dowm furry.jpg" />
     <Image Include="textures\finalformsquare.jpg" />
     <Image Include="textures\Shrek-and-Yoda.jpg" />

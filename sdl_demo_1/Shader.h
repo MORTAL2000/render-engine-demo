@@ -33,6 +33,7 @@ namespace Bagnall
 		static void SetTextureBlend(bool textureBlendb);
 		static void SetUseShadowCubeMap(bool useShadowCubeMap);
 		static void SetShadowZRange(const vec2& shadowZRange);
+		static void SetReflectiveCubeMap(bool b);
 
 	private:
 		static GLuint vertexBuffer;
@@ -55,6 +56,7 @@ namespace Bagnall
 		static void initTextureProgram();
 		static void initTextureBumpProgram();
 		static void initCubeMapProgram();
+		static void initCubeMapBumpProgram();
 
 		static GLuint getUniform(GLuint program, const char* name);
 

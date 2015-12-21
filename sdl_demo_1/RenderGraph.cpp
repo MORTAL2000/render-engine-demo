@@ -19,7 +19,8 @@ namespace Bagnall
 		auto cubeMap = o->GetCubeMap();
 		auto texture = o->GetTexture();
 		auto material = o->GetMaterial();
-		auto bumpmap = Texture::GetBumpMapByTexture(texture);
+		auto textureBumpmap = Texture::GetBumpMapByTexture(texture);
+		auto cubeBumpmap = Texture::GetBumpMapByCubeMap(cubeMap);
 
 		// non-emissive
 		if (!o->GetEmissive())
@@ -29,29 +30,61 @@ namespace Bagnall
 			// cube map
 			if (cubeMap != 0)
 			{
-				if (cubeMapNodeMap.find(cubeMap) == cubeMapNodeMap.end())
-					cubeMapNodeMap.emplace(cubeMap, new CubeMapNode(cubeMap));
-
-				// without material
-				if (material == Material::None())
+				// with bump map
+				if (cubeBumpmap != 0 && o->GetBumpMapEnabled())
 				{
-					auto *cubeMapNode = cubeMapNodeMap[cubeMap];
+					if (cubeMapBumpNodeMap.find(cubeMap) == cubeMapBumpNodeMap.end())
+						cubeMapBumpNodeMap.emplace(cubeMap, new CubeMapBumpNode(cubeMap, cubeBumpmap));
 
-					cubeMapNode->objects.push_back(o);
-					return cubeMapNode;
+					// without material
+					if (material == Material::None())
+					{
+						auto *cubeMapBumpNode = cubeMapBumpNodeMap[cubeMap];
+
+						cubeMapBumpNode->objects.push_back(o);
+						return cubeMapBumpNode;
+					}
+					// with material
+					else
+					{
+						auto _materialNodeMap = &cubeMapBumpNodeMap[cubeMap]->materialNodeMap;
+
+						if (_materialNodeMap->find(material) == _materialNodeMap->end())
+							_materialNodeMap->emplace(material, new MaterialNode(material));
+
+						materialNode = (*_materialNodeMap)[material];
+
+						materialNode->objects.push_back(o);
+						return materialNode;
+					}
 				}
-				// with material
+				// without bump map
 				else
 				{
-					auto _materialNodeMap = &cubeMapNodeMap[cubeMap]->materialNodeMap;
+					if (cubeMapNodeMap.find(cubeMap) == cubeMapNodeMap.end())
+						cubeMapNodeMap.emplace(cubeMap, new CubeMapNode(cubeMap));
 
-					if (_materialNodeMap->find(material) == _materialNodeMap->end())
-						_materialNodeMap->emplace(material, new MaterialNode(material));
+					// without material
+					if (material == Material::None())
+					{
+						auto *cubeMapNode = cubeMapNodeMap[cubeMap];
 
-					materialNode = (*_materialNodeMap)[material];
+						cubeMapNode->objects.push_back(o);
+						return cubeMapNode;
+					}
+					// with material
+					else
+					{
+						auto _materialNodeMap = &cubeMapNodeMap[cubeMap]->materialNodeMap;
 
-					materialNode->objects.push_back(o);
-					return materialNode;
+						if (_materialNodeMap->find(material) == _materialNodeMap->end())
+							_materialNodeMap->emplace(material, new MaterialNode(material));
+
+						materialNode = (*_materialNodeMap)[material];
+
+						materialNode->objects.push_back(o);
+						return materialNode;
+					}
 				}
 			}
 			// no texture, only material
@@ -66,10 +99,10 @@ namespace Bagnall
 			else if (material == Material::None())
 			{
 				// with bump map
-				if (bumpmap != 0 && o->GetBumpMapEnabled())
+				if (textureBumpmap != 0 && o->GetBumpMapEnabled())
 				{
 					if (textureBumpNodeMap.find(texture) == textureBumpNodeMap.end())
-						textureBumpNodeMap.emplace(texture, new TextureBumpNode(texture, bumpmap));
+						textureBumpNodeMap.emplace(texture, new TextureBumpNode(texture, textureBumpmap));
 
 					auto *textureBumpNode = textureBumpNodeMap[texture];
 
@@ -94,10 +127,10 @@ namespace Bagnall
 				std::unordered_map<Material, MaterialNode*> *_materialNodeMap;
 
 				// with bump map
-				if (bumpmap != 0 && o->GetBumpMapEnabled())
+				if (textureBumpmap != 0 && o->GetBumpMapEnabled())
 				{
 					if (textureBumpNodeMap.find(texture) == textureBumpNodeMap.end())
-						textureBumpNodeMap.emplace(texture, new TextureBumpNode(texture, bumpmap));
+						textureBumpNodeMap.emplace(texture, new TextureBumpNode(texture, textureBumpmap));
 
 					_materialNodeMap = &textureBumpNodeMap[texture]->materialNodeMap;
 				}
@@ -197,6 +230,11 @@ namespace Bagnall
 		Shader::SetProgram("cubemap");
 		for (auto it = cubeMapNodeMap.begin(); it != cubeMapNodeMap.end(); ++it)
 			(*it).second->Render();
+
+		// render objects with cubemap and bumpmap
+		Shader::SetProgram("cubemap_bump");
+		for (auto it = cubeMapBumpNodeMap.begin(); it != cubeMapBumpNodeMap.end(); ++it)
+			(*it).second->Render();
 	}
 
 	void RenderGraph::SetShadowsEnabled(bool s)
@@ -236,6 +274,30 @@ namespace Bagnall
 		// bind cube map
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+
+		// render objects without materials
+		Shader::SetTextureBlend(false);
+		RenderNode::Render();
+		Shader::SetTextureBlend(true);
+
+		// render material nodes
+		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
+		{
+			(*it).second->Render();
+		}
+	}
+
+	// CUBEMAPBUMPNODE PUBLIC
+
+	void CubeMapBumpNode::Render() const
+	{
+		// bind texture
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+
+		// bind bump map
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, bumpMap);
 
 		// render objects without materials
 		Shader::SetTextureBlend(false);

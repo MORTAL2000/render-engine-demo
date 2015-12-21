@@ -48,6 +48,8 @@ namespace Bagnall
 		**********************************************************************/
 		static std::vector<vec4> CreateCircle(int numberOfVertices);
 
+		static std::vector<vec4> CreateCircle(int numberOfVertices, std::vector<vec4>& tangents);
+
 		/**********************************************************************
 		Function:		CreateSphere
 		Purpose:		Generate the vertices for a sphere using a rotation
@@ -56,6 +58,8 @@ namespace Bagnall
 		Calls:			CreateCircle
 		**********************************************************************/
 		static std::vector<vec4> CreateSphere(int definition);
+
+		static std::vector<vec4> CreateSphere(int definition, std::vector<vec4>& tangents, std::vector<vec4>& binormals);
 
 		/**********************************************************************
 		Function:		CreateSphere2

@@ -17,7 +17,7 @@ namespace Bagnall
 			textureMap.emplace("shrek", tex);
 		GLuint bump = loadTexture("bumpmaps\\Shrek-and-Yoda_NRM.jpg");
 		if (bump != 0)
-			BumpMapMap.emplace(tex, bump);
+			bumpMapMap.emplace(tex, bump);
 
 		// BEN
 		tex = loadTexture("textures\\ben.jpg");
@@ -25,7 +25,7 @@ namespace Bagnall
 			textureMap.emplace("ben", tex);
 		bump = loadTexture("bumpmaps\\ben_NRM.jpg");
 		if (bump != 0)
-			BumpMapMap.emplace(tex, bump);
+			bumpMapMap.emplace(tex, bump);
 
 		// STONE WALL
 		tex = loadTexture("textures\\stone_wall.jpg");
@@ -33,7 +33,7 @@ namespace Bagnall
 			textureMap.emplace("stone_wall", tex);
 		bump = loadTexture("bumpmaps\\stone_wall_NRM.jpg");
 		if (bump != 0)
-			BumpMapMap.emplace(tex, bump);
+			bumpMapMap.emplace(tex, bump);
 
 		// COSTANZA
 		tex = loadTexture("textures\\costanza.jpg");
@@ -41,7 +41,7 @@ namespace Bagnall
 			textureMap.emplace("costanza", tex);
 		bump = loadTexture("bumpmaps\\costanza_NRM.jpg");
 		if (bump != 0)
-			BumpMapMap.emplace(tex, bump);
+			bumpMapMap.emplace(tex, bump);
 
 		// DOWM FURRY
 		tex = loadTexture("textures\\dowm furry.jpg");
@@ -49,7 +49,7 @@ namespace Bagnall
 			textureMap.emplace("dowm_furry", tex);
 		bump = loadTexture("bumpmaps\\dowm furry_NRM.jpg");
 		if (bump != 0)
-			BumpMapMap.emplace(tex, bump);
+			bumpMapMap.emplace(tex, bump);
 
 		// ISAAC FINAL FORM
 		tex = loadTexture("textures\\finalformsquare.jpg");
@@ -57,7 +57,15 @@ namespace Bagnall
 			textureMap.emplace("isaac_final_form", tex);
 		bump = loadTexture("bumpmaps\\finalformsquare_NRM.jpg");
 		if (bump != 0)
-			BumpMapMap.emplace(tex, bump);
+			bumpMapMap.emplace(tex, bump);
+
+		// CUBEMAP TEST 1
+		GLuint cubeMap = loadCubeMap("textures\\cubemap_test_1.jpg");
+		if (cubeMap != 0)
+			cubeMapMap.emplace("cubemap_test_1", cubeMap);
+		bump = loadCubeMap("bumpmaps\\cubemap_test_1_NRM.jpg");
+		if (bump != 0)
+			cubeBumpMapMap.emplace(cubeMap, bump);
 
 		// release texture loading stuff
 		IMG_Quit();
@@ -70,8 +78,21 @@ namespace Bagnall
 
 	GLuint Texture::GetBumpMapByTexture(GLuint tex)
 	{
-		if (BumpMapMap.find(tex) != BumpMapMap.end())
-			return BumpMapMap[tex];
+		if (bumpMapMap.find(tex) != bumpMapMap.end())
+			return bumpMapMap[tex];
+		else
+			return 0;
+	}
+
+	GLuint Texture::GetCubeMapByName(const char *name)
+	{
+		return cubeMapMap[name];
+	}
+
+	GLuint Texture::GetBumpMapByCubeMap(GLuint cubeMap)
+	{
+		if (cubeBumpMapMap.find(cubeMap) != cubeBumpMapMap.end())
+			return cubeBumpMapMap[cubeMap];
 		else
 			return 0;
 	}
@@ -79,7 +100,10 @@ namespace Bagnall
 	// PRIVATE
 
 	std::unordered_map<const char*, GLuint> Texture::textureMap;
-	std::unordered_map<GLuint, GLuint> Texture::BumpMapMap;
+	std::unordered_map<GLuint, GLuint> Texture::bumpMapMap;
+
+	std::unordered_map<const char*, GLuint> Texture::cubeMapMap;
+	std::unordered_map<GLuint, GLuint> Texture::cubeBumpMapMap;
 
 	GLuint Texture::loadTexture(const char *path)
 	{
@@ -124,5 +148,82 @@ namespace Bagnall
 		SDL_FreeSurface(surface);
 
 		return texture;
+	}
+
+	GLuint Texture::loadCubeMap(const char *path)
+	{
+		SDL_Surface *surface = IMG_Load(path);
+
+		if (surface == NULL)
+		{
+			std::cerr << "unable to load file " << path << std::endl;
+			return 0;
+		}
+
+		GLuint cubeMap;
+		glGenTextures(1, &cubeMap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		SDL_Rect rect;
+		rect.w = surface->w / 4;
+		rect.h = surface->h / 3;
+		/*Uint32 rmask, gmask, bmask, amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+		rmask = 0xff000000;
+		gmask = 0x00ff0000;
+		bmask = 0x0000ff00;
+		amask = 0x000000ff;
+#else
+		rmask = 0x000000ff;
+		gmask = 0x0000ff00;
+		bmask = 0x00ff0000;
+		amask = 0xff000000;
+#endif
+		SDL_Surface *subSurface = SDL_CreateRGBSurface(0, rect.w, rect.h, 32, rmask, gmask, bmask, amask);*/
+		SDL_Surface *subSurface = SDL_CreateRGBSurface(0, rect.w, rect.h, 32, 0, 0, 0, 0);
+
+		rect.x = 0;
+		rect.y = rect.h;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+		rect.x = rect.w;
+		rect.y = rect.h;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+		rect.x = rect.w * 2;
+		rect.y = rect.h;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+		
+		rect.x = rect.w * 3;
+		rect.y = rect.h;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+		rect.x = rect.w;
+		rect.y = 0;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+		
+		rect.x = rect.w;
+		rect.y = rect.h * 2;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+		// Unbind the texture
+		glBindTexture(GL_TEXTURE_CUBE_MAP, NULL);
+
+		// free the surface resources
+		SDL_FreeSurface(surface);
+		SDL_FreeSurface(subSurface);
+
+		return cubeMap;
 	}
 }

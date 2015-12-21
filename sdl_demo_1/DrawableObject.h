@@ -6,6 +6,7 @@
 namespace Bagnall
 {
 	struct RenderNode;
+	class VertexMesh;
 
 	class DrawableObject : public Object
 	{
@@ -17,12 +18,6 @@ namespace Bagnall
 		DrawableObject(Object *par, const vec4& emissionCol);
 
 		virtual void Draw() const;
-
-		/*virtual void DrawRaw() const;
-
-		void StartDrawEmissive() const;
-
-		void EndDrawEmissive() const;*/
 
 		bool GetEmissive() const;
 
@@ -62,6 +57,10 @@ namespace Bagnall
 
 		bool GetBumpMapEnabled() const;
 
+		bool GetReflectiveCubeMap() const;
+
+		void SetReflectiveCubeMap(bool b);
+
 	private:
 		bool emissive;
 		vec4 emissionColor;
@@ -71,7 +70,11 @@ namespace Bagnall
 		Material material;
 		GLuint texture;
 		GLuint cubeMap;
+		bool reflectiveCubeMap;
 		RenderNode *renderNode;
+
+	protected:
+		VertexMesh *vertexMesh;
 
 		void init();
 

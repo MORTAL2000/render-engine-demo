@@ -99,6 +99,9 @@
     <ClCompile Include="EnvironmentMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="VertexMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vertex\vshader_cubemap.glsl">
@@ -220,6 +223,9 @@
     <ClInclude Include="EnvironmentMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="VertexMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\Shrek-and-Yoda.jpg">
@@ -257,6 +263,12 @@
     </Image>
     <Image Include="textures\stone_wall.jpg">
       <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\cubemap_test_1.jpg">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="bumpmaps\cubemap_test_1_NRM.jpg">
+      <Filter>Resource Files\bumpmaps</Filter>
     </Image>
   </ItemGroup>
 </Project>
