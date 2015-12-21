@@ -116,7 +116,7 @@ void init(void)
 
 	// MANY CUBES
 	int range = Game::WorldSize - 5.0f;
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 25; ++i)
 	{
 		Cube *cube = new Cube(cubeContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));

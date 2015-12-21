@@ -155,7 +155,6 @@
     <None Include="shaders\fragment\fshader_material.glsl" />
     <None Include="shaders\fragment\fshader_texture.glsl" />
     <None Include="shaders\fragment\fshader_texture_bump.glsl" />
-    <None Include="shaders\fshader.glsl" />
     <None Include="shaders\vertex\vshader_cubemap.glsl" />
     <None Include="shaders\vertex\vshader_depth.glsl" />
     <None Include="shaders\vertex\vshader_emissive_color.glsl" />
@@ -164,7 +163,6 @@
     <None Include="shaders\vertex\vshader_material.glsl" />
     <None Include="shaders\vertex\vshader_texture.glsl" />
     <None Include="shaders\vertex\vshader_texture_bump.glsl" />
-    <None Include="shaders\vshader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bagnall.h" />
