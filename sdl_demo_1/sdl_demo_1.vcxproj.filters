@@ -152,6 +152,12 @@
     <None Include="shaders\fragment\fshader_texture_bump.glsl">
       <Filter>Source Files\shaders\fragment</Filter>
     </None>
+    <None Include="shaders\vertex\vshader_cubemap_bump.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_cubemap_bump.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bagnall.h">

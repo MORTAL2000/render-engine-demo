@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment\fshader_cubemap.glsl" />
+    <None Include="shaders\fragment\fshader_cubemap_bump.glsl" />
     <None Include="shaders\fragment\fshader_depth.glsl" />
     <None Include="shaders\fragment\fshader_emissive_color.glsl" />
     <None Include="shaders\fragment\fshader_emissive_cubemap.glsl" />
@@ -157,6 +158,7 @@
     <None Include="shaders\fragment\fshader_texture.glsl" />
     <None Include="shaders\fragment\fshader_texture_bump.glsl" />
     <None Include="shaders\vertex\vshader_cubemap.glsl" />
+    <None Include="shaders\vertex\vshader_cubemap_bump.glsl" />
     <None Include="shaders\vertex\vshader_depth.glsl" />
     <None Include="shaders\vertex\vshader_emissive_color.glsl" />
     <None Include="shaders\vertex\vshader_emissive_cubemap.glsl" />
