@@ -8,6 +8,7 @@ namespace Bagnall
 {
 	struct RenderNode;
 	class VertexMesh;
+	struct SchematicNode;
 
 	class DrawableObject : public Object
 	{
@@ -17,6 +18,8 @@ namespace Bagnall
 		DrawableObject(Object *par, GLuint tex, const Material& mat);
 
 		DrawableObject(Object *par, const vec4& emissionCol);
+
+		DrawableObject(Object *par, SchematicNode *schematic);
 
 		virtual void Draw() const;
 

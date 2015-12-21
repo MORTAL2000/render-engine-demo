@@ -150,6 +150,7 @@
     <ClCompile Include="VertexMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="model\Millennium_Falcon.mtl" />
     <None Include="model\torchic.blend" />
     <None Include="shaders\fragment\fshader_cubemap.glsl" />
     <None Include="shaders\fragment\fshader_cubemap_bump.glsl" />

@@ -31,7 +31,7 @@ SDL_GLContext glcontext;
 Camera *camera;
 Sphere *sun;
 //Cube *cameraCube;
-Sphere *player;
+DrawableObject *player;
 LightSource *lightSource;
 Object *cubeContainer;
 std::vector<Cube*> cubes;
@@ -78,10 +78,10 @@ void init(void)
 	// do this after all vertex data is loaded
 	Shader::Init();
 
-	//auto v = Shader::Vertices;
-	//auto n = Shader::Normals;
-	//auto s = Shader::Tangents;
-	//auto t = Shader::Binormals;
+	/*auto v = Shader::Vertices;
+	auto n = Shader::Normals;
+	auto s = Shader::Tangents;
+	auto t = Shader::Binormals;*/
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -134,17 +134,20 @@ void init(void)
 	}
 
 	// MIDDLE CUBE
-	Cube *cube = new Cube(cubeContainer);
+	//Cube *cube = new Cube(cubeContainer);
+	DrawableObject *cube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("millennium_falcon"));
+	//DrawableObject *cube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("torchic"));
 	//Sphere *cube = new Sphere(cubeContainer);
 	cube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
 	//cube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
-	cube->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
+	//cube->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
 	//cube->SetEmissive(true);
 	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 1.0f, 1.0f, 0.0f)));
-	cube->Scale(10.0f);
+	//cube->Scale(10.0f);
+	cube->Scale(0.1f);
 	cube->RotateX(-M_PI / 2.0f);
-	cubes.push_back(cube);
+	//cubes.push_back(cube);
 
 	// SUN
 	//sun = new Cube(rootObject);
@@ -165,18 +168,19 @@ void init(void)
 
 	// PLAYER
 	player = new Sphere(camera);
+	//player = new DrawableObject(camera, Schematic::GetSchematicByName("torchic"));
 	//player->SetMaterial(Material::Chrome());
 	//player->SetMaterial(Material::Plastic(vec4(0.25f, 0.25f, 0.25f, 1.0f)));
-	player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-	colorCubemap = EnvironmentMap::GenerateCubeMap();
-	player->SetCubeMap(colorCubemap);
-	player->SetReflectiveCubeMap(true);
+	//player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	//colorCubemap = EnvironmentMap::GenerateCubeMap();
+	//player->SetCubeMap(colorCubemap);
+	//player->SetReflectiveCubeMap(true);
 	//player->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
 	//player->SetTexture(Texture::GetTextureByName("ben"));
 	//player->SetPosition(vec4(0.0, 5.0f, 0.0, 1.0));
 	//player->SetEmissionColor(vec4(0.2f, 0.5f, 0.3f, 1.0f));
 	//player->SetEmissive(true);
-	player->Scale(1.0f);
+	player->Scale(0.1f);
 
 	// GIANT SKY CUBE
 	/*Skybox *skybox = new Skybox(rootObject);
@@ -519,7 +523,7 @@ int update()
 
 void draw()
 {
-	EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
+	//EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
 	Shadow::RenderShadowMap(vec3(lightSource->position), sun);
 
 	updateProjectionMatrixAndViewport();

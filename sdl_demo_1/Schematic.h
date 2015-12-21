@@ -24,12 +24,16 @@ namespace Bagnall
 	public:
 		static void Init();
 
+		static SchematicNode* GetSchematicByName(const char *name);
+
 	private:
 		static std::unordered_map<const char*, SchematicNode*> schematicNodeMap;
 
 		static SchematicNode* buildSchematic(const aiScene *scene, aiNode *node);
 
 		static void initTorchic();
+
+		static void initMillenniumFalcon();
 	};
 }
 

@@ -6,6 +6,7 @@
 #include "Game.h"
 #include "Shadow.h"
 #include "VertexMesh.h"
+#include "Schematic.h"
 
 namespace Bagnall
 {
@@ -32,6 +33,15 @@ namespace Bagnall
 		emissive = true;
 		SetEmissionColor(emissionCol);
 		init();
+	}
+
+	DrawableObject::DrawableObject(Object *par, SchematicNode *schematic) : DrawableObject(par)
+	{
+		for (auto it = schematic->vertexMeshes.begin(); it != schematic->vertexMeshes.end(); ++it)
+			vertexMeshes.push_back(*it);
+
+		for (auto it = schematic->children.begin(); it != schematic->children.end(); ++it)
+			AddChild(new DrawableObject(this, *it));
 	}
 
 	void DrawableObject::Draw() const

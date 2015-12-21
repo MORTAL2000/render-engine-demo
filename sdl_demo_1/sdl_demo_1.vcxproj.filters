@@ -167,6 +167,9 @@
     <None Include="model\torchic.blend">
       <Filter>Resource Files\model</Filter>
     </None>
+    <None Include="model\Millennium_Falcon.mtl">
+      <Filter>Resource Files\model</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bagnall.h">
