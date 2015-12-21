@@ -147,6 +147,9 @@ namespace Bagnall
 
 		Shader::SetProgram("cubemap");
 		Shader::SetShadowZRange(zRange);
+
+		Shader::SetProgram("cubemap_bump");
+		Shader::SetShadowZRange(zRange);
 	}
 
 	// PRIVATE

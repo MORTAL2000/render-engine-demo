@@ -16,6 +16,7 @@
 #include "Texture.h"
 #include "Shadow.h"
 #include "EnvironmentMap.h"
+#include "Schematic.h"
 #include <vector>
 #include <iostream>
 
@@ -70,9 +71,12 @@ void init(void)
 	Skybox::Init();
 	LightSource::Init();
 	Texture::Init();
-	Shader::Init();
 	Shadow::Init();
 	EnvironmentMap::Init();
+	Schematic::Init();
+
+	// do this after all vertex data is loaded
+	Shader::Init();
 
 	//auto v = Shader::Vertices;
 	//auto n = Shader::Normals;

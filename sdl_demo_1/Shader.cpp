@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "InitShader.h"
+#include "Material.h"
 #include <iostream>
 
 namespace Bagnall
@@ -110,6 +111,14 @@ namespace Bagnall
 		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["materialShininess"];
 			glUniform1f(loc, materialShininess);
+	}
+
+	void Shader::SetMaterial(const Material& material)
+	{
+		SetMaterialAmbient(material.ambient);
+		SetMaterialDiffuse(material.diffuse);
+		SetMaterialSpecular(material.specular);
+		SetMaterialShininess(material.shininess);
 	}
 
 	void Shader::SetLightSource(const mat4& lSource)

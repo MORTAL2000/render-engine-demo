@@ -260,6 +260,11 @@ namespace Bagnall
 		Shader::SetUseShadowCubeMap(s);
 		if (shadowsEnabled)
 			Shadow::BindToGPU();
+
+		Shader::SetProgram("cubemap_bump");
+		Shader::SetUseShadowCubeMap(s);
+		if (shadowsEnabled)
+			Shadow::BindToGPU();
 	}
 
 	bool RenderGraph::GetShadowsEnabled() const

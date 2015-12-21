@@ -7,6 +7,8 @@
 
 namespace Bagnall
 {
+	struct Material;
+
 	class Shader
 	{
 	public:
@@ -24,6 +26,7 @@ namespace Bagnall
 		static void SetMaterialDiffuse(const vec4& materialDiffuse);
 		static void SetMaterialSpecular(const vec4& materialSpecular);
 		static void SetMaterialShininess(float materialShininess);
+		static void SetMaterial(const Material& material);
 		static void SetLightSource(const mat4& lightSource);
 		static void SetCameraPosition(const vec4& cameraPosition);
 		static void SetModel(const mat4& model);

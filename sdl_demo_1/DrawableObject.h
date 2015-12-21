@@ -2,6 +2,7 @@
 #define DRAWABLEOBJECT_H
 
 #include "Object.h"
+#include "VertexMesh.h"
 
 namespace Bagnall
 {
@@ -74,7 +75,7 @@ namespace Bagnall
 		RenderNode *renderNode;
 
 	protected:
-		VertexMesh *vertexMesh;
+		std::vector<VertexMesh> vertexMeshes;
 
 		void init();
 

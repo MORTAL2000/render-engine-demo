@@ -39,8 +39,8 @@ namespace Bagnall
 		Shader::SetModel(finalModel);
 		if (cubeMap != 0)
 			Shader::SetReflectiveCubeMap(reflectiveCubeMap);
-		if (vertexMesh != nullptr)
-			vertexMesh->Draw();
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it).Draw();
 	};
 	
 	bool DrawableObject::GetEmissive() const
@@ -184,7 +184,6 @@ namespace Bagnall
 		renderEnabled = true;
 		cubeMap = 0;
 		reflectiveCubeMap = false;
-		vertexMesh = nullptr;
 		updateRenderNode();
 		Shadow::AddToDepthRenderList(this);
 	}

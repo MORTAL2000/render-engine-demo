@@ -16,6 +16,7 @@ Date:				December 9, 2015
 #include "Util.h"
 #include "Shader.h"
 #include "VertexMesh.h"
+#include "Material.h"
 
 namespace Bagnall
 {
@@ -28,7 +29,7 @@ namespace Bagnall
 
 	Cube::Cube(Object *par) : DrawableObject(par)
 	{
-		vertexMesh = VertexMesh::GetVertexMeshByName("cube");
+		vertexMeshes.push_back(VertexMesh::GetVertexMeshByName("cube"));
 	}
 
 	//void Cube::Draw() const
@@ -70,6 +71,6 @@ namespace Bagnall
 		std::vector<vec2> texCoords = Geometry::CreateCubeTextureCoordinates();
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), texCoords.begin(), texCoords.end());
 
-		VertexMesh::AddVertexMesh("cube", globalVertexOffset, vertexCount, false);
+		VertexMesh::AddVertexMesh("cube", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), globalVertexOffset, vertexCount, false);
 	}
 }
