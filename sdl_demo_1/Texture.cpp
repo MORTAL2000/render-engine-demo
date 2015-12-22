@@ -57,15 +57,47 @@ namespace Bagnall
 			textureMap.emplace("isaac_final_form", tex);
 		bump = loadTexture("bumpmaps\\finalformsquare_NRM.jpg");
 		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+		bumpMapMap.emplace(tex, bump);
 
 		// CUBEMAP TEST 1
 		GLuint cubeMap = loadCubeMap("textures\\cubemap_test_1.jpg");
 		if (cubeMap != 0)
-			cubeMapMap.emplace("cubemap_test_1", cubeMap);
+		cubeMapMap.emplace("cubemap_test_1", cubeMap);
 		bump = loadCubeMap("bumpmaps\\cubemap_test_1_NRM.jpg");
 		if (bump != 0)
-			cubeBumpMapMap.emplace(cubeMap, bump);
+		cubeBumpMapMap.emplace(cubeMap, bump);
+
+		// MILLENNIUM FALCON TOP
+		tex = loadTexture("textures\\Millennium_Falcon_Top_D.tga");
+		if (tex != 0)
+		textureMap.emplace("millennium_falcon_top", tex);
+		bump = loadTexture("bumpmaps\\Millennium_Falcon_Top_N.tga");
+		if (bump != 0)
+		bumpMapMap.emplace(tex, bump);
+
+		// MILLENNIUM FALCON BOTTOM
+		tex = loadTexture("textures\\Millennium_Falcon_Bottom_D.tga");
+		if (tex != 0)
+		textureMap.emplace("millennium_falcon_bottom", tex);
+		bump = loadTexture("bumpmaps\\Millennium_Falcon_Bottom_N.tga");
+		if (bump != 0)
+		bumpMapMap.emplace(tex, bump);
+
+		// R2D2
+		tex = loadTexture("textures\\R2-D2_D.tga");
+		if (tex != 0)
+			textureMap.emplace("r2d2", tex);
+		bump = loadTexture("bumpmaps\\R2-D2_N.tga");
+		if (bump != 0)
+			bumpMapMap.emplace(tex, bump);
+
+		// C3PO
+		tex = loadTexture("textures\\C-3PO_Dirty_D.tga");
+		if (tex != 0)
+			textureMap.emplace("c3po", tex);
+		bump = loadTexture("bumpmaps\\C-3PO_Dirty_N.tga");
+		if (bump != 0)
+			bumpMapMap.emplace(tex, bump);
 
 		// release texture loading stuff
 		IMG_Quit();
@@ -126,11 +158,25 @@ namespace Bagnall
 			return texture;
 		}
 
-		GLint mode = GL_RGB;
+		GLint internalFormat = GL_RGB;
 		if (surface->format->BytesPerPixel == 4)
-			mode = GL_RGBA;
+			internalFormat = GL_RGBA;
 
-		glTexImage2D(GL_TEXTURE_2D, 0, mode, surface->w, surface->h, 0, mode, GL_UNSIGNED_BYTE, surface->pixels);
+		GLint format;
+		if (strcmp(strrchr(path, '.'), ".tga"))
+		{
+			format = GL_RGB;
+			if (surface->format->BytesPerPixel == 4)
+				format = GL_RGBA;
+		}
+		else
+		{
+			format = GL_BGR;
+			if (surface->format->BytesPerPixel == 4)
+				format = GL_BGRA;
+		}
+
+		glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, surface->w, surface->h, 0, format, GL_UNSIGNED_BYTE, surface->pixels);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);

@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "VertexMesh.h"
 #include "Material.h"
+#include "Texture.h"
 #include "Util.h"
 #include <glm/vec4.hpp>
 #include <assimp/cimport.h>
@@ -28,6 +29,12 @@ namespace Bagnall
 		//initTorchic();
 
 		initMillenniumFalcon();
+
+		//initStarDestroyer();
+
+		initR2D2();
+
+		initC3PO();
 
 		// We added a log stream to the library, it's our job to disable it
 		// again. This will definitely release the last resources allocated
@@ -134,9 +141,9 @@ namespace Bagnall
 					auto face = mesh->mFaces[j];
 					if (face.mNumIndices == 3)
 					{
-						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[0]].x, mesh->mTextureCoords[0][face.mIndices[0]].y));
-						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[1]].x, mesh->mTextureCoords[0][face.mIndices[1]].y));
-						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[2]].x, mesh->mTextureCoords[0][face.mIndices[2]].y));
+						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[0]].x, -mesh->mTextureCoords[0][face.mIndices[0]].y));
+						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[1]].x, -mesh->mTextureCoords[0][face.mIndices[1]].y));
+						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[2]].x, -mesh->mTextureCoords[0][face.mIndices[2]].y));
 					}
 				}
 			}
@@ -158,11 +165,30 @@ namespace Bagnall
 			Shader::Binormals.insert(Shader::Binormals.end(), binormals.begin(), binormals.end());
 			Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), textureCoordinates.begin(), textureCoordinates.end());
 
+			// MATERIAL
 			auto aiMat = scene->mMaterials[mesh->mMaterialIndex];
+			Material mat;
 
-			//schematicNode->vertexMeshes.push_back(VertexMesh(Material::Plastic(vec4(0.5f, 0.5f, 0.5f, 1.0f)), vOffset, vCount, false));
-			//schematicNode->vertexMeshes.push_back(VertexMesh(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)), vOffset, vCount, false));
-			schematicNode->vertexMeshes.push_back(VertexMesh(Material::Chrome(), vOffset, vCount, false));
+			std::vector<aiMaterialProperty*> matProps;
+			for (int j = 0; j < aiMat->mNumProperties; ++j)
+			{
+				matProps.push_back(aiMat->mProperties[j]);
+			}
+
+			aiColor3D color(0.f, 0.f, 0.f);
+			aiMat->Get(AI_MATKEY_COLOR_AMBIENT, color);
+			mat.ambient = vec4(color.r, color.g, color.b, 1.0f);
+			aiMat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+			mat.diffuse = vec4(color.r, color.g, color.b, 1.0f);
+			aiMat->Get(AI_MATKEY_COLOR_SPECULAR, color);
+			mat.specular = vec4(color.r, color.g, color.b, 1.0f);
+
+			float shininess;
+			aiMat->Get(AI_MATKEY_SHININESS, shininess);
+			mat.shininess = shininess;
+
+			//schematicNode->vertexMeshes.push_back(VertexMesh(NULL, mat, vOffset, vCount, false));
+			schematicNode->vertexMeshes.push_back(VertexMesh(NULL, Material::None(), vOffset, vCount, false));
 		}
 
 		// recursively build children schematic nodes
@@ -203,11 +229,89 @@ namespace Bagnall
 		const aiScene *scene = NULL;
 
 		if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
-			//if ((scene = aiImportFile("model\\torchic.blend", aiProcessPreset_TargetRealtime_Fast)) != NULL)
+			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
 		{
 			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
 
 			schematicNodeMap.emplace("millennium_falcon", schematic);
+
+			for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
+				(*it).SetTexture(Texture::GetTextureByName("millennium_falcon_bottom"));
+
+			for (auto it = schematic->children[1]->vertexMeshes.begin(); it != schematic->children[1]->vertexMeshes.end(); ++it)
+				(*it).SetTexture(Texture::GetTextureByName("millennium_falcon_top"));
+		}
+		else
+		{
+			std::cerr << aiGetErrorString() << std::endl;
+		}
+
+		// cleanup - calling 'aiReleaseImport' is important, as the library 
+		// keeps internal resources until the scene is freed again. Not 
+		// doing so can cause severe resource leaking.
+		aiReleaseImport(scene);
+	}
+
+	void Schematic::initStarDestroyer()
+	{
+		const aiScene *scene = NULL;
+
+		if ((scene = aiImportFile("model\\Star_Destroyer.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
+		{
+			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
+
+			schematicNodeMap.emplace("star_destroyer", schematic);
+		}
+		else
+		{
+			std::cerr << aiGetErrorString() << std::endl;
+		}
+
+		// cleanup - calling 'aiReleaseImport' is important, as the library 
+		// keeps internal resources until the scene is freed again. Not 
+		// doing so can cause severe resource leaking.
+		aiReleaseImport(scene);
+	}
+
+	void Schematic::initR2D2()
+	{
+		const aiScene *scene = NULL;
+
+		if ((scene = aiImportFile("model\\R2-D2.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
+		{
+			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
+
+			schematicNodeMap.emplace("r2d2", schematic);
+
+			for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
+				(*it).SetTexture(Texture::GetTextureByName("r2d2"));
+		}
+		else
+		{
+			std::cerr << aiGetErrorString() << std::endl;
+		}
+
+		// cleanup - calling 'aiReleaseImport' is important, as the library 
+		// keeps internal resources until the scene is freed again. Not 
+		// doing so can cause severe resource leaking.
+		aiReleaseImport(scene);
+	}
+
+	void Schematic::initC3PO()
+	{
+		const aiScene *scene = NULL;
+
+		if ((scene = aiImportFile("model\\C-3PO_v2.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
+		{
+			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
+
+			schematicNodeMap.emplace("c3po", schematic);
+
+			for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
+				(*it).SetTexture(Texture::GetTextureByName("c3po"));
 		}
 		else
 		{

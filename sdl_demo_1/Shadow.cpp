@@ -118,14 +118,14 @@ namespace Bagnall
 		glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
 	}
 
-	void Shadow::AddToDepthRenderList(DrawableObject *o)
+	void Shadow::AddToDepthRenderList(VertexMesh *o)
 	{
 		auto it = std::find(depthRenderList.begin(), depthRenderList.end(), o);
 		if (it == depthRenderList.end())
 			depthRenderList.push_back(o);
 	}
 
-	void Shadow::RemoveFromDepthRenderList(DrawableObject *o)
+	void Shadow::RemoveFromDepthRenderList(VertexMesh *o)
 	{
 		auto it = std::find(depthRenderList.begin(), depthRenderList.end(), o);
 		if (it != depthRenderList.end())
@@ -158,7 +158,7 @@ namespace Bagnall
 	GLuint Shadow::depthCubeMap;
 	vec2 Shadow::zRange = vec2(1.0f, 2.0f);
 
-	std::vector<DrawableObject*> Shadow::depthRenderList;
+	std::vector<VertexMesh*> Shadow::depthRenderList;
 
 	void Shadow::renderDepthRenderList()
 	{

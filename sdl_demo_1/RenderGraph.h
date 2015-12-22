@@ -3,6 +3,7 @@
 
 #include "Bagnall.h"
 #include "Material.h"
+#include "VertexMesh.h"
 #include <vector>
 #include <unordered_map>
 
@@ -12,7 +13,7 @@ namespace Bagnall
 
 	struct RenderNode
 	{
-		std::vector<DrawableObject*> objects;
+		std::vector<VertexMesh*> meshes;
 
 		virtual void Render() const;
 	};
@@ -127,7 +128,7 @@ namespace Bagnall
 		std::unordered_map<vec4, EmissiveNode*> emissiveNodeMap;
 
 		// add an object to the graph
-		RenderNode* AddDrawableObject(DrawableObject *o);
+		RenderNode* AddVertexMesh(VertexMesh *o);
 
 		// render everything
 		void Render() const;

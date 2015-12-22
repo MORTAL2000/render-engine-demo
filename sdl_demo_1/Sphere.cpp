@@ -12,6 +12,13 @@ namespace Bagnall
 		createPrototypeVertices();
 	}
 
+	Sphere::Sphere(Object *par) : DrawableObject(par)
+	{
+		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("sphere");
+		mesh.SetOwner(this);
+		vertexMeshes.push_back(mesh);
+	}
+
 	void Sphere::Draw() const
 	{
 		DrawableObject::Draw();
@@ -47,5 +54,7 @@ namespace Bagnall
 		Shader::Binormals.insert(Shader::Binormals.end(), binormals.begin(), binormals.end());
 
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), texCoords.begin(), texCoords.end());
+
+		VertexMesh::AddVertexMeshPrototype("sphere", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), globalVertexOffset, vertexCount, true);
 	}
 }

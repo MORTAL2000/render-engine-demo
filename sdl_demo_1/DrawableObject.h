@@ -15,39 +15,43 @@ namespace Bagnall
 	public:
 		DrawableObject(Object *par);
 
-		DrawableObject(Object *par, GLuint tex, const Material& mat);
+		//DrawableObject(Object *par, GLuint tex, const Material& mat);
 
-		DrawableObject(Object *par, const vec4& emissionCol);
+		//DrawableObject(Object *par, const vec4& emissionCol);
 
 		DrawableObject(Object *par, SchematicNode *schematic);
 
 		virtual void Draw() const;
 
-		bool GetEmissive() const;
+		void SendTransformToGPU();
+
+		void AddVertexMesh(const VertexMesh& vertexMesh);
+
+		//bool GetEmissive() const;
 
 		void SetEmissive(bool e);
 
-		vec4 GetEmissionColor() const;
+		//vec4 GetEmissionColor() const;
 
 		virtual void SetEmissionColor(const vec4& color);
 
-		bool GetBlend() const;
+		//bool GetBlend() const;
 
-		void SetBlend(bool b);
+		//void SetBlend(bool b);
 
-		Material GetMaterial() const;
+		//Material GetMaterial() const;
 
 		virtual void SetMaterial(const Material& m);
 
-		GLuint GetTexture() const;
+		//GLuint GetTexture() const;
 
 		void SetTexture(GLuint tex);
 
-		GLuint GetCubeMap() const;
+		//GLuint GetCubeMap() const;
 
-		void SetCubeMap (GLuint cm);
+		//void SetCubeMap (GLuint cm);
 
-		static void UseMaterial(const Material& m);
+		//static void UseMaterial(const Material& m);
 
 		void EnableRender();
 
@@ -59,30 +63,32 @@ namespace Bagnall
 
 		bool GetRenderEnabled() const;
 
-		bool GetBumpMapEnabled() const;
+		//bool GetBumpMapEnabled() const;
 
-		bool GetReflectiveCubeMap() const;
+		void SetBumpMapEnabled(bool b);
 
-		void SetReflectiveCubeMap(bool b);
+		//bool GetReflectiveCubeMap() const;
+
+		//void SetReflectiveCubeMap(bool b);
 
 	private:
-		bool emissive;
-		vec4 emissionColor;
-		bool blend; // blend material with texture?
-		bool bumpMapEnabled;
+		//bool emissive;
+		//vec4 emissionColor;
+		//bool blend; // blend material with texture?
+		//bool bumpMapEnabled;
 		bool renderEnabled;
-		Material material;
-		GLuint texture;
-		GLuint cubeMap;
-		bool reflectiveCubeMap;
-		RenderNode *renderNode;
+		//Material material;
+		//GLuint texture;
+		//GLuint cubeMap;
+		//bool reflectiveCubeMap;
+		//RenderNode *renderNode;
 
 	protected:
 		std::vector<VertexMesh> vertexMeshes;
 
 		void init();
 
-		void updateRenderNode();
+		void updateRenderNodes();
 	};
 }
 

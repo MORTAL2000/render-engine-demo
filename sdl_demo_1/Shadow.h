@@ -13,6 +13,7 @@
 namespace Bagnall
 {
 	class DrawableObject;
+	class VertexMesh;
 
 	class Shadow
 	{
@@ -23,9 +24,9 @@ namespace Bagnall
 
 		static void BindToGPU();
 
-		static void AddToDepthRenderList(DrawableObject *o);
+		static void AddToDepthRenderList(VertexMesh *o);
 
-		static void RemoveFromDepthRenderList(DrawableObject *o);
+		static void RemoveFromDepthRenderList(VertexMesh *o);
 
 		static void SetNearAndFarPlanes(float zNear, float zFar);
 
@@ -34,7 +35,7 @@ namespace Bagnall
 		static GLuint depthCubeMap;
 		static glm::vec2 zRange;
 
-		static std::vector<DrawableObject*> depthRenderList;
+		static std::vector<VertexMesh*> depthRenderList;
 
 		static void renderDepthRenderList();
 	};

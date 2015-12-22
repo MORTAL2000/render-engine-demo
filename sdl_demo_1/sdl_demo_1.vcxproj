@@ -204,6 +204,8 @@
     <Image Include="bumpmaps\cubemap_test_1_NRM.jpg" />
     <Image Include="bumpmaps\dowm furry_NRM.jpg" />
     <Image Include="bumpmaps\finalformsquare_NRM.jpg" />
+    <Image Include="bumpmaps\Millennium_Falcon_Bottom_N.tga" />
+    <Image Include="bumpmaps\Millennium_Falcon_Top_N.tga" />
     <Image Include="bumpmaps\Shrek-and-Yoda_NRM.jpg" />
     <Image Include="bumpmaps\stone_wall_NRM.jpg" />
     <Image Include="textures\ben.jpg" />
@@ -211,6 +213,8 @@
     <Image Include="textures\cubemap_test_1.jpg" />
     <Image Include="textures\dowm furry.jpg" />
     <Image Include="textures\finalformsquare.jpg" />
+    <Image Include="textures\Millennium_Falcon_Bottom_D.tga" />
+    <Image Include="textures\Millennium_Falcon_Top_D.tga" />
     <Image Include="textures\Shrek-and-Yoda.jpg" />
     <Image Include="textures\stone_wall.jpg" />
   </ItemGroup>

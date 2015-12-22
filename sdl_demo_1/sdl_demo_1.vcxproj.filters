@@ -291,5 +291,17 @@
     <Image Include="bumpmaps\cubemap_test_1_NRM.jpg">
       <Filter>Resource Files\bumpmaps</Filter>
     </Image>
+    <Image Include="textures\Millennium_Falcon_Bottom_D.tga">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\Millennium_Falcon_Top_D.tga">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="bumpmaps\Millennium_Falcon_Bottom_N.tga">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="bumpmaps\Millennium_Falcon_Top_N.tga">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
   </ItemGroup>
 </Project>

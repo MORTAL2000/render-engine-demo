@@ -29,7 +29,9 @@ namespace Bagnall
 
 	Cube::Cube(Object *par) : DrawableObject(par)
 	{
-		vertexMeshes.push_back(VertexMesh::GetVertexMeshByName("cube"));
+		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("cube");
+		mesh.SetOwner(this);
+		vertexMeshes.push_back(mesh);
 	}
 
 	//void Cube::Draw() const
@@ -71,6 +73,6 @@ namespace Bagnall
 		std::vector<vec2> texCoords = Geometry::CreateCubeTextureCoordinates();
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), texCoords.begin(), texCoords.end());
 
-		VertexMesh::AddVertexMesh("cube", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), globalVertexOffset, vertexCount, false);
+		VertexMesh::AddVertexMeshPrototype("cube", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), globalVertexOffset, vertexCount, false);
 	}
 }

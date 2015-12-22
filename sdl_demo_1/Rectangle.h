@@ -10,7 +10,7 @@ namespace Bagnall
 	public:
 		static void Init();
 
-		Rectangle(Object *par) : DrawableObject(par) {}
+		Rectangle(Object *par);
 
 		void Draw() const;
 

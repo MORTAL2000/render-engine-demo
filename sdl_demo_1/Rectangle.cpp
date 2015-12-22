@@ -15,6 +15,7 @@ Date:				December 9, 2015
 #include "Geometry.h"
 #include "Util.h"
 #include "Shader.h"
+#include "VertexMesh.h"
 
 namespace Bagnall
 {
@@ -23,6 +24,13 @@ namespace Bagnall
 	void Rectangle::Init()
 	{
 		createPrototypeVertices();
+	}
+
+	Rectangle::Rectangle(Object *par) : DrawableObject(par)
+	{
+		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("rectangle");
+		mesh.SetOwner(this);
+		vertexMeshes.push_back(mesh);
 	}
 
 	void Rectangle::Draw() const
@@ -52,5 +60,7 @@ namespace Bagnall
 
 		std::vector<vec2> texCoords = Util::Vec4toVec2(Util::TransformVertices(rect, translate(vec3(0.5f, 0.5f, 0.0f)) * glm::scale(vec3(1.0, 1.0, 1.0))));
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), texCoords.begin(), texCoords.end());
+
+		VertexMesh::AddVertexMeshPrototype("rectangle", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), globalVertexOffset, vertexCount, true);
 	}
 }

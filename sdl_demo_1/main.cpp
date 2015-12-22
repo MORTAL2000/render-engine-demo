@@ -17,6 +17,7 @@
 #include "Shadow.h"
 #include "EnvironmentMap.h"
 #include "Schematic.h"
+#include "VertexMesh.h"
 #include <vector>
 #include <iostream>
 
@@ -33,8 +34,9 @@ Sphere *sun;
 //Cube *cameraCube;
 DrawableObject *player;
 LightSource *lightSource;
-Object *cubeContainer;
-std::vector<Cube*> cubes;
+Object *objectContainer;
+std::vector<DrawableObject*> objects;
+DrawableObject *middleCube;
 
 Object *groundContainer;
 
@@ -112,7 +114,7 @@ void init(void)
 	LightSource::UpdateLightSourceMatricesInShaders();
 
 	// CONTAINERS
-	cubeContainer = new Object(rootObject);
+	objectContainer = new Object(rootObject);
 	groundContainer = new Object(rootObject);
 	groundContainer->Translate(vec4(0.0f, 0.0f, -Game::WorldSize / 2.0f, 0.0f));
 
@@ -122,31 +124,64 @@ void init(void)
 	int range = Game::WorldSize - 5.0f;
 	for (int i = 0; i < 25; ++i)
 	{
-		Cube *cube = new Cube(cubeContainer);
+		Cube *cube = new Cube(objectContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
 		//cube->SetTexture(Texture::GetTextureByName("shrek"));
 		cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
 		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 		cube->Scale(5.0f);
-		cubes.push_back(cube);
+		objects.push_back(cube);
+		//cube->Cull();
+	}
+
+	// R2D2S LOL
+	for (int i = 0; i < 25; ++i)
+	{
+		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("r2d2"));
+		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		o->RotateX(-M_PI / 2.0f);
+		//cube->SetTexture(Texture::GetTextureByName("shrek"));
+		//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+		//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		o->Scale(5.0f);
+		objects.push_back(o);
+		//cube->Cull();
+	}
+
+	// C3POS LMAO
+	for (int i = 0; i < 25; ++i)
+	{
+		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("c3po"));
+		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		o->RotateX(-M_PI / 2.0f);
+		//cube->SetTexture(Texture::GetTextureByName("shrek"));
+		//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+		//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		o->Scale(5.0f);
+		objects.push_back(o);
 		//cube->Cull();
 	}
 
 	// MIDDLE CUBE
-	//Cube *cube = new Cube(cubeContainer);
-	DrawableObject *cube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("millennium_falcon"));
-	//DrawableObject *cube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("torchic"));
+	//middleCube = new Cube(cubeContainer);
+	middleCube = new DrawableObject(objectContainer, Schematic::GetSchematicByName("millennium_falcon"));
+	//middleCube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("r2d2"));
+	//middleCube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("torchic"));
 	//Sphere *cube = new Sphere(cubeContainer);
-	cube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
-	//cube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
+	middleCube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
+	//middleCube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
 	//cube->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
 	//cube->SetEmissive(true);
-	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+	//middleCube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 1.0f, 1.0f, 0.0f)));
-	//cube->Scale(10.0f);
-	cube->Scale(0.1f);
-	cube->RotateX(-M_PI / 2.0f);
+	//middleCube->Scale(10.0f);
+	middleCube->Scale(0.1f);
+	//middleCube->Scale(0.0001f);
+	middleCube->RotateX(-M_PI / 2.0f);
+	//middleCube->SetBumpMapEnabled(false);
 	//cubes.push_back(cube);
 
 	// SUN
@@ -169,7 +204,7 @@ void init(void)
 	// PLAYER
 	player = new Sphere(camera);
 	//player = new DrawableObject(camera, Schematic::GetSchematicByName("torchic"));
-	//player->SetMaterial(Material::Chrome());
+	player->SetMaterial(Material::Chrome());
 	//player->SetMaterial(Material::Plastic(vec4(0.25f, 0.25f, 0.25f, 1.0f)));
 	//player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 	//colorCubemap = EnvironmentMap::GenerateCubeMap();
@@ -320,6 +355,24 @@ int update()
 			case SDLK_f:
 				SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 				break;
+			case SDLK_1:
+				middleCube->RotateX(-0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_2:
+				middleCube->RotateX(0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_3:
+				middleCube->RotateY(-0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_4:
+				middleCube->RotateY(0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_5:
+				middleCube->RotateZ(-0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_6:
+				middleCube->RotateZ(0.005f * FpsTracker::GetFrameTimeMs());
+				break;
 			}
 		}
 		// mouse click
@@ -358,23 +411,23 @@ int update()
 	cubeContainer->RotateZ(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());*/
 	//cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 	//cubeContainer->RotateY(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
-	cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	objectContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 
 	//groundContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 
 	//for (auto it = cubes.begin(); it != cubes.end(); ++it)
-	concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
+	/*concurrency::parallel_for_each(begin(objects), end(objects), [&](Object *o)
 	{
-		cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-	});
-	//concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
-	//{
-	//	cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-	//	cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-	//	cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-	//}, concurrency::static_partitioner());
+		o->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+		o->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+		o->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+	});*/
+	concurrency::parallel_for_each(begin(objects), end(objects), [&](Object *o)
+	{
+		//o->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		//o->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		o->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+	}, concurrency::static_partitioner());
 
 	rootUpdateNode->Update();
 

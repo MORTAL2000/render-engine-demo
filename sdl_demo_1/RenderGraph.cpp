@@ -14,7 +14,7 @@ namespace Bagnall
 		shadowsEnabled = false;
 	}
 
-	RenderNode* RenderGraph::AddDrawableObject(DrawableObject *o)
+	RenderNode* RenderGraph::AddVertexMesh(VertexMesh *o)
 	{
 		auto cubeMap = o->GetCubeMap();
 		auto texture = o->GetTexture();
@@ -41,7 +41,7 @@ namespace Bagnall
 					{
 						auto *cubeMapBumpNode = cubeMapBumpNodeMap[cubeMap];
 
-						cubeMapBumpNode->objects.push_back(o);
+						cubeMapBumpNode->meshes.push_back(o);
 						return cubeMapBumpNode;
 					}
 					// with material
@@ -54,7 +54,7 @@ namespace Bagnall
 
 						materialNode = (*_materialNodeMap)[material];
 
-						materialNode->objects.push_back(o);
+						materialNode->meshes.push_back(o);
 						return materialNode;
 					}
 				}
@@ -69,7 +69,7 @@ namespace Bagnall
 					{
 						auto *cubeMapNode = cubeMapNodeMap[cubeMap];
 
-						cubeMapNode->objects.push_back(o);
+						cubeMapNode->meshes.push_back(o);
 						return cubeMapNode;
 					}
 					// with material
@@ -82,7 +82,7 @@ namespace Bagnall
 
 						materialNode = (*_materialNodeMap)[material];
 
-						materialNode->objects.push_back(o);
+						materialNode->meshes.push_back(o);
 						return materialNode;
 					}
 				}
@@ -106,7 +106,7 @@ namespace Bagnall
 
 					auto *textureBumpNode = textureBumpNodeMap[texture];
 
-					textureBumpNode->objects.push_back(o);
+					textureBumpNode->meshes.push_back(o);
 					return textureBumpNode;
 				}
 				// without bump map
@@ -117,7 +117,7 @@ namespace Bagnall
 
 					auto *textureNode = textureNodeMap[texture];
 
-					textureNode->objects.push_back(o);
+					textureNode->meshes.push_back(o);
 					return textureNode;
 				}
 			}
@@ -149,7 +149,7 @@ namespace Bagnall
 				materialNode = (*_materialNodeMap)[material];
 			}
 
-			materialNode->objects.push_back(o);
+			materialNode->meshes.push_back(o);
 			return materialNode;
 		}
 		// emissive
@@ -165,7 +165,7 @@ namespace Bagnall
 					cubeMapEmissiveNodeMap.emplace(cubeMap, new CubeMapEmissiveNode(cubeMap));
 
 				auto cubeMapEmissiveNode = cubeMapEmissiveNodeMap[cubeMap];
-				cubeMapEmissiveNode->objects.push_back(o);
+				cubeMapEmissiveNode->meshes.push_back(o);
 				return cubeMapEmissiveNode;
 			}
 			// texture
@@ -175,7 +175,7 @@ namespace Bagnall
 					textureEmissiveNodeMap.emplace(texture, new TextureEmissiveNode(texture));
 
 				auto textureEmissiveNode = textureEmissiveNodeMap[texture];
-				textureEmissiveNode->objects.push_back(o);
+				textureEmissiveNode->meshes.push_back(o);
 				return textureEmissiveNode;
 			}
 			// no texture
@@ -189,7 +189,7 @@ namespace Bagnall
 
 			emissiveNode = (*_emissiveNodeMap)[o->GetEmissionColor()];
 
-			emissiveNode->objects.push_back(o);
+			emissiveNode->meshes.push_back(o);
 			return emissiveNode;
 		}
 	}
@@ -414,7 +414,7 @@ namespace Bagnall
 	void RenderNode::Render() const
 	{
 		// render objects
-		for (auto it = objects.begin(); it != objects.end(); ++it)
+		for (auto it = meshes.begin(); it != meshes.end(); ++it)
 		{
 			auto o = *it;
 			if (o->GetRenderEnabled())

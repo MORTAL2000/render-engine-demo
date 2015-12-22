@@ -34,6 +34,12 @@ namespace Bagnall
 		static void initTorchic();
 
 		static void initMillenniumFalcon();
+
+		static void initStarDestroyer();
+
+		static void initR2D2();
+
+		static void initC3PO();
 	};
 }
 
