@@ -121,7 +121,7 @@ void init(void)
 	char *textureNames[] = { "shrek", "dowm_furry", "isaac_final_form", "costanza" };
 
 	// MANY CUBES
-	int range = Game::WorldSize - 5.0f;
+	int range = Game::WorldSize * 0.75f;
 	for (int i = 0; i < 25; ++i)
 	{
 		Cube *cube = new Cube(objectContainer);
@@ -179,7 +179,7 @@ void init(void)
 	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 1.0f, 1.0f, 0.0f)));
 	//middleCube->Scale(10.0f);
 	middleCube->Scale(0.1f);
-	//middleCube->Scale(0.0001f);
+	//middleCube->Scale(0.01f);
 	middleCube->RotateX(-M_PI / 2.0f);
 	//middleCube->SetBumpMapEnabled(false);
 	//cubes.push_back(cube);

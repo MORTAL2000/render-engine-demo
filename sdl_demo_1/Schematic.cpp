@@ -187,8 +187,14 @@ namespace Bagnall
 			aiMat->Get(AI_MATKEY_SHININESS, shininess);
 			mat.shininess = shininess;
 
+			aiString texturePath;
+			aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+
+			VertexMesh vMesh(NULL, Material::None(), vOffset, vCount, false);
+			vMesh.SetTexture(Texture::GetTextureByFile(texturePath.C_Str()));
+
 			//schematicNode->vertexMeshes.push_back(VertexMesh(NULL, mat, vOffset, vCount, false));
-			schematicNode->vertexMeshes.push_back(VertexMesh(NULL, Material::None(), vOffset, vCount, false));
+			schematicNode->vertexMeshes.push_back(vMesh);
 		}
 
 		// recursively build children schematic nodes
@@ -206,7 +212,7 @@ namespace Bagnall
 	{
 		const aiScene *scene = NULL;
 
-		if ((scene = aiImportFile("model\\torchic.blend", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+		if ((scene = aiImportFile("models\\torchic.blend", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
 		//if ((scene = aiImportFile("model\\torchic.blend", aiProcessPreset_TargetRealtime_Fast)) != NULL)
 		{
 			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
@@ -228,18 +234,18 @@ namespace Bagnall
 	{
 		const aiScene *scene = NULL;
 
-		if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+		if ((scene = aiImportFile("models\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
 			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
 		{
 			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
 
 			schematicNodeMap.emplace("millennium_falcon", schematic);
 
-			for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
+			/*for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
 				(*it).SetTexture(Texture::GetTextureByName("millennium_falcon_bottom"));
 
 			for (auto it = schematic->children[1]->vertexMeshes.begin(); it != schematic->children[1]->vertexMeshes.end(); ++it)
-				(*it).SetTexture(Texture::GetTextureByName("millennium_falcon_top"));
+				(*it).SetTexture(Texture::GetTextureByName("millennium_falcon_top"));*/
 		}
 		else
 		{
@@ -256,7 +262,7 @@ namespace Bagnall
 	{
 		const aiScene *scene = NULL;
 
-		if ((scene = aiImportFile("model\\Star_Destroyer.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+		if ((scene = aiImportFile("models\\Star_Destroyer.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
 			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
 		{
 			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
@@ -278,15 +284,15 @@ namespace Bagnall
 	{
 		const aiScene *scene = NULL;
 
-		if ((scene = aiImportFile("model\\R2-D2.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+		if ((scene = aiImportFile("models\\R2-D2.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
 			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
 		{
 			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
 
 			schematicNodeMap.emplace("r2d2", schematic);
 
-			for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
-				(*it).SetTexture(Texture::GetTextureByName("r2d2"));
+			/*for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
+				(*it).SetTexture(Texture::GetTextureByName("r2d2"));*/
 		}
 		else
 		{
@@ -303,15 +309,15 @@ namespace Bagnall
 	{
 		const aiScene *scene = NULL;
 
-		if ((scene = aiImportFile("model\\C-3PO_v2.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
+		if ((scene = aiImportFile("models\\C-3PO_v2.obj", aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
 			//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
 		{
 			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
 
 			schematicNodeMap.emplace("c3po", schematic);
 
-			for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
-				(*it).SetTexture(Texture::GetTextureByName("c3po"));
+			/*for (auto it = schematic->children[0]->vertexMeshes.begin(); it != schematic->children[0]->vertexMeshes.end(); ++it)
+			(*it).SetTexture(Texture::GetTextureByName("c3po"));*/
 		}
 		else
 		{

@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <unordered_map>
+#include <string>
 
 namespace Bagnall
 {
@@ -11,17 +12,21 @@ namespace Bagnall
 	public:
 		static void Init();
 
-		static GLuint GetTextureByName(const char *name);
+		static GLuint GetTextureByName(std::string name);
+		static GLuint GetTextureByFile(std::string path);
 		static GLuint GetBumpMapByTexture(GLuint tex);
 
-		static GLuint GetCubeMapByName(const char *name);
+		static GLuint GetCubeMapByName(std::string name);
+		static GLuint GetCubeMapByFile(std::string path);
 		static GLuint GetBumpMapByCubeMap(GLuint cubeMap);
 
 	private:
-		static std::unordered_map<const char*, GLuint> textureMap;
+		static std::unordered_map<std::string, GLuint> textureMap;
+		static std::unordered_map<std::string, GLuint> textureFileMap;
 		static std::unordered_map<GLuint, GLuint> bumpMapMap;
 
-		static std::unordered_map<const char*, GLuint> cubeMapMap;
+		static std::unordered_map<std::string, GLuint> cubeMapMap;
+		static std::unordered_map<std::string, GLuint> cubeMapFileMap;
 		static std::unordered_map<GLuint, GLuint> cubeBumpMapMap;
 
 		static GLuint loadTexture(const char *path);

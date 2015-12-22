@@ -11,101 +11,135 @@ namespace Bagnall
 	{
 		IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
 
+		GLuint tex;
+		GLuint bump;
+
 		// SHREK
-		GLuint tex = loadTexture("textures\\Shrek-and-Yoda.jpg");
+		tex = loadTexture("textures\\Shrek-and-Yoda.jpg");
 		if (tex != 0)
+		{
 			textureMap.emplace("shrek", tex);
-		GLuint bump = loadTexture("bumpmaps\\Shrek-and-Yoda_NRM.jpg");
-		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+			bump = loadTexture("bumpmaps\\Shrek-and-Yoda_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// BEN
 		tex = loadTexture("textures\\ben.jpg");
 		if (tex != 0)
+		{
 			textureMap.emplace("ben", tex);
-		bump = loadTexture("bumpmaps\\ben_NRM.jpg");
-		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+			bump = loadTexture("bumpmaps\\ben_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// STONE WALL
 		tex = loadTexture("textures\\stone_wall.jpg");
 		if (tex != 0)
+		{
 			textureMap.emplace("stone_wall", tex);
-		bump = loadTexture("bumpmaps\\stone_wall_NRM.jpg");
-		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+			bump = loadTexture("bumpmaps\\stone_wall_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// COSTANZA
 		tex = loadTexture("textures\\costanza.jpg");
 		if (tex != 0)
+		{
 			textureMap.emplace("costanza", tex);
-		bump = loadTexture("bumpmaps\\costanza_NRM.jpg");
-		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+			bump = loadTexture("bumpmaps\\costanza_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// DOWM FURRY
 		tex = loadTexture("textures\\dowm furry.jpg");
 		if (tex != 0)
+		{
 			textureMap.emplace("dowm_furry", tex);
-		bump = loadTexture("bumpmaps\\dowm furry_NRM.jpg");
-		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+			bump = loadTexture("bumpmaps\\dowm furry_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// ISAAC FINAL FORM
 		tex = loadTexture("textures\\finalformsquare.jpg");
 		if (tex != 0)
+		{
 			textureMap.emplace("isaac_final_form", tex);
-		bump = loadTexture("bumpmaps\\finalformsquare_NRM.jpg");
-		if (bump != 0)
-		bumpMapMap.emplace(tex, bump);
+			bump = loadTexture("bumpmaps\\finalformsquare_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// CUBEMAP TEST 1
 		GLuint cubeMap = loadCubeMap("textures\\cubemap_test_1.jpg");
 		if (cubeMap != 0)
-		cubeMapMap.emplace("cubemap_test_1", cubeMap);
-		bump = loadCubeMap("bumpmaps\\cubemap_test_1_NRM.jpg");
-		if (bump != 0)
-		cubeBumpMapMap.emplace(cubeMap, bump);
+		{
+			cubeMapMap.emplace("cubemap_test_1", cubeMap);
+			bump = loadCubeMap("bumpmaps\\cubemap_test_1_NRM.jpg");
+			if (bump != 0)
+				cubeBumpMapMap.emplace(cubeMap, bump);
+		}
 
 		// MILLENNIUM FALCON TOP
 		tex = loadTexture("textures\\Millennium_Falcon_Top_D.tga");
 		if (tex != 0)
-		textureMap.emplace("millennium_falcon_top", tex);
-		bump = loadTexture("bumpmaps\\Millennium_Falcon_Top_N.tga");
-		if (bump != 0)
-		bumpMapMap.emplace(tex, bump);
+		{
+			textureMap.emplace("millennium_falcon_top", tex);
+			textureFileMap.emplace("Millennium_Falcon_Top_D.tga", tex);
+			bump = loadTexture("bumpmaps\\Millennium_Falcon_Top_N.tga");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// MILLENNIUM FALCON BOTTOM
 		tex = loadTexture("textures\\Millennium_Falcon_Bottom_D.tga");
 		if (tex != 0)
-		textureMap.emplace("millennium_falcon_bottom", tex);
-		bump = loadTexture("bumpmaps\\Millennium_Falcon_Bottom_N.tga");
-		if (bump != 0)
-		bumpMapMap.emplace(tex, bump);
+		{
+			textureMap.emplace("millennium_falcon_bottom", tex);
+			textureFileMap.emplace("Millennium_Falcon_Bottom_D.tga", tex);
+			bump = loadTexture("bumpmaps\\Millennium_Falcon_Bottom_N.tga");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// R2D2
 		tex = loadTexture("textures\\R2-D2_D.tga");
 		if (tex != 0)
+		{
 			textureMap.emplace("r2d2", tex);
-		bump = loadTexture("bumpmaps\\R2-D2_N.tga");
-		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+			textureFileMap.emplace("R2-D2_D.tga", tex);
+			bump = loadTexture("bumpmaps\\R2-D2_N.tga");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// C3PO
 		tex = loadTexture("textures\\C-3PO_Dirty_D.tga");
 		if (tex != 0)
+		{
 			textureMap.emplace("c3po", tex);
-		bump = loadTexture("bumpmaps\\C-3PO_Dirty_N.tga");
-		if (bump != 0)
-			bumpMapMap.emplace(tex, bump);
+			textureFileMap.emplace("C-3PO_Dirty_D.tga", tex);
+			bump = loadTexture("bumpmaps\\C-3PO_Dirty_N.tga");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
 
 		// release texture loading stuff
 		IMG_Quit();
 	}
 
-	GLuint Texture::GetTextureByName(const char *name)
+	GLuint Texture::GetTextureByName(std::string name)
 	{
 		return textureMap[name];
+	}
+
+	GLuint Texture::GetTextureByFile(std::string path)
+	{
+		return textureFileMap[path];
 	}
 
 	GLuint Texture::GetBumpMapByTexture(GLuint tex)
@@ -116,9 +150,14 @@ namespace Bagnall
 			return 0;
 	}
 
-	GLuint Texture::GetCubeMapByName(const char *name)
+	GLuint Texture::GetCubeMapByName(std::string name)
 	{
 		return cubeMapMap[name];
+	}
+
+	GLuint Texture::GetCubeMapByFile(std::string path)
+	{
+		return cubeMapFileMap[path];
 	}
 
 	GLuint Texture::GetBumpMapByCubeMap(GLuint cubeMap)
@@ -131,10 +170,12 @@ namespace Bagnall
 
 	// PRIVATE
 
-	std::unordered_map<const char*, GLuint> Texture::textureMap;
+	std::unordered_map<std::string, GLuint> Texture::textureMap;
+	std::unordered_map<std::string, GLuint> Texture::textureFileMap;
 	std::unordered_map<GLuint, GLuint> Texture::bumpMapMap;
 
-	std::unordered_map<const char*, GLuint> Texture::cubeMapMap;
+	std::unordered_map<std::string, GLuint> Texture::cubeMapMap;
+	std::unordered_map<std::string, GLuint> Texture::cubeMapFileMap;
 	std::unordered_map<GLuint, GLuint> Texture::cubeBumpMapMap;
 
 	GLuint Texture::loadTexture(const char *path)

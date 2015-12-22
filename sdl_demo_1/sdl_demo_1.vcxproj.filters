@@ -28,7 +28,7 @@
     <Filter Include="Source Files\shaders\fragment">
       <UniqueIdentifier>{0c15c50d-9864-4dbc-a791-5886c0cad289}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Resource Files\model">
+    <Filter Include="Resource Files\models">
       <UniqueIdentifier>{e872f1d8-da98-4284-bcf5-6a7c53c272fc}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -165,10 +165,10 @@
       <Filter>Source Files\shaders\fragment</Filter>
     </None>
     <None Include="model\torchic.blend">
-      <Filter>Resource Files\model</Filter>
+      <Filter>Resource Files\models</Filter>
     </None>
     <None Include="model\Millennium_Falcon.mtl">
-      <Filter>Resource Files\model</Filter>
+      <Filter>Resource Files\models</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
