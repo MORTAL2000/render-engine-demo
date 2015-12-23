@@ -4,8 +4,6 @@ varying vec3 E;
 varying vec2 fTextureCoord;
 varying mat4 inverseTBN;
 varying vec3 shadowCoordDepth;
-varying vec4 vPositionWorld;
-varying vec3 vPositionLight;
 
 uniform vec4 materialAmbient, materialDiffuse, materialSpecular;
 uniform float materialShininess;
@@ -18,7 +16,6 @@ uniform samplerCubeShadow shadowCubeMap;
 uniform bool textureBlend;
 uniform int shadowMode;
 uniform vec2 shadowZRange;
-uniform mat4 lightProjection;
 
 // http://stackoverflow.com/questions/21293726/opengl-project-shadow-cubemap-onto-scene
 float vecToDepth (vec3 Vec)
@@ -92,15 +89,9 @@ void main()
 	if (shadowMode == 1)
 	{
 		//vec3 posLight = (lightProjection * vPositionWorld).xyz;
-		vec3 posLight = vPositionLight;
-		vec3 coordDepth = vec3((posLight.x + 1.0) / 2.0, (posLight.y + 1.0) / 2.0, (posLight.z + 1.0) / 2.0);
-		//vec3 coordDepth = vec3((posLight.x + 1.0) / 2.0, (posLight.y + 1.0) / 2.0, 0.499);
-		//vec3 coordDepth = vec3(posLight.x, posLight.y, 0.0);
-
-		//vec3 coordDepth = vec3((vPositionLight.x + 1.0) / 2.0, (vPositionLight.y + 1.0) / 2.0, (vPositionLight.z + 1.0) / 2.0);
+		//vec3 coordDepth = vec3((posLight.x + 1.0) / 2.0, (posLight.y + 1.0) / 2.0, (posLight.z + 1.0) / 2.0 * 0.90);
 		//float shadowVal = shadow2D(shadowTex, coordDepth);
 		float shadowVal = shadow2D(shadowTex, shadowCoordDepth);
-		//float shadowVal = shadow2D(shadowTex, vec3(shadowCoordDepth.xy, -1.0));
 		diffuse = diffuse * shadowVal;
 		specular = specular * shadowVal;
 	}

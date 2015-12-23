@@ -10,8 +10,6 @@ varying vec3 E;
 varying vec2 fTextureCoord;
 varying mat4 inverseTBN;
 varying vec3 shadowCoordDepth;
-varying vec3 vPositionLight;
-varying vec4 vPositionWorld;
 
 uniform mat4 model;
 uniform mat4 camera;
@@ -24,7 +22,7 @@ uniform mat4 lightProjection;
 void main()
 {
 	// compute vPosition in world space
-	vPositionWorld = model * vPosition;
+	vec4 vPositionWorld = model * vPosition;
 	
 	inverseTBN = mat4(vTangent, vBinormal, vNormal, vec4(0.0, 0.0, 0.0, 0.0));
 	
@@ -41,9 +39,10 @@ void main()
 
 	if (shadowMode == 1)
 	{
-		vPositionLight = (lightProjection * model * vPosition).xyz;
-		shadowCoordDepth = vec3((vPositionLight.x + 1.0) / 2.0, (vPositionLight.y + 1.0) / 2.0, (vPositionLight.z + 1.0) / 2.0 - 0.002);
-		//shadowCoordDepth = vec3(vPositionLight.x, vPositionLight.y, vPositionLight.z);
+		vec3 vPositionLight = (lightProjection * vPositionWorld).xyz;
+		float bias = 0.005*tan(acos(dot(normalize(N), normalize(L))));
+		bias = clamp(bias, 0, 0.01);
+		shadowCoordDepth = vec3((vPositionLight.x + 1.0) / 2.0, (vPositionLight.y + 1.0) / 2.0, (vPositionLight.z + 1.0) / 2.0 - bias);
 	}
 	
 	// pass texture coordinates to be interpolated over fragments

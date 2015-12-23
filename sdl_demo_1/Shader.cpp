@@ -418,6 +418,8 @@ namespace Bagnall
 		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
 		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+		uniformMap.emplace("shadowTex", getUniform(program, "shadowTex"));
+		uniformMap.emplace("lightProjection", getUniform(program, "lightProjection"));
 
 		// copy uniform map to program uniform map
 		programToUniformMap.emplace(program, uniformMap);
@@ -426,6 +428,7 @@ namespace Bagnall
 		glUseProgram(program);
 		glUniform1i(uniformMap["shadowMode"], 0);
 		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
+		glUniform1i(uniformMap["shadowTex"], TEXTURE_SHADOW_2D);
 	}
 
 	void Shader::initTextureProgram()
@@ -470,6 +473,8 @@ namespace Bagnall
 		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
 		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+		uniformMap.emplace("shadowTex", getUniform(program, "shadowTex"));
+		uniformMap.emplace("lightProjection", getUniform(program, "lightProjection"));
 
 		// copy uniform map to program uniform map
 		programToUniformMap.emplace(program, uniformMap);
@@ -480,6 +485,7 @@ namespace Bagnall
 		glUniform1i(uniformMap["textureBlend"], 1);
 		glUniform1i(uniformMap["shadowMode"], 0);
 		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
+		glUniform1i(uniformMap["shadowTex"], TEXTURE_SHADOW_2D);
 	}
 
 	void Shader::initTextureBumpProgram()
@@ -588,6 +594,8 @@ namespace Bagnall
 		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 		uniformMap.emplace("reflectiveCubeMap", getUniform(program, "reflective"));
+		uniformMap.emplace("shadowTex", getUniform(program, "shadowTex"));
+		uniformMap.emplace("lightProjection", getUniform(program, "lightProjection"));
 
 		// copy uniform map to program uniform map
 		programToUniformMap.emplace(program, uniformMap);
@@ -599,6 +607,7 @@ namespace Bagnall
 		glUniform1i(uniformMap["shadowMode"], 0);
 		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
 		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
+		glUniform1i(uniformMap["shadowTex"], TEXTURE_SHADOW_2D);
 	}
 
 	void Shader::initCubeMapBumpProgram()
@@ -649,6 +658,8 @@ namespace Bagnall
 		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 		uniformMap.emplace("reflectiveCubeMap", getUniform(program, "reflective"));
+		uniformMap.emplace("shadowTex", getUniform(program, "shadowTex"));
+		uniformMap.emplace("lightProjection", getUniform(program, "lightProjection"));
 
 		// copy uniform map to program uniform map
 		programToUniformMap.emplace(program, uniformMap);
@@ -661,6 +672,7 @@ namespace Bagnall
 		glUniform1i(uniformMap["shadowMode"], 0);
 		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
 		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
+		glUniform1i(uniformMap["shadowTex"], TEXTURE_SHADOW_2D);
 	}
 
 	GLuint Shader::getUniform(GLuint program, const char* name)

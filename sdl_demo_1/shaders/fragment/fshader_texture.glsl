@@ -2,11 +2,14 @@ varying vec3 N;
 varying vec3 L;
 varying vec3 E;
 varying vec2 fTextureCoord;
+varying vec3 shadowCoordDepth;
+varying vec3 vPositionLight;
 
 uniform vec4 materialAmbient, materialDiffuse, materialSpecular;
 uniform float materialShininess;
 uniform mat4 lightSource;
 uniform sampler2D tex;
+uniform sampler2DShadow shadowTex;
 uniform samplerCubeShadow shadowCubeMap;
 uniform bool textureBlend;
 uniform int shadowMode;
@@ -74,7 +77,14 @@ void main()
 	else
 		specular = Ks*specularProduct;
 
-	if (shadowMode == 2)
+	if (shadowMode == 1)
+	{
+		vec3 coordDepth = vec3((vPositionLight.x + 1.0) / 2.0, (vPositionLight.y + 1.0) / 2.0, (vPositionLight.z + 1.0) / 2.0);
+		float shadowVal = shadow2D(shadowTex, shadowCoordDepth);
+		diffuse = diffuse * shadowVal;
+		specular = specular * shadowVal;
+	}
+	else if (shadowMode == 2)
 	{
 		vec3 lightDir = -L;
 		float d = vecToDepth(lightDir) - 0.002;
