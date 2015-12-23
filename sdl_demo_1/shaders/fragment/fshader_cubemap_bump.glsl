@@ -12,7 +12,7 @@ uniform samplerCube cubeMap;
 uniform samplerCube bumpCubeMap;
 uniform samplerCubeShadow shadowCubeMap;
 uniform bool textureBlend;
-uniform bool useShadowCubeMap;
+uniform int shadowMode;
 uniform vec2 shadowZRange;
 
 // http://stackoverflow.com/questions/21293726/opengl-project-shadow-cubemap-onto-scene
@@ -80,7 +80,7 @@ void main()
 	else
 		specular = Ks*specularProduct;
 
-	if (useShadowCubeMap)
+	if (shadowMode == 2)
 	{
 		vec3 lightDir = -L;
 		float d = vecToDepth(lightDir) - 0.002;

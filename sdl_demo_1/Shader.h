@@ -9,6 +9,16 @@ namespace Bagnall
 {
 	struct Material;
 
+	enum TextureSampler
+	{
+		TEXTURE_2D,
+		TEXTURE_2D_BUMP,
+		TEXTURE_CUBE,
+		TEXTURE_CUBE_BUMP,
+		TEXTURE_SHADOW_2D,
+		TEXTURE_SHADOW_CUBE
+	};
+
 	class Shader
 	{
 	public:
@@ -17,6 +27,8 @@ namespace Bagnall
 		static std::vector<vec4> Tangents;
 		static std::vector<vec4> Binormals;
 		static std::vector<vec2> TextureCoordinates;
+
+		static std::vector<uint> VertexIndices;
 
 		static void Init();
 
@@ -32,20 +44,23 @@ namespace Bagnall
 		static void SetModel(const mat4& model);
 		static void SetCamera(const mat4& camera);
 		static void SetProjection(const mat4& projection);
+		static void SetLightProjection(const mat4& lightProj);
 		static void SetEmissionColor(const vec4& emissionColor);
 		static void SetTextureBlend(bool textureBlendb);
-		static void SetUseShadowCubeMap(bool useShadowCubeMap);
+		static void SetShadowMode(int shadowMode);
 		static void SetShadowZRange(const vec2& shadowZRange);
 		static void SetReflectiveCubeMap(bool b);
 
 	private:
 		static GLuint vertexBuffer;
+		static GLuint elementBuffer;
 		static GLuint currentProgram;
 
 		static mat4 camera;
 		static vec4 cameraPosition;
 		static mat4 projection;
 		static mat4 lightSource;
+		static mat4 lightProjection;
 
 		static std::unordered_map<const char*, GLuint> nameToProgramMap;
 		static std::unordered_map<GLuint, GLuint> programToVaoMap;

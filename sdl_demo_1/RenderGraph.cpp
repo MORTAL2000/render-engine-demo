@@ -11,7 +11,7 @@ namespace Bagnall
 
 	RenderGraph::RenderGraph()
 	{
-		shadowsEnabled = false;
+		shadowMode = SHADOW_MODE_NONE;
 	}
 
 	RenderNode* RenderGraph::AddVertexMesh(VertexMesh *o)
@@ -237,39 +237,34 @@ namespace Bagnall
 			(*it).second->Render();
 	}
 
-	void RenderGraph::SetShadowsEnabled(bool s)
+	void RenderGraph::SetShadowMode(int s)
 	{
-		shadowsEnabled = s;
+		shadowMode = s;
 
 		Shader::SetProgram("material");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
+		Shader::SetShadowMode(s);
+		Shadow::BindToGPU(shadowMode);
 
 		Shader::SetProgram("texture");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
+		Shader::SetShadowMode(s);
+		Shadow::BindToGPU(shadowMode);
 
 		Shader::SetProgram("texture_bump");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
+		Shader::SetShadowMode(s);
+		Shadow::BindToGPU(shadowMode);
 
 		Shader::SetProgram("cubemap");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
+		Shader::SetShadowMode(s);
+		Shadow::BindToGPU(shadowMode);
 
 		Shader::SetProgram("cubemap_bump");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
+		Shader::SetShadowMode(s);
+		Shadow::BindToGPU(shadowMode);
 	}
 
-	bool RenderGraph::GetShadowsEnabled() const
+	int RenderGraph::GetShadowMode() const
 	{
-		return shadowsEnabled;
+		return shadowMode;
 	}
 
 	void RenderGraph::SetShadowZRange(float zNear, float zFar)

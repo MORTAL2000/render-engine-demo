@@ -19,7 +19,7 @@ namespace Bagnall
 		// need public default constructor to use it as non-dynamic memory struct
 		VertexMesh();
 
-		VertexMesh(DrawableObject *o, const Material& mat, int vOffset, int vCount, bool tStrip);
+		VertexMesh(DrawableObject *o, const Material& mat, int iOffset, int iCount, bool tStrip);
 
 		static void AddVertexMeshPrototype(const char *name, const Material& mat, int vOffset, int vCount, bool tStrip);
 
@@ -78,8 +78,8 @@ namespace Bagnall
 		RenderNode *renderNode;
 		bool renderEnabled;
 
-		int globalVertexOffset;
-		int vertexCount;
+		uint indexOffset;
+		uint indexCount;
 		bool triangleStrip;
 
 		void init();

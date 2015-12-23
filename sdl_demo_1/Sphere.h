@@ -12,11 +12,11 @@ namespace Bagnall
 
 		Sphere(Object *par);
 
-		void Draw() const;
+		//void Draw() const;
 
 	private:
-		static int globalVertexOffset; // location of sphere vertices in global array
-		static int vertexCount; // # of cube vertices
+		static int indexOffset; // location of sphere vertices in global array
+		static int indexCount; // # of cube vertices
 
 		static void createPrototypeVertices();
 	};

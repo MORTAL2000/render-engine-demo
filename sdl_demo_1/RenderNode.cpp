@@ -9,7 +9,7 @@ namespace Bagnall
 	void CubeMapNode::Render() const
 	{
 		// bind cube map
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_CUBE);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
 
 		// render objects without materials
@@ -29,11 +29,11 @@ namespace Bagnall
 	void CubeMapBumpNode::Render() const
 	{
 		// bind texture
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_CUBE);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
 
 		// bind bump map
-		glActiveTexture(GL_TEXTURE4);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_CUBE_BUMP);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, bumpMap);
 
 		// render objects without materials
@@ -53,7 +53,7 @@ namespace Bagnall
 	void CubeMapEmissiveNode::Render() const
 	{
 		// bind cube map
-		glActiveTexture(GL_TEXTURE2);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_CUBE);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
 
 		// render objects
@@ -65,11 +65,11 @@ namespace Bagnall
 	void TextureBumpNode::Render() const
 	{
 		// bind texture
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 		// bind bump map
-		glActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_2D_BUMP);
 		glBindTexture(GL_TEXTURE_2D, bumpmap);
 
 		// render objects without materials
@@ -89,7 +89,7 @@ namespace Bagnall
 	void TextureNode::Render() const
 	{
 		// bind texture
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 		// render objects without materials
@@ -109,7 +109,7 @@ namespace Bagnall
 	void TextureEmissiveNode::Render() const
 	{
 		// bind texture
-		glActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0 + TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 		// render objects

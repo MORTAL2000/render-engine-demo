@@ -70,62 +70,117 @@ namespace Bagnall
 		for (uint i = 0; i < node->mNumMeshes; ++i)
 		{
 			auto mesh = scene->mMeshes[node->mMeshes[i]];
+			//std::vector<vec4> vertices;
+			///*for (int j = 0; j < mesh->mNumVertices; ++j)
+			//	vertices.push_back(vec4(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z, 1.0f));*/
+			//for (int j = 0; j < mesh->mNumFaces; ++j)
+			//{
+			//	auto face = mesh->mFaces[j];
+			//	if (face.mNumIndices == 3)
+			//	{
+			//		vertices.push_back(vec4(mesh->mVertices[face.mIndices[0]].x, mesh->mVertices[face.mIndices[0]].y, mesh->mVertices[face.mIndices[0]].z, 1.0f));
+			//		vertices.push_back(vec4(mesh->mVertices[face.mIndices[1]].x, mesh->mVertices[face.mIndices[1]].y, mesh->mVertices[face.mIndices[1]].z, 1.0f));
+			//		vertices.push_back(vec4(mesh->mVertices[face.mIndices[2]].x, mesh->mVertices[face.mIndices[2]].y, mesh->mVertices[face.mIndices[2]].z, 1.0f));
+			//	}
+			//}
+
+			//std::vector<vec4> normals;
+			//if (mesh->HasNormals())
+			//{
+			//	//for (int j = 0; j < mesh->mNumVertices; ++j)
+			//	//	normals.push_back(vec4(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z, 1.0f));
+			//	for (int j = 0; j < mesh->mNumFaces; ++j)
+			//	{
+			//		auto face = mesh->mFaces[j];
+			//		if (face.mNumIndices == 3)
+			//		{
+			//			normals.push_back(vec4(mesh->mNormals[face.mIndices[0]].x, mesh->mNormals[face.mIndices[0]].y, mesh->mNormals[face.mIndices[0]].z, 0.0f));
+			//			normals.push_back(vec4(mesh->mNormals[face.mIndices[1]].x, mesh->mNormals[face.mIndices[1]].y, mesh->mNormals[face.mIndices[1]].z, 0.0f));
+			//			normals.push_back(vec4(mesh->mNormals[face.mIndices[2]].x, mesh->mNormals[face.mIndices[2]].y, mesh->mNormals[face.mIndices[2]].z, 0.0f));
+			//		}
+			//	}
+			//}
+			//else
+			//	normals = std::vector<vec4>(vertices);
+
+			//std::vector<vec4> tangents;
+			//std::vector<vec4> binormals;
+			//if (mesh->HasTangentsAndBitangents())
+			//{
+			//	/*for (int j = 0; j < mesh->mNumVertices; ++j)
+			//	{
+			//		tangents.push_back(vec4(mesh->mTangents[j].x, mesh->mTangents[j].y, mesh->mTangents[j].z, 1.0f));
+			//		binormals.push_back(vec4(mesh->mBitangents[j].x, mesh->mBitangents[j].y, mesh->mBitangents[j].z, 1.0f));
+			//	}*/
+			//	for (int j = 0; j < mesh->mNumFaces; ++j)
+			//	{
+			//		auto face = mesh->mFaces[j];
+			//		if (face.mNumIndices == 3)
+			//		{
+			//			tangents.push_back(vec4(mesh->mTangents[face.mIndices[0]].x, mesh->mTangents[face.mIndices[0]].y, mesh->mTangents[face.mIndices[0]].z, 0.0f));
+			//			tangents.push_back(vec4(mesh->mTangents[face.mIndices[1]].x, mesh->mTangents[face.mIndices[1]].y, mesh->mTangents[face.mIndices[1]].z, 0.0f));
+			//			tangents.push_back(vec4(mesh->mTangents[face.mIndices[2]].x, mesh->mTangents[face.mIndices[2]].y, mesh->mTangents[face.mIndices[2]].z, 0.0f));
+
+			//			binormals.push_back(vec4(mesh->mBitangents[face.mIndices[0]].x, mesh->mBitangents[face.mIndices[0]].y, mesh->mBitangents[face.mIndices[0]].z, 0.0f));
+			//			binormals.push_back(vec4(mesh->mBitangents[face.mIndices[1]].x, mesh->mBitangents[face.mIndices[1]].y, mesh->mBitangents[face.mIndices[1]].z, 0.0f));
+			//			binormals.push_back(vec4(mesh->mBitangents[face.mIndices[2]].x, mesh->mBitangents[face.mIndices[2]].y, mesh->mBitangents[face.mIndices[2]].z, 0.0f));
+			//		}
+			//	}
+			//}
+			//else
+			//{
+			//	tangents = std::vector<vec4>(vertices);
+			//	binormals = std::vector<vec4>(vertices);
+			//}
+
+			//std::vector<vec2> textureCoordinates;
+			//if (mesh->HasTextureCoords(0))
+			//{
+			//	for (int j = 0; j < mesh->mNumFaces; ++j)
+			//	{
+			//		auto face = mesh->mFaces[j];
+			//		if (face.mNumIndices == 3)
+			//		{
+			//			textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[0]].x, -mesh->mTextureCoords[0][face.mIndices[0]].y));
+			//			textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[1]].x, -mesh->mTextureCoords[0][face.mIndices[1]].y));
+			//			textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[2]].x, -mesh->mTextureCoords[0][face.mIndices[2]].y));
+			//		}
+			//	}
+			//}
+			////for (int j = 0; j < mesh->mNumVertices; ++j)
+			////for (int j = 0; j < vertices.size(); ++j)
+			////	textureCoordinates.push_back(vec2(0.0f, 0.0f));
+
+			///*vertices = Util::TransformVertices(vertices, schematicNode->transform);
+			//normals = Util::TransformVertices(normals, schematicNode->transform);
+			//tangents = Util::TransformVertices(tangents, schematicNode->transform);
+			//binormals = Util::TransformVertices(binormals, schematicNode->transform);*/
+
+			int vertexOffset = Shader::Vertices.size();
+
 			std::vector<vec4> vertices;
-			/*for (int j = 0; j < mesh->mNumVertices; ++j)
-				vertices.push_back(vec4(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z, 1.0f));*/
-			for (int j = 0; j < mesh->mNumFaces; ++j)
-			{
-				auto face = mesh->mFaces[j];
-				if (face.mNumIndices == 3)
-				{
-					vertices.push_back(vec4(mesh->mVertices[face.mIndices[0]].x, mesh->mVertices[face.mIndices[0]].y, mesh->mVertices[face.mIndices[0]].z, 1.0f));
-					vertices.push_back(vec4(mesh->mVertices[face.mIndices[1]].x, mesh->mVertices[face.mIndices[1]].y, mesh->mVertices[face.mIndices[1]].z, 1.0f));
-					vertices.push_back(vec4(mesh->mVertices[face.mIndices[2]].x, mesh->mVertices[face.mIndices[2]].y, mesh->mVertices[face.mIndices[2]].z, 1.0f));
-				}
-			}
+			for (int j = 0; j < mesh->mNumVertices; ++j)
+				vertices.push_back(vec4(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z, 1.0f));
 
 			std::vector<vec4> normals;
 			if (mesh->HasNormals())
 			{
-				//for (int j = 0; j < mesh->mNumVertices; ++j)
-				//	normals.push_back(vec4(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z, 1.0f));
-				for (int j = 0; j < mesh->mNumFaces; ++j)
-				{
-					auto face = mesh->mFaces[j];
-					if (face.mNumIndices == 3)
-					{
-						normals.push_back(vec4(mesh->mNormals[face.mIndices[0]].x, mesh->mNormals[face.mIndices[0]].y, mesh->mNormals[face.mIndices[0]].z, 0.0f));
-						normals.push_back(vec4(mesh->mNormals[face.mIndices[1]].x, mesh->mNormals[face.mIndices[1]].y, mesh->mNormals[face.mIndices[1]].z, 0.0f));
-						normals.push_back(vec4(mesh->mNormals[face.mIndices[2]].x, mesh->mNormals[face.mIndices[2]].y, mesh->mNormals[face.mIndices[2]].z, 0.0f));
-					}
-				}
+				for (int j = 0; j < mesh->mNumVertices; ++j)
+					normals.push_back(vec4(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z, 0.0f));
 			}
 			else
+			{
 				normals = std::vector<vec4>(vertices);
+			}
 
 			std::vector<vec4> tangents;
 			std::vector<vec4> binormals;
 			if (mesh->HasTangentsAndBitangents())
 			{
-				/*for (int j = 0; j < mesh->mNumVertices; ++j)
-				{
-					tangents.push_back(vec4(mesh->mTangents[j].x, mesh->mTangents[j].y, mesh->mTangents[j].z, 1.0f));
-					binormals.push_back(vec4(mesh->mBitangents[j].x, mesh->mBitangents[j].y, mesh->mBitangents[j].z, 1.0f));
-				}*/
-				for (int j = 0; j < mesh->mNumFaces; ++j)
-				{
-					auto face = mesh->mFaces[j];
-					if (face.mNumIndices == 3)
-					{
-						tangents.push_back(vec4(mesh->mTangents[face.mIndices[0]].x, mesh->mTangents[face.mIndices[0]].y, mesh->mTangents[face.mIndices[0]].z, 0.0f));
-						tangents.push_back(vec4(mesh->mTangents[face.mIndices[1]].x, mesh->mTangents[face.mIndices[1]].y, mesh->mTangents[face.mIndices[1]].z, 0.0f));
-						tangents.push_back(vec4(mesh->mTangents[face.mIndices[2]].x, mesh->mTangents[face.mIndices[2]].y, mesh->mTangents[face.mIndices[2]].z, 0.0f));
-
-						binormals.push_back(vec4(mesh->mBitangents[face.mIndices[0]].x, mesh->mBitangents[face.mIndices[0]].y, mesh->mBitangents[face.mIndices[0]].z, 0.0f));
-						binormals.push_back(vec4(mesh->mBitangents[face.mIndices[1]].x, mesh->mBitangents[face.mIndices[1]].y, mesh->mBitangents[face.mIndices[1]].z, 0.0f));
-						binormals.push_back(vec4(mesh->mBitangents[face.mIndices[2]].x, mesh->mBitangents[face.mIndices[2]].y, mesh->mBitangents[face.mIndices[2]].z, 0.0f));
-					}
-				}
+				for (int j = 0; j < mesh->mNumVertices; ++j)
+					tangents.push_back(vec4(mesh->mTangents[j].x, mesh->mTangents[j].y, mesh->mTangents[j].z, 0.0f));
+				for (int j = 0; j < mesh->mNumVertices; ++j)
+					binormals.push_back(vec4(mesh->mBitangents[j].x, mesh->mBitangents[j].y, mesh->mBitangents[j].z, 0.0f));
 			}
 			else
 			{
@@ -136,34 +191,36 @@ namespace Bagnall
 			std::vector<vec2> textureCoordinates;
 			if (mesh->HasTextureCoords(0))
 			{
-				for (int j = 0; j < mesh->mNumFaces; ++j)
+				for (int j = 0; j < mesh->mNumVertices; ++j)
+					textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][j].x, -mesh->mTextureCoords[0][j].y));
+			}
+			else
+			{
+				for (int j = 0; j < mesh->mNumVertices; ++j)
+					textureCoordinates.push_back(vec2(0.0f, 0.0f));
+			}
+
+			std::vector<uint> indices;
+			for (int j = 0; j < mesh->mNumFaces; ++j)
+			{
+				auto face = mesh->mFaces[j];
+				if (face.mNumIndices == 3)
 				{
-					auto face = mesh->mFaces[j];
-					if (face.mNumIndices == 3)
-					{
-						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[0]].x, -mesh->mTextureCoords[0][face.mIndices[0]].y));
-						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[1]].x, -mesh->mTextureCoords[0][face.mIndices[1]].y));
-						textureCoordinates.push_back(vec2(mesh->mTextureCoords[0][face.mIndices[2]].x, -mesh->mTextureCoords[0][face.mIndices[2]].y));
-					}
+					indices.push_back(face.mIndices[0] + vertexOffset);
+					indices.push_back(face.mIndices[1] + vertexOffset);
+					indices.push_back(face.mIndices[2] + vertexOffset);
 				}
 			}
-			//for (int j = 0; j < mesh->mNumVertices; ++j)
-			//for (int j = 0; j < vertices.size(); ++j)
-			//	textureCoordinates.push_back(vec2(0.0f, 0.0f));
 
-			/*vertices = Util::TransformVertices(vertices, schematicNode->transform);
-			normals = Util::TransformVertices(normals, schematicNode->transform);
-			tangents = Util::TransformVertices(tangents, schematicNode->transform);
-			binormals = Util::TransformVertices(binormals, schematicNode->transform);*/
-
-			int vOffset = Shader::Vertices.size();
-			int vCount = vertices.size();
+			int indexOffset = Shader::VertexIndices.size();
+			int indexCount = indices.size();
 
 			Shader::Vertices.insert(Shader::Vertices.end(), vertices.begin(), vertices.end());
 			Shader::Normals.insert(Shader::Normals.end(), normals.begin(), normals.end());
 			Shader::Tangents.insert(Shader::Tangents.end(), tangents.begin(), tangents.end());
 			Shader::Binormals.insert(Shader::Binormals.end(), binormals.begin(), binormals.end());
 			Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), textureCoordinates.begin(), textureCoordinates.end());
+			Shader::VertexIndices.insert(Shader::VertexIndices.end(), indices.begin(), indices.end());
 
 			// MATERIAL
 			auto aiMat = scene->mMaterials[mesh->mMaterialIndex];
@@ -190,7 +247,7 @@ namespace Bagnall
 			aiString texturePath;
 			aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 
-			VertexMesh vMesh(NULL, Material::None(), vOffset, vCount, false);
+			VertexMesh vMesh(NULL, Material::None(), indexOffset, indexCount, false);
 			vMesh.SetTexture(Texture::GetTextureByFile(texturePath.C_Str()));
 
 			//schematicNode->vertexMeshes.push_back(VertexMesh(NULL, mat, vOffset, vCount, false));

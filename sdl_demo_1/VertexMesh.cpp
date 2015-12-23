@@ -16,14 +16,14 @@ namespace Bagnall
 		init();
 	}
 
-	VertexMesh::VertexMesh(DrawableObject *o, const Material& mat, int vOffset, int vCount, bool tStrip)
+	VertexMesh::VertexMesh(DrawableObject *o, const Material& mat, int iOffset, int iCount, bool tStrip)
 	{
 		init();
 
 		owner = o;
 		material = mat;
-		globalVertexOffset = vOffset;
-		vertexCount = vCount;
+		indexOffset = iOffset;
+		indexCount = iCount;
 		triangleStrip = tStrip;
 		texture = 0;
 	}
@@ -59,7 +59,8 @@ namespace Bagnall
 
 		// hacky way of doing triangle strip instead of triangles when the bool is set
 		// because GL_TRIANGLES is 4 and GL_TRIANGLE_STRIP is 5
-		glDrawArrays(GL_TRIANGLES + triangleStrip, globalVertexOffset, vertexCount);
+		//glDrawArrays(GL_TRIANGLES + triangleStrip, globalVertexOffset, vertexCount);
+		glDrawElements(GL_TRIANGLES + triangleStrip, indexCount, GL_UNSIGNED_INT, reinterpret_cast<void*>(indexOffset * sizeof(uint)));
 	}
 
 	void VertexMesh::UpdateRenderNode()
@@ -193,8 +194,8 @@ namespace Bagnall
 		renderNode = NULL;
 		renderEnabled = true;
 
-		globalVertexOffset = 0;
-		vertexCount = 0;
+		indexOffset = 0;
+		indexCount = 0;
 		triangleStrip = false;
 	}
 }

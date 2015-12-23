@@ -15,8 +15,8 @@ namespace Bagnall
 		bool ContainsPoint(const vec4& p) const;
 
 	private:
-		static int globalVertexOffset;
-		static int vertexCount;
+		static int indexOffset;
+		static int indexCount;
 
 		static void createPrototypeVertices();
 	};

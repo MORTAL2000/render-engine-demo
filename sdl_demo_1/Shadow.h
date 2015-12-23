@@ -15,14 +15,23 @@ namespace Bagnall
 	class DrawableObject;
 	class VertexMesh;
 
+	enum ShadowMode
+	{
+		SHADOW_MODE_NONE,
+		SHADOW_MODE_UNI,
+		SHADOW_MODE_OMNI
+	};
+
 	class Shadow
 	{
 	public:
 		static void Init();
 
-		static void RenderShadowMap(const glm::vec3& sourcePos, DrawableObject* source);
+		static void RenderShadowOrthoMap(const glm::vec3& sourcePos, const glm::vec3& destPos);
 
-		static void BindToGPU();
+		static void RenderShadowCubeMap(const glm::vec3& sourcePos, DrawableObject* source);
+
+		static void BindToGPU(int shadowMode);
 
 		static void AddToDepthRenderList(VertexMesh *o);
 
@@ -30,9 +39,12 @@ namespace Bagnall
 
 		static void SetZRange(const glm::vec2& zr);
 
+		static GLuint depthBuffer; // for shadow ortho map
+
 	private:
 		static GLuint frameBuffer;
-		static GLuint depthCubeMap;
+		//static GLuint depthBuffer; // for shadow ortho map
+		static GLuint depthCubeMap; // for shadow cube map
 		static glm::vec2 zRange;
 
 		static std::vector<VertexMesh*> depthRenderList;

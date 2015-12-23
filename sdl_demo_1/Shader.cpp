@@ -13,6 +13,8 @@ namespace Bagnall
 	std::vector<vec4> Shader::Binormals;
 	std::vector<vec2> Shader::TextureCoordinates;
 
+	std::vector<uint> Shader::VertexIndices;
+
 	void Shader::Init()
 	{
 		// set up vertex buffer
@@ -26,6 +28,13 @@ namespace Bagnall
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size(), sizeof(vec4)*Tangents.size(), &Tangents[0]);
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size(), sizeof(vec4)*Binormals.size(), &Binormals[0]);
 			glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4)*Vertices.size() + sizeof(vec4)*Normals.size() + sizeof(vec4)*Tangents.size() + sizeof(vec4)*Binormals.size(), sizeof(vec2)*TextureCoordinates.size(), &TextureCoordinates[0]);
+		}
+
+		if (VertexIndices.size())
+		{
+			glGenBuffers(1, &elementBuffer);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint)*VertexIndices.size(), &VertexIndices[0], GL_STATIC_DRAW);
 		}
 
 		// EMISSIVE COLOR PROGRAM
@@ -55,6 +64,13 @@ namespace Bagnall
 		// CUBEMAP BUMP PROGRAM
 		initCubeMapBumpProgram();
 
+		/*if (VertexIndices.size())
+		{
+			glGenBuffers(1, &elementBuffer);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint)*VertexIndices.size(), &VertexIndices[0], GL_STATIC_DRAW);
+		}*/
+
 		glUseProgram(nameToProgramMap["emissive_color"]);
 	}
 
@@ -78,6 +94,9 @@ namespace Bagnall
 			loc = getUniformFromCurrentProgram("cameraPosition");
 			if (loc != -1)
 				glUniform4fv(loc, 1, value_ptr(cameraPosition));
+			loc = getUniformFromCurrentProgram("lightProjection");
+			if (loc != -1)
+				glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lightProjection));
 		}
 	}
 
@@ -168,6 +187,14 @@ namespace Bagnall
 			glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(proj));
 	}
 
+	void Shader::SetLightProjection(const mat4& lightProj)
+	{
+		lightProjection = lightProj;
+
+		GLuint loc = programToUniformMap[currentProgram]["lightProjection"];
+		glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lightProj));
+	}
+
 	void Shader::SetEmissionColor(const vec4& emissionColor)
 	{
 		//GLuint loc = getUniformFromCurrentProgram("emissionColor");
@@ -184,12 +211,10 @@ namespace Bagnall
 			glUniform1i(loc, textureBlend);
 	}
 
-	void Shader::SetUseShadowCubeMap(bool useShadowCubeMap)
+	void Shader::SetShadowMode(int shadowMode)
 	{
-		//GLuint loc = getUniformFromCurrentProgram("useShadowCubeMap");
-		//if (loc != -1)
-		GLuint loc = programToUniformMap[currentProgram]["useShadowCubeMap"];
-			glUniform1i(loc, useShadowCubeMap);
+		GLuint loc = programToUniformMap[currentProgram]["shadowMode"];
+		glUniform1i(loc, shadowMode);
 	}
 
 	void Shader::SetShadowZRange(const vec2& shadowZRange)
@@ -209,12 +234,14 @@ namespace Bagnall
 	// PRIVATE
 
 	GLuint Shader::vertexBuffer;
+	GLuint Shader::elementBuffer;
 	GLuint Shader::currentProgram;
 
 	mat4 Shader::camera;
 	vec4 Shader::cameraPosition;
 	mat4 Shader::projection;
 	mat4 Shader::lightSource;
+	mat4 Shader::lightProjection;
 
 	std::unordered_map<const char*, GLuint> Shader::nameToProgramMap;
 	std::unordered_map<GLuint, GLuint> Shader::programToVaoMap;
@@ -230,6 +257,8 @@ namespace Bagnall
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -257,6 +286,8 @@ namespace Bagnall
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -292,6 +323,8 @@ namespace Bagnall
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -332,6 +365,8 @@ namespace Bagnall
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
 		glEnableVertexAttribArray(vPositionLoc);
@@ -358,6 +393,8 @@ namespace Bagnall
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
 		glEnableVertexAttribArray(vPositionLoc);
@@ -379,7 +416,7 @@ namespace Bagnall
 		uniformMap.emplace("materialDiffuse", getUniform(program, "materialDiffuse"));
 		uniformMap.emplace("materialSpecular", getUniform(program, "materialSpecular"));
 		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
-		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 
 		// copy uniform map to program uniform map
@@ -387,8 +424,8 @@ namespace Bagnall
 
 		// initialize uniforms
 		glUseProgram(program);
-		glUniform1i(uniformMap["useShadowCubeMap"], 0);
-		glUniform1i(uniformMap["shadowCubeMap"], 3);
+		glUniform1i(uniformMap["shadowMode"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
 	}
 
 	void Shader::initTextureProgram()
@@ -401,6 +438,8 @@ namespace Bagnall
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -429,7 +468,7 @@ namespace Bagnall
 		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
 		uniformMap.emplace("tex", getUniform(program, "tex"));
 		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
-		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 
 		// copy uniform map to program uniform map
@@ -437,10 +476,10 @@ namespace Bagnall
 
 		// initialize uniforms
 		glUseProgram(program);
-		glUniform1i(uniformMap["tex"], 0);
+		glUniform1i(uniformMap["tex"], TEXTURE_2D);
 		glUniform1i(uniformMap["textureBlend"], 1);
-		glUniform1i(uniformMap["useShadowCubeMap"], 0);
-		glUniform1i(uniformMap["shadowCubeMap"], 3);
+		glUniform1i(uniformMap["shadowMode"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
 	}
 
 	void Shader::initTextureBumpProgram()
@@ -453,6 +492,8 @@ namespace Bagnall
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -490,19 +531,22 @@ namespace Bagnall
 		uniformMap.emplace("tex", getUniform(program, "tex"));
 		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
 		uniformMap.emplace("bumpTex", getUniform(program, "bumpTex"));
-		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowTex", getUniform(program, "shadowTex"));
+		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+		uniformMap.emplace("lightProjection", getUniform(program, "lightProjection"));
 
 		// copy uniform map to program uniform map
 		programToUniformMap.emplace(program, uniformMap);
 
 		// initialize uniforms
 		glUseProgram(program);
-		glUniform1i(uniformMap["tex"], 0);
+		glUniform1i(uniformMap["tex"], TEXTURE_2D);
 		glUniform1i(uniformMap["textureBlend"], 1);
-		glUniform1i(uniformMap["bumpTex"], 1);
-		glUniform1i(uniformMap["useShadowCubeMap"], 0);
-		glUniform1i(uniformMap["shadowCubeMap"], 3);
+		glUniform1i(uniformMap["bumpTex"], TEXTURE_2D_BUMP);
+		glUniform1i(uniformMap["shadowTex"], TEXTURE_SHADOW_2D);
+		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
+		glUniform1i(uniformMap["shadowMode"], 0);
 	}
 
 	void Shader::initCubeMapProgram()
@@ -515,6 +559,8 @@ namespace Bagnall
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -539,7 +585,7 @@ namespace Bagnall
 		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
 		uniformMap.emplace("cubeMap", getUniform(program, "cubeMap"));
 		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
-		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 		uniformMap.emplace("reflectiveCubeMap", getUniform(program, "reflective"));
 
@@ -548,11 +594,10 @@ namespace Bagnall
 
 		// initialize uniforms
 		glUseProgram(program);
-		glUniform1i(uniformMap["cubeMap"], 2);
+		glUniform1i(uniformMap["cubeMap"], TEXTURE_CUBE);
 		glUniform1i(uniformMap["textureBlend"], 1);
-		glUniform1i(uniformMap["bumpTex"], 1);
-		glUniform1i(uniformMap["useShadowCubeMap"], 0);
-		glUniform1i(uniformMap["shadowCubeMap"], 3);
+		glUniform1i(uniformMap["shadowMode"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
 		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
 	}
 
@@ -566,6 +611,8 @@ namespace Bagnall
 		glGenVertexArrays(1, &vao);
 		glBindVertexArray(vao);
 		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
 
 		// set up vertex arrays
 		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
@@ -599,7 +646,7 @@ namespace Bagnall
 		uniformMap.emplace("cubeMap", getUniform(program, "cubeMap"));
 		uniformMap.emplace("bumpCubeMap", getUniform(program, "bumpCubeMap"));
 		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
-		uniformMap.emplace("useShadowCubeMap", getUniform(program, "useShadowCubeMap"));
+		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
 		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
 		uniformMap.emplace("reflectiveCubeMap", getUniform(program, "reflective"));
 
@@ -608,11 +655,11 @@ namespace Bagnall
 
 		// initialize uniforms
 		glUseProgram(program);
-		glUniform1i(uniformMap["cubeMap"], 2);
+		glUniform1i(uniformMap["cubeMap"], TEXTURE_CUBE);
 		glUniform1i(uniformMap["textureBlend"], 1);
-		glUniform1i(uniformMap["bumpCubeMap"], 4);
-		glUniform1i(uniformMap["useShadowCubeMap"], 0);
-		glUniform1i(uniformMap["shadowCubeMap"], 3);
+		glUniform1i(uniformMap["bumpCubeMap"], TEXTURE_CUBE_BUMP);
+		glUniform1i(uniformMap["shadowMode"], 0);
+		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
 		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
 	}
 

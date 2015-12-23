@@ -3,6 +3,9 @@ varying vec3 L;
 varying vec3 E;
 varying vec2 fTextureCoord;
 varying mat4 inverseTBN;
+varying vec3 shadowCoordDepth;
+varying vec4 vPositionWorld;
+varying vec3 vPositionLight;
 
 uniform vec4 materialAmbient, materialDiffuse, materialSpecular;
 uniform float materialShininess;
@@ -10,10 +13,12 @@ uniform mat4 lightSource;
 uniform mat4 model;
 uniform sampler2D tex;
 uniform sampler2D bumpTex;
+uniform sampler2DShadow shadowTex;
 uniform samplerCubeShadow shadowCubeMap;
 uniform bool textureBlend;
-uniform bool useShadowCubeMap;
+uniform int shadowMode;
 uniform vec2 shadowZRange;
+uniform mat4 lightProjection;
 
 // http://stackoverflow.com/questions/21293726/opengl-project-shadow-cubemap-onto-scene
 float vecToDepth (vec3 Vec)
@@ -39,6 +44,9 @@ void main()
 	vec3 EE = normalize(E);
 
 	vec4 texColor = texture2D(tex, fTextureCoord);
+
+	//float d = (2.0 * shadowZRange.x) / (shadowZRange.y + shadowZRange.x - texColor * (shadowZRange.y - shadowZRange.x));
+	//texColor *= d;
 	
 	vec4 ambientProduct, diffuseProduct, specularProduct;
 	if (textureBlend)
@@ -81,7 +89,22 @@ void main()
 	else
 		specular = Ks*specularProduct;
 
-	if (useShadowCubeMap)
+	if (shadowMode == 1)
+	{
+		//vec3 posLight = (lightProjection * vPositionWorld).xyz;
+		vec3 posLight = vPositionLight;
+		vec3 coordDepth = vec3((posLight.x + 1.0) / 2.0, (posLight.y + 1.0) / 2.0, (posLight.z + 1.0) / 2.0);
+		//vec3 coordDepth = vec3((posLight.x + 1.0) / 2.0, (posLight.y + 1.0) / 2.0, 0.499);
+		//vec3 coordDepth = vec3(posLight.x, posLight.y, 0.0);
+
+		//vec3 coordDepth = vec3((vPositionLight.x + 1.0) / 2.0, (vPositionLight.y + 1.0) / 2.0, (vPositionLight.z + 1.0) / 2.0);
+		//float shadowVal = shadow2D(shadowTex, coordDepth);
+		float shadowVal = shadow2D(shadowTex, shadowCoordDepth);
+		//float shadowVal = shadow2D(shadowTex, vec3(shadowCoordDepth.xy, -1.0));
+		diffuse = diffuse * shadowVal;
+		specular = specular * shadowVal;
+	}
+	else if (shadowMode == 2)
 	{
 		vec3 lightDir = -L;
 		float d = vecToDepth(lightDir) - 0.002;

@@ -19,15 +19,15 @@ namespace Bagnall
 		vertexMeshes.push_back(mesh);
 	}
 
-	void Sphere::Draw() const
-	{
-		DrawableObject::Draw();
-		glDrawArrays(GL_TRIANGLE_STRIP, globalVertexOffset, vertexCount);
-	}
+	//void Sphere::Draw() const
+	//{
+	//	DrawableObject::Draw();
+	//	glDrawArrays(GL_TRIANGLE_STRIP, globalVertexOffset, vertexCount);
+	//}
 
 	// PRIVATE
 
-	int Sphere::globalVertexOffset, Sphere::vertexCount;
+	int Sphere::indexOffset, Sphere::indexCount;
 
 	void Sphere::createPrototypeVertices()
 	{
@@ -46,15 +46,21 @@ namespace Bagnall
 			texCoords.push_back(vec2(u, v));
 		}
 
-		vertexCount = sphere.size();
-		globalVertexOffset = Shader::Vertices.size();
+		int vertexOffset = Shader::Vertices.size();
+		indexOffset = Shader::VertexIndices.size();
+		indexCount = sphere.size();
+
+		std::vector<uint> indices;
+		for (int i = 0; i < indexCount; ++i)
+			indices.push_back(vertexOffset + i);
+
 		Shader::Vertices.insert(Shader::Vertices.end(), sphere.begin(), sphere.end());
 		Shader::Normals.insert(Shader::Normals.end(), normals.begin(), normals.end());
 		Shader::Tangents.insert(Shader::Tangents.end(), tangents.begin(), tangents.end());
 		Shader::Binormals.insert(Shader::Binormals.end(), binormals.begin(), binormals.end());
-
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), texCoords.begin(), texCoords.end());
+		Shader::VertexIndices.insert(Shader::VertexIndices.end(), indices.begin(), indices.end());
 
-		VertexMesh::AddVertexMeshPrototype("sphere", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), globalVertexOffset, vertexCount, true);
+		VertexMesh::AddVertexMeshPrototype("sphere", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), indexOffset, indexCount, true);
 	}
 }
