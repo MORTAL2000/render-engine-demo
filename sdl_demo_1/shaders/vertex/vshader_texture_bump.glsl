@@ -15,8 +15,6 @@ uniform mat4 camera;
 uniform mat4 projection;
 uniform mat4 lightSource;
 uniform vec4 cameraPosition;
-uniform vec2 shadowZRange;
-uniform bool useShadowCubeMap;
 
 void main()
 {
