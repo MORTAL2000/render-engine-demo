@@ -322,7 +322,8 @@ namespace Bagnall
 
 	void Shader::initDepthProgram()
 	{
-		GLuint program = InitShader("shaders\\vertex\\vshader_depth.glsl", "shaders\\fragment\\fshader_depth.glsl");
+		//GLuint program = InitShader("shaders\\vertex\\vshader_depth.glsl", "shaders\\fragment\\fshader_depth.glsl");
+		GLuint program = InitShader("shaders\\vertex\\vshader_depth.glsl");
 		nameToProgramMap.emplace("depth", program);
 
 		// create a vertex array object

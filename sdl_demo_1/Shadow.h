@@ -28,7 +28,7 @@ namespace Bagnall
 
 		static void RemoveFromDepthRenderList(VertexMesh *o);
 
-		static void SetNearAndFarPlanes(float zNear, float zFar);
+		static void SetZRange(const glm::vec2& zr);
 
 	private:
 		static GLuint frameBuffer;

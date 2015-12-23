@@ -132,24 +132,9 @@ namespace Bagnall
 			depthRenderList.erase(it);
 	}
 
-	void Shadow::SetNearAndFarPlanes(float zNear, float zFar)
+	void Shadow::SetZRange(const vec2& zr)
 	{
-		zRange = vec2(zNear, zFar);
-
-		Shader::SetProgram("material");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("texture");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("texture_bump");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("cubemap");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("cubemap_bump");
-		Shader::SetShadowZRange(zRange);
+		zRange = zr;
 	}
 
 	// PRIVATE

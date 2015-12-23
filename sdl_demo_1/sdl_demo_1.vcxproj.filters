@@ -108,6 +108,9 @@
     <ClCompile Include="Schematic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vertex\vshader_cubemap.glsl">
@@ -245,6 +248,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Schematic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

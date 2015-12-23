@@ -52,17 +52,6 @@ namespace Bagnall
 
 	void VertexMesh::Draw() const
 	{
-		/*Shader::SetMaterial(material);
-
-		if (texture != 0)
-		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texture);
-
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Texture::GetBumpMapByTexture(texture));
-		}*/
-
 		owner->SendTransformToGPU();
 
 		if (cubeMap != 0)

@@ -15,26 +15,8 @@ namespace Bagnall
 
 	DrawableObject::DrawableObject(Object *par) : Object(par)
 	{
-		//SetTexture(0);
-		//emissive = false;
-		//SetMaterial(Material::None());
 		init();
 	}
-
-	//DrawableObject::DrawableObject(Object *par, GLuint tex, const Material& mat) : Object(par)
-	//{
-	//	//SetTexture(tex);
-	//	//SetMaterial(mat);
-	//	//blend = true;
-	//	init();
-	//}
-
-	//DrawableObject::DrawableObject(Object *par, const vec4& emissionCol) : Object(par)
-	//{
-	//	//emissive = true;
-	//	//SetEmissionColor(emissionCol);
-	//	init();
-	//}
 
 	DrawableObject::DrawableObject(Object *par, SchematicNode *schematic) : DrawableObject(par)
 	{
@@ -68,11 +50,6 @@ namespace Bagnall
 	{
 		vertexMeshes.push_back(vertexMesh);
 	}
-	
-	//bool DrawableObject::GetEmissive() const
-	//{
-	//	return emissive;
-	//}
 
 	void DrawableObject::SetEmissive(bool e)
 	{
@@ -80,16 +57,6 @@ namespace Bagnall
 			(*it).SetEmissive(e);
 		updateRenderNodes();
 	}
-
-	//vec4 DrawableObject::GetEmissionColor() const
-	//{
-	//	return emissionColor;
-	//}
-
-	//bool DrawableObject::GetBlend() const
-	//{
-	//	return blend;
-	//}
 
 	//void DrawableObject::SetBlend(bool b)
 	//{
@@ -103,21 +70,12 @@ namespace Bagnall
 		updateRenderNodes();
 	}
 
-	//Material DrawableObject::GetMaterial() const
-	//{
-	//	return material;
-	//}
 	void DrawableObject::SetMaterial(const Material& m)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
 			(*it).SetMaterial(m);
 		updateRenderNodes();
 	}
-
-	//GLuint DrawableObject::GetTexture() const
-	//{
-	//	return texture;
-	//}
 
 	void DrawableObject::SetTexture(GLuint tex)
 	{
@@ -126,28 +84,12 @@ namespace Bagnall
 		updateRenderNodes();
 	}
 
-	//GLuint DrawableObject::GetCubeMap() const
-	//{
-	//	return cubeMap;
-	//}
-
-	//void DrawableObject::SetCubeMap(GLuint cm)
-	//{
-	//	cubeMap = cm;
-	//	updateRenderNode();
-	//}
-
-	//void DrawableObject::UseMaterial(const Material& m)
-	//{
-	//	/*glUniform4fv(Game::MaterialAmbientLoc, 1, m.ambient);
-	//	glUniform4fv(Game::MaterialDiffuseLoc, 1, m.diffuse);
-	//	glUniform4fv(Game::MaterialSpecularLoc, 1, m.specular);
-	//	glUniform1f(Game::MaterialShininessLoc, m.shininess);*/
-	//	Shader::SetMaterialAmbient(m.ambient);
-	//	Shader::SetMaterialDiffuse(m.diffuse);
-	//	Shader::SetMaterialSpecular(m.specular);
-	//	Shader::SetMaterialShininess(m.shininess);
-	//}
+	void DrawableObject::SetCubeMap(GLuint cm)
+	{
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it).SetCubeMap(cm);
+		updateRenderNodes();
+	}
 
 	void DrawableObject::EnableRender()
 	{
@@ -175,12 +117,6 @@ namespace Bagnall
 
 	void DrawableObject::Cull()
 	{
-		/*if (renderNode != NULL)
-			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));
-		renderNode = NULL;
-
-		Shadow::RemoveFromDepthRenderList(this);*/
-
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
 			(*it).Cull();
 
@@ -202,44 +138,28 @@ namespace Bagnall
 		return renderEnabled;
 	}
 
-	/*bool DrawableObject::GetBumpMapEnabled() const
-	{
-		return bumpMapEnabled;
-	}*/
-
 	void DrawableObject::SetBumpMapEnabled(bool b)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
 			(*it).SetBumpMapEnabled(b);
 	}
-	
-	/*bool DrawableObject::GetReflectiveCubeMap() const
-	{
-		return reflectiveCubeMap;
-	}
 
 	void DrawableObject::SetReflectiveCubeMap(bool b)
 	{
-		reflectiveCubeMap = b;
-	}*/
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it).SetReflectiveCubeMap(b);
+	}
 
 	// PRIVATE
 
 	void DrawableObject::init()
 	{
-		//bumpMapEnabled = true;
 		renderEnabled = true;
-		//cubeMap = 0;
-		//reflectiveCubeMap = false;
 		updateRenderNodes();
-		//Shadow::AddToDepthRenderList(this);
 	}
 
 	void DrawableObject::updateRenderNodes()
 	{
-		/*if (renderNode != NULL)
-			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));
-		renderNode = Game::MainRenderGraph->AddDrawableObject(this);*/
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
 			(*it).UpdateRenderNode();
 	}

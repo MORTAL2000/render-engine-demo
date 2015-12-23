@@ -272,153 +272,25 @@ namespace Bagnall
 		return shadowsEnabled;
 	}
 
-	// CUBEMAPNODE PUBLIC
-
-	void CubeMapNode::Render() const
+	void RenderGraph::SetShadowZRange(float zNear, float zFar)
 	{
-		// bind cube map
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+		vec2 zRange = vec2(zNear, zFar);
 
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
+		Shadow::SetZRange(zRange);
 
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
+		Shader::SetProgram("material");
+		Shader::SetShadowZRange(zRange);
 
-	// CUBEMAPBUMPNODE PUBLIC
+		Shader::SetProgram("texture");
+		Shader::SetShadowZRange(zRange);
 
-	void CubeMapBumpNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+		Shader::SetProgram("texture_bump");
+		Shader::SetShadowZRange(zRange);
 
-		// bind bump map
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, bumpMap);
+		Shader::SetProgram("cubemap");
+		Shader::SetShadowZRange(zRange);
 
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
-
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
-
-	// CUBEMAPEMISSIVENODE PUBLIC
-
-	void CubeMapEmissiveNode::Render() const
-	{
-		// bind cube map
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// TEXTUREBUMPNODE PUBLIC
-
-	void TextureBumpNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// bind bump map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, bumpmap);
-
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
-
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
-
-	// TEXTURENODE PUBLIC
-
-	void TextureNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
-
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
-
-	// TEXTUREEMISSIVENODE PUBLIC
-
-	void TextureEmissiveNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// MATERIALNODE PUBLIC
-
-	void MaterialNode::Render() const
-	{
-		// send material properties to GPU
-		Shader::SetMaterialAmbient(material.ambient);
-		Shader::SetMaterialDiffuse(material.diffuse);
-		Shader::SetMaterialSpecular(material.specular);
-		Shader::SetMaterialShininess(material.shininess);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// EMISSIVENODE PUBLIC
-
-	void EmissiveNode::Render() const
-	{
-		// send color to GPU
-		Shader::SetEmissionColor(emissionColor);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// RENDERNODE PUBLIC
-
-	void RenderNode::Render() const
-	{
-		// render objects
-		for (auto it = meshes.begin(); it != meshes.end(); ++it)
-		{
-			auto o = *it;
-			if (o->GetRenderEnabled())
-				o->Draw();
-		}
+		Shader::SetProgram("cubemap_bump");
+		Shader::SetShadowZRange(zRange);
 	}
 }

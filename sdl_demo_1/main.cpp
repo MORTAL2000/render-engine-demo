@@ -207,15 +207,15 @@ void init(void)
 	player->SetMaterial(Material::Chrome());
 	//player->SetMaterial(Material::Plastic(vec4(0.25f, 0.25f, 0.25f, 1.0f)));
 	//player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-	//colorCubemap = EnvironmentMap::GenerateCubeMap();
-	//player->SetCubeMap(colorCubemap);
-	//player->SetReflectiveCubeMap(true);
+	colorCubemap = EnvironmentMap::GenerateCubeMap();
+	player->SetCubeMap(colorCubemap);
+	player->SetReflectiveCubeMap(true);
 	//player->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
 	//player->SetTexture(Texture::GetTextureByName("ben"));
 	//player->SetPosition(vec4(0.0, 5.0f, 0.0, 1.0));
 	//player->SetEmissionColor(vec4(0.2f, 0.5f, 0.3f, 1.0f));
 	//player->SetEmissive(true);
-	player->Scale(0.1f);
+	player->Scale(1.0f);
 
 	// GIANT SKY CUBE
 	/*Skybox *skybox = new Skybox(rootObject);
@@ -319,7 +319,7 @@ void init(void)
 	eastWall->Translate(vec4(Game::WorldSize / 2.0f, 0.0, 0.0, 0.0));
 
 	// SET SHADOW NEAR AND FAR PLANES
-	Shadow::SetNearAndFarPlanes(2.0f, Game::ViewDistance);
+	Game::MainRenderGraph->SetShadowZRange(2.0f, Game::ViewDistance);
 
 	// ENABLE SHADOWS
 	Shadow::RenderShadowMap(vec3(lightSource->position), sun);
@@ -349,12 +349,15 @@ int update()
 		{
 			switch (ev.key.keysym.sym)
 			{
+			// EXIT PROGRAM
 			case SDLK_ESCAPE:
 				return 1;
 				break;
+			// ENABLE FULLSCREEN
 			case SDLK_f:
 				SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 				break;
+			// ROTATE MIDDLE OBJECT
 			case SDLK_1:
 				middleCube->RotateX(-0.005f * FpsTracker::GetFrameTimeMs());
 				break;
@@ -372,6 +375,31 @@ int update()
 				break;
 			case SDLK_6:
 				middleCube->RotateZ(0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			// MOVE LIGHT SOURCE
+			case SDLK_UP:
+				sun->Translate(vec4(0.0f, 0.05f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
+				break;
+			case SDLK_DOWN:
+				sun->Translate(vec4(0.0f, -0.05f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
+				break;
+			case SDLK_LEFT:
+				sun->Translate(vec4(-0.05f, 0.0f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
+				break;
+			case SDLK_RIGHT:
+				sun->Translate(vec4(0.05f, 0.0f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
 				break;
 			}
 		}
@@ -576,7 +604,7 @@ int update()
 
 void draw()
 {
-	//EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
+	EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
 	Shadow::RenderShadowMap(vec3(lightSource->position), sun);
 
 	updateProjectionMatrixAndViewport();
