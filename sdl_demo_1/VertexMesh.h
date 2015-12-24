@@ -25,7 +25,7 @@ namespace Bagnall
 
 		static VertexMesh GetVertexMeshPrototypeByName(const char *name);
 
-		void Draw() const;
+		virtual void Draw() const;
 
 		void UpdateRenderNode();
 
@@ -78,11 +78,13 @@ namespace Bagnall
 		RenderNode *renderNode;
 		bool renderEnabled;
 
-		uint indexOffset;
-		uint indexCount;
 		bool triangleStrip;
 
 		void init();
+
+	protected:
+		uint indexOffset;
+		uint indexCount;
 	};
 }
 

@@ -31,6 +31,9 @@
     <Filter Include="Resource Files\models">
       <UniqueIdentifier>{e872f1d8-da98-4284-bcf5-6a7c53c272fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\heightmaps">
+      <UniqueIdentifier>{30a882b9-53ab-4f42-803e-a005ded9de8d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -109,6 +112,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="RenderNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapTerrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -253,6 +259,9 @@
     <ClInclude Include="RenderNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="HeightMapTerrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\Shrek-and-Yoda.jpg">
@@ -308,6 +317,9 @@
     </Image>
     <Image Include="bumpmaps\Millennium_Falcon_Top_N.tga">
       <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="heightmaps\terrain.png">
+      <Filter>Resource Files\heightmaps</Filter>
     </Image>
   </ItemGroup>
 </Project>

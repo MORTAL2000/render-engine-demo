@@ -49,6 +49,8 @@ namespace Bagnall
 	void DrawableObject::AddVertexMesh(const VertexMesh& vertexMesh)
 	{
 		vertexMeshes.push_back(vertexMesh);
+		vertexMeshes[vertexMeshes.size() - 1].SetOwner(this);
+		updateRenderNodes();
 	}
 
 	void DrawableObject::SetEmissive(bool e)

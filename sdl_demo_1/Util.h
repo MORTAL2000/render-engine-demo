@@ -146,6 +146,8 @@ namespace Bagnall
 		static std::vector<vec2> Vec4toVec2(const std::vector<vec4>& v);
 
 		static void Apply(std::vector<vec4>& vecs, vec4(*func)(const vec4&));
+
+		static std::vector<char> ReadAllBytes(char const* fileName);
 	};
 }
 

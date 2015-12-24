@@ -132,6 +132,7 @@
     <ClCompile Include="FpsTracker.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="HeightMapTerrain.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="main.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="FpsTracker.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="HeightMapTerrain.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Material.h" />
@@ -211,6 +213,7 @@
     <Image Include="bumpmaps\Millennium_Falcon_Top_N.tga" />
     <Image Include="bumpmaps\Shrek-and-Yoda_NRM.jpg" />
     <Image Include="bumpmaps\stone_wall_NRM.jpg" />
+    <Image Include="heightmaps\terrain.png" />
     <Image Include="textures\ben.jpg" />
     <Image Include="textures\costanza.jpg" />
     <Image Include="textures\cubemap_test_1.jpg" />

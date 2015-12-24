@@ -223,9 +223,11 @@ namespace Bagnall
 			vec4(1.0f, -1.0f, 1.0f, 1.0f)
 		};
 
+		mat4 inverseProj = inverse(Game::Projection * Game::Camera);
+
 		std::vector<vec4> cornersInWorldSpace;
 		for (int i = 0; i < NUM_CORNERS; ++i)
-			cornersInWorldSpace.push_back(inverse(Game::Projection * Game::Camera) * cornersInClipSpace[i]);
+			cornersInWorldSpace.push_back(inverseProj * cornersInClipSpace[i]);
 		for (int i = 0; i < NUM_CORNERS; ++i)
 			cornersInWorldSpace[i] = cornersInWorldSpace[i] / cornersInWorldSpace[i].w;
 		for (int i = 0; i < NUM_CORNERS; ++i)

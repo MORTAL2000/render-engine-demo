@@ -128,6 +128,14 @@ namespace Bagnall
 				bumpMapMap.emplace(tex, bump);
 		}
 
+		// terrain 1
+		tex = loadTexture("textures\\terrain1.jpg");
+		if (tex != 0)
+		{
+			textureMap.emplace("terrain1", tex);
+			textureFileMap.emplace("terrain1.jpg", tex);
+		}
+
 		// release texture loading stuff
 		IMG_Quit();
 	}
