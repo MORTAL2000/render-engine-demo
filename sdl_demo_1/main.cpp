@@ -91,7 +91,7 @@ void init(void)
 
 	glClearColor(0.5, 0.5, 1.0, 1.0);
 
-	Game::ViewDistance = Game::WorldSize * 2.0f;
+	Game::ViewDistance = Game::WorldSize * 1.6f;
 
 	// initialize projection matrix
 	updateProjectionMatrixAndViewport();
@@ -139,34 +139,34 @@ void init(void)
 	}
 
 	// R2D2S LOL
-	for (int i = 0; i < 15; ++i)
-	{
-		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("r2d2"));
-		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
-		o->RotateX(-M_PI / 2.0f);
-		//cube->SetTexture(Texture::GetTextureByName("shrek"));
-		//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
-		//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
-		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
-		o->Scale(5.0f);
-		objects.push_back(o);
-		//cube->Cull();
-	}
+	//for (int i = 0; i < 15; ++i)
+	//{
+	//	DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("r2d2"));
+	//	o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+	//	o->RotateX(-M_PI / 2.0f);
+	//	//cube->SetTexture(Texture::GetTextureByName("shrek"));
+	//	//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+	//	//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+	//	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+	//	o->Scale(5.0f);
+	//	objects.push_back(o);
+	//	//cube->Cull();
+	//}
 
-	// C3POS LMAO
-	for (int i = 0; i < 15; ++i)
-	{
-		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("c3po"));
-		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
-		o->RotateX(-M_PI / 2.0f);
-		//cube->SetTexture(Texture::GetTextureByName("shrek"));
-		//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
-		//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
-		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
-		o->Scale(5.0f);
-		objects.push_back(o);
-		//cube->Cull();
-	}
+	//// C3POS LMAO
+	//for (int i = 0; i < 15; ++i)
+	//{
+	//	DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("c3po"));
+	//	o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+	//	o->RotateX(-M_PI / 2.0f);
+	//	//cube->SetTexture(Texture::GetTextureByName("shrek"));
+	//	//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+	//	//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+	//	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+	//	o->Scale(5.0f);
+	//	objects.push_back(o);
+	//	//cube->Cull();
+	//}
 
 	// MIDDLE CUBE
 	//middleCube = new Cube(objectContainer);
@@ -323,7 +323,8 @@ void init(void)
 	// ENABLE SHADOWS
 	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
 	//Game::MainRenderGraph->SetShadowMode(SHADOW_MODE_OMNI);
-	Shadow::RenderShadowOrthoMap(vec3(lightSource->position), vec3(Game::WorldSize / 3.0f, Game::WorldSize / 3.0f, -Game::WorldSize / 3.0f));
+	//Shadow::RenderShadowOrthoMap(vec3(lightSource->position), vec3(Game::WorldSize / 3.0f, Game::WorldSize / 3.0f, -Game::WorldSize / 3.0f));
+	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
 	Game::MainRenderGraph->SetShadowMode(SHADOW_MODE_UNI);
 }
 
@@ -607,7 +608,8 @@ void draw()
 {
 	//EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
 	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
-	Shadow::RenderShadowOrthoMap(vec3(lightSource->position), vec3(Game::WorldSize / 3.0f, Game::WorldSize / 3.0f, -Game::WorldSize / 3.0f));
+	//Shadow::RenderShadowOrthoMap(vec3(lightSource->position), vec3(Game::WorldSize / 3.0f, Game::WorldSize / 3.0f, -Game::WorldSize / 3.0f));
+	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
 
 	updateProjectionMatrixAndViewport();
 

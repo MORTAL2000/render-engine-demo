@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/mat4x4.hpp>
 #include <vector>
 
 namespace Bagnall
@@ -27,7 +28,7 @@ namespace Bagnall
 	public:
 		static void Init();
 
-		static void RenderShadowOrthoMap(const glm::vec3& sourcePos, const glm::vec3& destPos);
+		static void RenderShadowOrthoMap(const glm::vec3& lightDir);
 
 		static void RenderShadowCubeMap(const glm::vec3& sourcePos, DrawableObject* source);
 
@@ -50,6 +51,8 @@ namespace Bagnall
 		static std::vector<VertexMesh*> depthRenderList;
 
 		static void renderDepthRenderList();
+
+		static glm::mat4 computeOrthoCamAndProjection(const glm::vec3 lightDir, glm::mat4& cam);
 	};
 }
 

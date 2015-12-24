@@ -6,6 +6,7 @@
 #include "RenderGraph.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Cube.h"
 
 namespace Bagnall
 {
@@ -74,7 +75,7 @@ namespace Bagnall
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
-	void Shadow::RenderShadowOrthoMap(const vec3& sourcePos, const vec3& destPos)
+	void Shadow::RenderShadowOrthoMap(const vec3& lightDir)
 	{
 		Shader::SetProgram("depth");
 
@@ -82,20 +83,16 @@ namespace Bagnall
 
 		glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
 
+		mat4 cam;// = lookAt(sourcePos, destPos, vec3(0.0f, 0.0f, 1.0f));
+
+		auto proj = computeOrthoCamAndProjection(lightDir, cam);
+
 		//mat4 projection = ortho(-zRange.y / 2.0f, zRange.y / 2.0f, -zRange.y / 2.0f, zRange.y / 2.0f, -zRange.y, zRange.y);
-		mat4 projection = ortho(-zRange.y, zRange.y, -zRange.y, zRange.y, zRange.x, zRange.y);
+		//mat4 projection = ortho(-zRange.y, zRange.y, -zRange.y, zRange.y, zRange.x, zRange.y);
 		//mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zRange.x, zRange.y);
-		Shader::SetProjection(projection);
+		Shader::SetProjection(proj);
 
-		vec3 destinationPos;
-		if (sourcePos != destPos)
-			destinationPos = destPos;
-		else
-			destinationPos = destPos + vec3(0.1f, 0.1f, 0.0f);
-
-		mat4 cam = lookAt(sourcePos, destPos, vec3(0.0f, 0.0f, 1.0f));
-
-		Shader::SetLightProjection(projection * cam);
+		Shader::SetLightProjection(proj * cam);
 
 		glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthBuffer, 0);
 		glClear(GL_DEPTH_BUFFER_BIT);
@@ -209,5 +206,63 @@ namespace Bagnall
 			if (o->GetRenderEnabled())
 				o->Draw();
 		}
+	}
+
+	mat4 Shadow::computeOrthoCamAndProjection(const glm::vec3 lightDir, mat4& cam)
+	{
+		const int NUM_CORNERS = 8;
+		vec4 cornersInClipSpace[] =
+		{
+			vec4(-1.0f, -1.0f, -1.0f, 1.0f),
+			vec4(-1.0f, 1.0f, -1.0f, 1.0f),
+			vec4(1.0f, 1.0f, -1.0f, 1.0f),
+			vec4(1.0f, -1.0f, -1.0f, 1.0f),
+			vec4(-1.0f, -1.0f, 1.0f, 1.0f),
+			vec4(-1.0f, 1.0f, 1.0f, 1.0f),
+			vec4(1.0f, 1.0f, 1.0f, 1.0f),
+			vec4(1.0f, -1.0f, 1.0f, 1.0f)
+		};
+
+		std::vector<vec4> cornersInWorldSpace;
+		for (int i = 0; i < NUM_CORNERS; ++i)
+			cornersInWorldSpace.push_back(inverse(Game::Projection * Game::Camera) * cornersInClipSpace[i]);
+		for (int i = 0; i < NUM_CORNERS; ++i)
+			cornersInWorldSpace[i] = cornersInWorldSpace[i] / cornersInWorldSpace[i].w;
+		for (int i = 0; i < NUM_CORNERS; ++i)
+			cornersInWorldSpace[i].w = 1.0f;
+
+		vec4 sum = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+		for (int i = 0; i < NUM_CORNERS; ++i)
+			sum += cornersInWorldSpace[i];
+
+		vec4 centroid = sum / static_cast<float>(NUM_CORNERS);
+
+		cam = lookAt(vec3(centroid) + normalize(lightDir) * Game::ViewDistance, vec3(centroid), vec3(0.0f, 0.0f, 1.0f));
+
+		std::vector<vec4> cornersInLightViewSpace;
+		for (int i = 0; i < NUM_CORNERS; ++i)
+			cornersInLightViewSpace.push_back(cam * cornersInWorldSpace[i]);
+
+		float minX, minY, minZ, maxX, maxY, maxZ;
+		minX = minY = minZ = FLT_MAX;
+		maxX = maxY = maxZ = FLT_MIN;
+		for (int i = 0; i < NUM_CORNERS; ++i)
+		{
+			vec4 corner = cornersInLightViewSpace[i];
+			if (corner.x < minX)
+				minX = corner.x;
+			if (corner.y < minY)
+				minY = corner.y;
+			if (corner.z < minZ)
+				minZ = corner.z;
+			if (corner.x > maxX)
+				maxX = corner.x;
+			if (corner.y > maxY)
+				maxY = corner.y;
+			if (corner.z > maxZ)
+				maxZ = corner.z;
+		}
+
+		return ortho(minX, maxX, minY, maxY, -maxZ, -minZ);
 	}
 }
