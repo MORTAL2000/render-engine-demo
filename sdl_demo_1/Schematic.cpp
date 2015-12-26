@@ -247,10 +247,10 @@ namespace Bagnall
 			aiString texturePath;
 			aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
 
+			//VertexMesh vMesh(NULL, Material::Rubber(vec4(1.0f, 1.0f, 1.0f, 1.0f)), indexOffset, indexCount, false);
 			VertexMesh vMesh(NULL, Material::None(), indexOffset, indexCount, false);
 			vMesh.SetTexture(Texture::GetTextureByFile(texturePath.C_Str()));
 
-			//schematicNode->vertexMeshes.push_back(VertexMesh(NULL, mat, vOffset, vCount, false));
 			schematicNode->vertexMeshes.push_back(vMesh);
 		}
 

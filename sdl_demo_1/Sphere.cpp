@@ -16,7 +16,7 @@ namespace Bagnall
 	{
 		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("sphere");
 		mesh.SetOwner(this);
-		vertexMeshes.push_back(mesh);
+		vertexMeshes.push_back(new VertexMesh(mesh));
 	}
 
 	//void Sphere::Draw() const

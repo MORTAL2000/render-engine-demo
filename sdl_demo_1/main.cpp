@@ -18,6 +18,7 @@
 #include "EnvironmentMap.h"
 #include "Schematic.h"
 #include "VertexMesh.h"
+#include "TerrainVertexMesh.h"
 #include "HeightMapTerrain.h"
 #include <vector>
 #include <iostream>
@@ -45,6 +46,7 @@ UpdateNode *rootUpdateNode;
 ModelNode *rootModelNode;
 
 DrawableObject *terrain;
+TerrainVertexMesh *terrainMesh;
 
 //GLuint frameBuffer;
 //GLuint depthBuffer;
@@ -79,7 +81,16 @@ void init(void)
 	Shadow::Init();
 	EnvironmentMap::Init();
 	Schematic::Init();
-	VertexMesh terrainMesh = HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\jackson_height.png", 1.0f);
+
+	terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\terrain.png", 25.0f, 25.0f, 0.5f));
+	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\west_norway.png", 50.0f, 50.0f, 0.25f));
+	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("textures\\bill.png", 25.0f, 25.0f, 0.1f));
+	terrainMesh->SetTexture1(Texture::GetTextureByName("sand1"));
+	terrainMesh->SetTexture2(Texture::GetTextureByName("grass1"));
+	terrainMesh->SetTexture3(Texture::GetTextureByName("stone1"));
+	terrainMesh->SetTexture4(Texture::GetTextureByName("snow1"));
+	//terrainMesh->SetMaterial(Material::Rubber(vec4(0.5f, 0.5f, 0.5f, 1.0f)));
+	terrainMesh->SetTextureHeights(vec4(0.0f, 0.3f, 0.5f, 0.9f));
 
 	// do this after all vertex data is loaded
 	Shader::Init();
@@ -117,9 +128,9 @@ void init(void)
 	lightSource->ambient = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->specular = vec4(1.0, 1.0, 1.0, 1.0);
-	//lightSource->position = vec4(0.0f, 0.0f, Game::WorldSize * 0.25f, 1.0);
-	//lightSource->position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	lightSource->position = vec4(-Game::WorldSize / 2.0f, -Game::WorldSize / 2.0f, Game::WorldSize / 2.0f, 0.0f);
+	//lightSource->position = vec4(-Game::WorldSize / 2.0f, -Game::WorldSize / 2.0f, Game::WorldSize / 2.0f, 0.0f);
+	//lightSource->position = vec4(0.0f, 0.0f, 10.0f, 1.0f);
+	lightSource->position = vec4(-1.0f, -1.0f, 1.0f, 0.0f);
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
@@ -128,16 +139,16 @@ void init(void)
 	groundContainer = new Object(rootObject);
 	groundContainer->Translate(vec4(0.0f, 0.0f, -Game::WorldSize / 2.0f, 0.0f));
 
-	char *textureNames[] = { "shrek", "dowm_furry", "isaac_final_form", "costanza" };
+	char *textureNames[] = { "shrek", "dowm_furry", "isaac_final_form", "costanza", "bill" };
 
 	// MANY CUBES
-	//int range = Game::WorldSize * 0.75f;
+	int range = Game::WorldSize * 0.75f;
 	//for (int i = 0; i < 25; ++i)
 	//{
 	//	Cube *cube = new Cube(objectContainer);
 	//	cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
 	//	//cube->SetTexture(Texture::GetTextureByName("shrek"));
-	//	cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+	//	cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 5]));
 	//	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	//	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 	//	cube->Scale(5.0f);
@@ -182,10 +193,10 @@ void init(void)
 	//middleCube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("torchic"));
 	//Sphere *cube = new Sphere(cubeContainer);
 	middleCube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
-	middleCube->SetTexture(Shadow::depthBuffer);
-	//middleCube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
+	//middleCube->SetTexture(Shadow::depthBuffer);
+	middleCube->SetTexture(Texture::GetTextureByName("bill"));
 	//cube->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
-	middleCube->SetEmissive(true);
+	//middleCube->SetEmissive(true);
 	//middleCube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 1.0f, 1.0f, 0.0f)));
 	//middleCube->Scale(10.0f);
@@ -216,6 +227,7 @@ void init(void)
 	player = new Sphere(camera);
 	//player = new DrawableObject(camera, Schematic::GetSchematicByName("torchic"));
 	player->SetMaterial(Material::Chrome());
+	//player->SetTexture(Texture::GetTextureByName("shrek"));
 	//player->SetMaterial(Material::Plastic(vec4(0.25f, 0.25f, 0.25f, 1.0f)));
 	//player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 	//colorCubemap = EnvironmentMap::GenerateCubeMap();
@@ -327,16 +339,14 @@ void init(void)
 	terrain = new DrawableObject(rootObject);
 	terrain->AddVertexMesh(terrainMesh);
 	terrain->SetScale(10.0f);
-	//terrain->SetTexture(Texture::GetTextureByName("terrain1"));
-	terrain->SetTexture(Texture::GetTextureByName("ben"));
+	//terrain->Translate(vec4(-2000.0f, -2000.0f, -2500.0f, 0.0f));
 
 	// SET SHADOW NEAR AND FAR PLANES
-	Game::MainRenderGraph->SetShadowZRange(2.0f, Game::ViewDistance);
+	Game::MainRenderGraph->SetShadowZRange(100.0f, Game::ViewDistance);
 
 	// ENABLE SHADOWS
 	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
 	//Game::MainRenderGraph->SetShadowMode(SHADOW_MODE_OMNI);
-	//Shadow::RenderShadowOrthoMap(vec3(lightSource->position), vec3(Game::WorldSize / 3.0f, Game::WorldSize / 3.0f, -Game::WorldSize / 3.0f));
 	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
 	Game::MainRenderGraph->SetShadowMode(SHADOW_MODE_UNI);
 }
@@ -621,7 +631,6 @@ void draw()
 {
 	//EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
 	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
-	//Shadow::RenderShadowOrthoMap(vec3(lightSource->position), vec3(Game::WorldSize / 3.0f, Game::WorldSize / 3.0f, -Game::WorldSize / 3.0f));
 	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
 
 	updateProjectionMatrixAndViewport();

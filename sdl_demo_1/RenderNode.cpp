@@ -1,6 +1,8 @@
 #include "RenderNode.h"
 #include "Shader.h"
 #include "VertexMesh.h"
+#include "TerrainVertexMesh.h"
+#include "Texture.h"
 
 namespace Bagnall
 {

@@ -64,6 +64,9 @@ namespace Bagnall
 		// CUBEMAP BUMP PROGRAM
 		initCubeMapBumpProgram();
 
+		// TERRAIN TEXTURE BUMP PROGRAM
+		initTerrainTextureBumpProgram();
+
 		/*if (VertexIndices.size())
 		{
 			glGenBuffers(1, &elementBuffer);
@@ -229,6 +232,30 @@ namespace Bagnall
 	{
 		GLuint loc = programToUniformMap[currentProgram]["reflectiveCubeMap"];
 		glUniform1i(loc, b);
+	}
+
+	void Shader::SetGroundCoordZ(float z)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["groundCoordZ"];
+		glUniform1f(loc, z);
+	}
+
+	void Shader::SetTerrainScaleZ(float z)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["terrainScaleZ"];
+		glUniform1f(loc, z);
+	}
+
+	void Shader::SetTerrainMaxHeight(int z)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["terrainMaxHeight"];
+		glUniform1f(loc, z);
+	}
+
+	void Shader::SetTexHeights(const vec4& texHeights)
+	{
+		GLuint loc = programToUniformMap[currentProgram]["texHeights"];
+		glUniform4fv(loc, 1, value_ptr(texHeights));
 	}
 
 	// PRIVATE
@@ -673,6 +700,89 @@ namespace Bagnall
 		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
 		glUniform1i(uniformMap["reflectiveCubeMap"], 0);
 		glUniform1i(uniformMap["shadowTex"], TEXTURE_SHADOW_2D);
+	}
+
+	void Shader::initTerrainTextureBumpProgram()
+	{
+		GLuint program = InitShader("shaders\\vertex\\vshader_terrain_texture_bump.glsl", "shaders\\fragment\\fshader_terrain_texture_bump.glsl");
+		nameToProgramMap.emplace("terrain_texture_bump", program);
+
+		// create a vertex array object
+		GLuint vao;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+		programToVaoMap.emplace(program, vao);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
+
+		// set up vertex arrays
+		GLuint vPositionLoc = glGetAttribLocation(program, "vPosition");
+		glEnableVertexAttribArray(vPositionLoc);
+		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
+
+		GLuint vNormalLoc = glGetAttribLocation(program, "vNormal");
+		glEnableVertexAttribArray(vNormalLoc);
+		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
+
+		GLuint vTangentLoc = glGetAttribLocation(program, "vTangent");
+		glEnableVertexAttribArray(vTangentLoc);
+		glVertexAttribPointer(vTangentLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size()));
+
+		GLuint vBinormalLoc = glGetAttribLocation(program, "vBinormal");
+		glEnableVertexAttribArray(vBinormalLoc);
+		glVertexAttribPointer(vBinormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size()));
+
+		GLuint vTextureCoordinateLoc = glGetAttribLocation(program, "vTextureCoordinate");
+		glEnableVertexAttribArray(vTextureCoordinateLoc);
+		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
+
+		// get uniform locations
+		std::unordered_map<const char*, GLuint> uniformMap;
+		uniformMap.emplace("model", getUniform(program, "model"));
+		uniformMap.emplace("camera", getUniform(program, "camera"));
+		uniformMap.emplace("projection", getUniform(program, "projection"));
+		uniformMap.emplace("lightSource", getUniform(program, "lightSource"));
+		uniformMap.emplace("cameraPosition", getUniform(program, "cameraPosition"));
+		uniformMap.emplace("shadowZRange", getUniform(program, "shadowZRange"));
+		uniformMap.emplace("materialAmbient", getUniform(program, "materialAmbient"));
+		uniformMap.emplace("materialDiffuse", getUniform(program, "materialDiffuse"));
+		uniformMap.emplace("materialSpecular", getUniform(program, "materialSpecular"));
+		uniformMap.emplace("materialShininess", getUniform(program, "materialShininess"));
+		uniformMap.emplace("textureBlend", getUniform(program, "textureBlend"));
+		uniformMap.emplace("shadowTex", getUniform(program, "shadowTex"));
+		uniformMap.emplace("shadowMode", getUniform(program, "shadowMode"));
+		uniformMap.emplace("shadowCubeMap", getUniform(program, "shadowCubeMap"));
+		uniformMap.emplace("lightProjection", getUniform(program, "lightProjection"));
+		uniformMap.emplace("groundCoordZ", getUniform(program, "groundCoordZ"));
+		uniformMap.emplace("terrainScaleZ", getUniform(program, "terrainScaleZ"));
+		uniformMap.emplace("terrainMaxHeight", getUniform(program, "terrainMaxHeight"));
+		uniformMap.emplace("texHeights", getUniform(program, "texHeights"));
+		uniformMap.emplace("tex1", getUniform(program, "tex1"));
+		uniformMap.emplace("tex2", getUniform(program, "tex2"));
+		uniformMap.emplace("tex3", getUniform(program, "tex3"));
+		uniformMap.emplace("tex4", getUniform(program, "tex4"));
+		uniformMap.emplace("bumpTex1", getUniform(program, "bumpTex1"));
+		uniformMap.emplace("bumpTex2", getUniform(program, "bumpTex2"));
+		uniformMap.emplace("bumpTex3", getUniform(program, "bumpTex3"));
+		uniformMap.emplace("bumpTex4", getUniform(program, "bumpTex4"));
+
+		// copy uniform map to program uniform map
+		programToUniformMap.emplace(program, uniformMap);
+
+		// initialize uniforms
+		glUseProgram(program);
+		glUniform1i(uniformMap["textureBlend"], 0);
+		glUniform1i(uniformMap["shadowTex"], TEXTURE_SHADOW_2D);
+		glUniform1i(uniformMap["shadowCubeMap"], TEXTURE_SHADOW_CUBE);
+		glUniform1i(uniformMap["shadowMode"], 0);
+		glUniform1i(uniformMap["tex1"], TEXTURE_TERRAIN_1);
+		glUniform1i(uniformMap["tex2"], TEXTURE_TERRAIN_2);
+		glUniform1i(uniformMap["tex3"], TEXTURE_TERRAIN_3);
+		glUniform1i(uniformMap["tex4"], TEXTURE_TERRAIN_4);
+		glUniform1i(uniformMap["bumpTex1"], TEXTURE_TERRAIN_BUMP_1);
+		glUniform1i(uniformMap["bumpTex2"], TEXTURE_TERRAIN_BUMP_2);
+		glUniform1i(uniformMap["bumpTex3"], TEXTURE_TERRAIN_BUMP_3);
+		glUniform1i(uniformMap["bumpTex4"], TEXTURE_TERRAIN_BUMP_4);
 	}
 
 	GLuint Shader::getUniform(GLuint program, const char* name)

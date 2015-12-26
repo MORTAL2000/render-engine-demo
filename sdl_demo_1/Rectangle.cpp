@@ -30,7 +30,7 @@ namespace Bagnall
 	{
 		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("rectangle");
 		mesh.SetOwner(this);
-		vertexMeshes.push_back(mesh);
+		vertexMeshes.push_back(new VertexMesh(mesh));
 	}
 
 	void Rectangle::Draw() const

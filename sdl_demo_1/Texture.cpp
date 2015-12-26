@@ -74,6 +74,16 @@ namespace Bagnall
 				bumpMapMap.emplace(tex, bump);
 		}
 
+		// BILL
+		tex = loadTexture("textures\\bill.png");
+		if (tex != 0)
+		{
+			textureMap.emplace("bill", tex);
+			bump = loadTexture("bumpmaps\\bill_NRM.png");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
+
 		// CUBEMAP TEST 1
 		GLuint cubeMap = loadCubeMap("textures\\cubemap_test_1.jpg");
 		if (cubeMap != 0)
@@ -128,12 +138,48 @@ namespace Bagnall
 				bumpMapMap.emplace(tex, bump);
 		}
 
-		// terrain 1
-		tex = loadTexture("textures\\terrain1.jpg");
+		// sand1
+		tex = loadTexture("textures\\sand1.jpg");
 		if (tex != 0)
 		{
-			textureMap.emplace("terrain1", tex);
-			textureFileMap.emplace("terrain1.jpg", tex);
+			textureMap.emplace("sand1", tex);
+			textureFileMap.emplace("sand1.jpg", tex);
+			bump = loadTexture("bumpmaps\\sand1_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
+
+		// grass1
+		tex = loadTexture("textures\\grass1.jpg");
+		if (tex != 0)
+		{
+			textureMap.emplace("grass1", tex);
+			textureFileMap.emplace("grass1.jpg", tex);
+			bump = loadTexture("bumpmaps\\grass1_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
+
+		// stone1
+		tex = loadTexture("textures\\stone1.jpg");
+		if (tex != 0)
+		{
+			textureMap.emplace("stone1", tex);
+			textureFileMap.emplace("stone1.jpg", tex);
+			bump = loadTexture("bumpmaps\\stone1_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
+
+		// snow1
+		tex = loadTexture("textures\\snow1.jpg");
+		if (tex != 0)
+		{
+			textureMap.emplace("snow1", tex);
+			textureFileMap.emplace("snow1.jpg", tex);
+			bump = loadTexture("bumpmaps\\snow1_NRM.jpg");
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
 		}
 
 		// release texture loading stuff
@@ -229,11 +275,15 @@ namespace Bagnall
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 		// When MAGnifying the image (no bigger mipmap available), use LINEAR filtering
 		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		// When MINifying the image, use a LINEAR blend of two mipmaps, each filtered LINEARLY too
 		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		// Generate mipmaps, by the way.
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		// Unbind the texture

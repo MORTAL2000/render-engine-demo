@@ -3,12 +3,12 @@
 
 namespace Bagnall
 {
-	class VertexMesh;
+	class TerrainVertexMesh;
 
 	class HeightMapTerrain
 	{
 	public:
-		static VertexMesh CreateTerrainMeshFromFile(const char *fileName, float scaleZ);
+		static TerrainVertexMesh CreateTerrainMeshFromFile(const char *fileName, float texWidth, float texHeight, float scaleZ);
 
 	private:
 	};

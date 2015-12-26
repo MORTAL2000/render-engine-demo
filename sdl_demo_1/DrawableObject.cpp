@@ -22,8 +22,8 @@ namespace Bagnall
 	{
 		for (auto it = schematic->vertexMeshes.begin(); it != schematic->vertexMeshes.end(); ++it)
 		{
-			vertexMeshes.push_back(*it);
-			vertexMeshes[vertexMeshes.size() - 1].SetOwner(this);
+			vertexMeshes.push_back(new VertexMesh(*it));
+			vertexMeshes[vertexMeshes.size() - 1]->SetOwner(this);
 		}
 
 		for (auto it = schematic->children.begin(); it != schematic->children.end(); ++it)
@@ -38,7 +38,7 @@ namespace Bagnall
 		/*if (cubeMap != 0)
 			Shader::SetReflectiveCubeMap(reflectiveCubeMap);*/
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).Draw();
+			(*it)->Draw();
 	};
 
 	void DrawableObject::SendTransformToGPU()
@@ -46,17 +46,17 @@ namespace Bagnall
 		Shader::SetModel(finalModel);
 	}
 
-	void DrawableObject::AddVertexMesh(const VertexMesh& vertexMesh)
+	void DrawableObject::AddVertexMesh(VertexMesh *vertexMesh)
 	{
 		vertexMeshes.push_back(vertexMesh);
-		vertexMeshes[vertexMeshes.size() - 1].SetOwner(this);
+		vertexMeshes[vertexMeshes.size() - 1]->SetOwner(this);
 		updateRenderNodes();
 	}
 
 	void DrawableObject::SetEmissive(bool e)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).SetEmissive(e);
+			(*it)->SetEmissive(e);
 		updateRenderNodes();
 	}
 
@@ -68,28 +68,28 @@ namespace Bagnall
 	void DrawableObject::SetEmissionColor(const vec4& c)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).SetEmissionColor(c);
+			(*it)->SetEmissionColor(c);
 		updateRenderNodes();
 	}
 
 	void DrawableObject::SetMaterial(const Material& m)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).SetMaterial(m);
+			(*it)->SetMaterial(m);
 		updateRenderNodes();
 	}
 
 	void DrawableObject::SetTexture(GLuint tex)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).SetTexture(tex);
+			(*it)->SetTexture(tex);
 		updateRenderNodes();
 	}
 
 	void DrawableObject::SetCubeMap(GLuint cm)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).SetCubeMap(cm);
+			(*it)->SetCubeMap(cm);
 		updateRenderNodes();
 	}
 
@@ -98,7 +98,7 @@ namespace Bagnall
 		renderEnabled = true;
 
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).EnableRender();
+			(*it)->EnableRender();
 
 		for (auto it = children.begin(); it != children.end(); ++it)
 			static_cast<DrawableObject*>(*it)->EnableRender();
@@ -111,7 +111,7 @@ namespace Bagnall
 		renderEnabled = false;
 
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).DisableRender();
+			(*it)->DisableRender();
 
 		for (auto it = children.begin(); it != children.end(); ++it)
 			static_cast<DrawableObject*>(*it)->DisableRender();
@@ -120,7 +120,7 @@ namespace Bagnall
 	void DrawableObject::Cull()
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).Cull();
+			(*it)->Cull();
 
 		Object::Cull();
 	}
@@ -128,7 +128,7 @@ namespace Bagnall
 	void DrawableObject::UnCull()
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).UnCull();
+			(*it)->UnCull();
 
 		Object::UnCull();
 
@@ -143,13 +143,13 @@ namespace Bagnall
 	void DrawableObject::SetBumpMapEnabled(bool b)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).SetBumpMapEnabled(b);
+			(*it)->SetBumpMapEnabled(b);
 	}
 
 	void DrawableObject::SetReflectiveCubeMap(bool b)
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).SetReflectiveCubeMap(b);
+			(*it)->SetReflectiveCubeMap(b);
 	}
 
 	// PRIVATE
@@ -163,6 +163,6 @@ namespace Bagnall
 	void DrawableObject::updateRenderNodes()
 	{
 		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
-			(*it).UpdateRenderNode();
+			(*it)->UpdateRenderNode();
 	}
 }

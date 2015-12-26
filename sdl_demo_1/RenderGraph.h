@@ -9,6 +9,8 @@
 
 namespace Bagnall
 {
+	class TerrainVertexMesh;
+
 	class RenderGraph
 	{
 	public:
@@ -39,8 +41,17 @@ namespace Bagnall
 		// root node for emissive objects
 		std::unordered_map<vec4, EmissiveNode*> emissiveNodeMap;
 
+		// list of TERRAIN textured objects without bump maps and normal lighting
+		std::vector<TerrainVertexMesh*> terrainVertexMeshes;
+
+		// list of TERRAIN textured objects with bump maps and normal lighting
+		std::vector<TerrainVertexMesh*> terrainVertexMeshesWithBump;
+
 		// add an object to the graph
 		RenderNode* AddVertexMesh(VertexMesh *o);
+
+		void AddTerrainVertexMesh(TerrainVertexMesh *o);
+		void RemoveTerrainVertexMesh(TerrainVertexMesh *o);
 
 		// render everything
 		void Render() const;

@@ -1,5 +1,6 @@
 #include "HeightMapTerrain.h"
 #include "VertexMesh.h"
+#include "TerrainVertexMesh.h"
 #include "Shader.h"
 #include <SDL\SDL_image.h>
 #include <iostream>
@@ -8,94 +9,44 @@ namespace Bagnall
 {
 	// PUBLIC
 
-	VertexMesh HeightMapTerrain::CreateTerrainMeshFromFile(const char *fileName, float scaleZ)
+	TerrainVertexMesh HeightMapTerrain::CreateTerrainMeshFromFile(const char *fileName, float texWidth, float texHeight, float scaleZ)
 	{
 		SDL_Surface *surface = IMG_Load(fileName);
 
 		if (surface == NULL)
 		{
 			std::cerr << "unable to load file " << fileName << std::endl;
-			return VertexMesh(nullptr, Material::None(), 0, 0, false);
+			return TerrainVertexMesh(Material::None(), 0, 0);
 		}
 
 		unsigned char *pixels = (unsigned char*)surface->pixels;
 		int bytesPerPixel = surface->format->BytesPerPixel;
+		int maxHeight = INT_MIN;
 
 		std::vector<vec4> vertices;
-		for (int i = 0; i < surface->h; ++i)
-			for (int j = 0; j < surface->w; ++j)
-				vertices.push_back(vec4(i, j, pixels[(i * surface->w + j) * bytesPerPixel] * scaleZ, 1.0f));
-
-		std::vector<vec4> normals;
 		for (int i = 0; i < surface->h; ++i)
 		{
 			for (int j = 0; j < surface->w; ++j)
 			{
-				/*vec3 v1(-1.0f);
-				if (i > 0)
-					v1 = vec3(vertices[(i - 1) * surface->w + j]);
+				unsigned char height = pixels[(i * surface->w + j) * bytesPerPixel];
+				if (height > maxHeight)
+					maxHeight = height;
+				vertices.push_back(vec4(i, j, height * scaleZ, 1.0f));
+			}
+		}
 
-				vec3 v2(-1.0f);
-				if (i > 0 && j < surface->w - 1)
-					v2 = vec3(vertices[(i - 1) * surface->w + j + 1]);
-
-				vec3 v3(-1.0f);
-				if (j > 0)
-					v3 = vec3(vertices[i * surface->w + j - 1]);
-
-				vec3 v4 = vec3(vertices[i * surface->w + j]);
-
-				vec3 v5(-1.0f); 
-				if (j < surface->w - 1)
-					v5 = vec3(vertices[i * surface->w + j + 1]);
-
-				vec3 v6(-1.0f); 
-				if (i < surface->h - 1 && j > 0)
-					v6 = vec3(vertices[(i + 1) * surface->w + j - 1]);
-
-				vec3 v7(-1.0f);
-				if (i < surface->h - 1)
-					v7 = vec3(vertices[(i + 1) * surface->w + j]);
-
-				int n = 0;
-				vec3 normalSum = vec3(0.0f, 0.0f, 0.0f);
-
-				if (v1.x != -1.0f && v3.x != -1.0f && v4.x != -1.0f)
-				{
-					normalSum += normalize(cross(v1 - v4, v3 - v4));
-					++n;
-				}
-				if (v1.x != -1.0f && v2.x != -1.0f && v4.x != -1.0f)
-				{
-					normalSum += normalize(cross(v4 - v1, v2 - v1));
-					++n;
-				}
-				if (v2.x != -1.0f && v4.x != -1.0f && v5.x != -1.0f)
-				{
-					normalSum += normalize(cross(v2 - v5, v4 - v5));
-					++n;
-				}
-				if (v3.x != -1.0f && v4.x != -1.0f && v6.x != -1.0f)
-				{
-					normalSum += normalize(cross(v6 - v3, v4 - v3));
-					++n;
-				}
-				if (v4.x != -1.0f && v6.x != -1.0f && v7.x != -1.0f)
-				{
-					normalSum += normalize(cross(v4 - v7, v6 - v7));
-					++n;
-				}
-				if (v4.x != -1.0f && v5.x != -1.0f && v7.x != -1.0f)
-				{
-					normalSum += normalize(cross(v7 - v4, v5 - v4));
-					++n;
-				}
-
-				normals.push_back(vec4(normalSum / static_cast<float>(n), 0.0f));*/
-
+		std::vector<vec4> normals;
+		std::vector<vec4> tangents;
+		std::vector<vec4> binormals;
+		for (int i = 0; i < surface->h; ++i)
+		{
+			for (int j = 0; j < surface->w; ++j)
+			{
 				if (i == 0 || i == surface->h - 1 || j == 0 || j == surface->w - 1)
 				{
 					normals.push_back(vec4(0.0f, 0.0f, 1.0f, 0.0f));
+					tangents.push_back(vec4(1.0f, 0.0f, 0.0f, 0.0f));
+					binormals.push_back(vec4(0.0f, 1.0f, 0.0f, 0.0f));
 					continue;
 				}
 
@@ -107,34 +58,57 @@ namespace Bagnall
 				vec3 v6 = vec3(vertices[(i + 1) * surface->w + j - 1]);
 				vec3 v7 = vec3(vertices[(i + 1) * surface->w + j]);
 
-				vec3 n1 = normalize(cross(v1 - v4, v3 - v4));
-				vec3 n2 = normalize(cross(v4 - v1, v2 - v1));
-				vec3 n3 = normalize(cross(v2 - v5, v4 - v5));
-				vec3 n4 = normalize(cross(v6 - v3, v4 - v3));
-				vec3 n5 = normalize(cross(v4 - v7, v6 - v7));
-				vec3 n6 = normalize(cross(v7 - v4, v5 - v4));
+				vec3 tan1 = v4 - v3;
+				vec3 binorm1 = v1 - v4;
+				vec3 tan2 = v2 - v1;
+				vec3 binorm2 = v1 - v4;
+				vec3 tan3 = v5 - v4;
+				vec3 binorm3 = v1 - v4;
+				vec3 tan4 = v4 - v3;
+				vec3 binorm4 = v3 - v6;
+				vec3 tan5 = v7 - v6;
+				vec3 binorm5 = v3 - v6;
+				vec3 tan6 = v5 - v4;
+				vec3 binorm6 = v4 - v7;
+
+				vec3 n1 = normalize(cross(tan1, binorm1));
+				vec3 n2 = normalize(cross(tan2, binorm2));
+				vec3 n3 = normalize(cross(tan3, binorm3));
+				vec3 n4 = normalize(cross(tan4, binorm4));
+				vec3 n5 = normalize(cross(tan5, binorm5));
+				vec3 n6 = normalize(cross(tan6, binorm6));
 
 				normals.push_back(normalize(vec4((n1 + n2 + n3 + n4 + n5 + n6) / 6.0f, 0.0f)));
+				tangents.push_back(normalize(vec4((tan1 + tan2 + tan3 + tan4 + tan5 + tan6) / 6.0f, 0.0f)));
+				binormals.push_back(normalize(vec4((binorm1 + binorm2 + binorm3 + binorm4 + binorm5 + binorm6) / 6.0f, 0.0f)));
 			}
 		}
-
-		std::vector<vec4> tangents;
-		std::vector<vec4> binormals;
-		for (int i = 0; i < vertices.size(); ++i)
-		{
-			tangents.push_back(vec4(0.0f));
-			binormals.push_back(vec4(0.0f));
-		}
-
-		std::vector<vec2> textureCoords;
-		/*for (int i = 0; i < vertices.size(); ++i)
-			textureCoords.push_back(vec2(0.0f));*/
 		for (int i = 0; i < surface->h; ++i)
 		{
 			for (int j = 0; j < surface->w; ++j)
 			{
-				//textureCoords.push_back(vec2(i / static_cast<float>(surface->h), j / static_cast<float>(surface->w)));
-				textureCoords.push_back(vec2(j / static_cast<float>(surface->w), i / static_cast<float>(surface->h)));
+				if (i == 0 || j == surface->w - 1)
+				{
+					tangents.push_back(vec4(1.0f, 0.0f, 0.0f, 0.0f));
+					binormals.push_back(vec4(0.0f, 1.0f, 0.0f, 0.0f));
+					continue;
+				}
+
+
+			}
+		}
+
+		std::vector<vec2> textureCoords;
+		if (texWidth == 0)
+			texWidth = surface->w;
+		if (texHeight == 0)
+			texHeight = surface->h;
+		for (int i = 0; i < surface->h; ++i)
+		{
+			for (int j = 0; j < surface->w; ++j)
+			{
+				//textureCoords.push_back(vec2(fmod(j, texWidth) / texWidth, fmod(i, texHeight) / texHeight));
+				textureCoords.push_back(vec2(j / texWidth, i / texHeight));
 			}
 		}
 
@@ -153,13 +127,24 @@ namespace Bagnall
 		}
 
 		Shader::Vertices.insert(Shader::Vertices.end(), vertices.begin(), vertices.end());
+		//vertices.clear();
 		Shader::Normals.insert(Shader::Normals.end(), normals.begin(), normals.end());
+		//normals.clear();
 		Shader::Tangents.insert(Shader::Tangents.end(), tangents.begin(), tangents.end());
+		//tangents.clear();
 		Shader::Binormals.insert(Shader::Binormals.end(), binormals.begin(), binormals.end());
+		//binormals.clear();
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), textureCoords.begin(), textureCoords.end());
+		//textureCoords.clear();
 		Shader::VertexIndices.insert(Shader::VertexIndices.end(), indices.begin(), indices.end());
+		//indices.clear();
 
-		return VertexMesh(nullptr, Material::Plastic(vec4(0.5f, 0.5f, 0.5f, 1.0f)), indexOffset, indices.size(), true);
+		TerrainVertexMesh mesh = TerrainVertexMesh(Material::Plastic(vec4(0.5f, 0.5f, 0.5f, 1.0f)), indexOffset, indices.size());
+		mesh.SetGroundCoordZ(0.0f);
+		mesh.SetScaleZ(scaleZ);
+		mesh.SetMaxHeight(maxHeight);
+
+		return mesh;
 
 		// free the surface resource
 		SDL_FreeSurface(surface);

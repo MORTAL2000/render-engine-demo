@@ -21,13 +21,15 @@ namespace Bagnall
 
 		VertexMesh(DrawableObject *o, const Material& mat, int iOffset, int iCount, bool tStrip);
 
+		~VertexMesh();
+
 		static void AddVertexMeshPrototype(const char *name, const Material& mat, int vOffset, int vCount, bool tStrip);
 
 		static VertexMesh GetVertexMeshPrototypeByName(const char *name);
 
 		virtual void Draw() const;
 
-		void UpdateRenderNode();
+		virtual void UpdateRenderNode();
 
 		void EnableRender();
 

@@ -16,7 +16,15 @@ namespace Bagnall
 		TEXTURE_CUBE,
 		TEXTURE_CUBE_BUMP,
 		TEXTURE_SHADOW_2D,
-		TEXTURE_SHADOW_CUBE
+		TEXTURE_SHADOW_CUBE,
+		TEXTURE_TERRAIN_1,
+		TEXTURE_TERRAIN_BUMP_1,
+		TEXTURE_TERRAIN_2,
+		TEXTURE_TERRAIN_BUMP_2,
+		TEXTURE_TERRAIN_3,
+		TEXTURE_TERRAIN_BUMP_3,
+		TEXTURE_TERRAIN_4,
+		TEXTURE_TERRAIN_BUMP_4,
 	};
 
 	class Shader
@@ -51,6 +59,12 @@ namespace Bagnall
 		static void SetShadowZRange(const vec2& shadowZRange);
 		static void SetReflectiveCubeMap(bool b);
 
+		// terrain uniforms
+		static void SetGroundCoordZ(float z);
+		static void SetTerrainScaleZ(float z);
+		static void SetTerrainMaxHeight(int z);
+		static void SetTexHeights(const vec4& texHeights);
+
 	private:
 		static GLuint vertexBuffer;
 		static GLuint elementBuffer;
@@ -75,6 +89,7 @@ namespace Bagnall
 		static void initTextureBumpProgram();
 		static void initCubeMapProgram();
 		static void initCubeMapBumpProgram();
+		static void initTerrainTextureBumpProgram();
 
 		static GLuint getUniform(GLuint program, const char* name);
 

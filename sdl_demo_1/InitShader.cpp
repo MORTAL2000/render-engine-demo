@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_DEPRECATE
 //#include "Angel.h"
 //#include <cmath>
+#include "Util.h"
 #include <iostream>
 #include <GL/glew.h>
 //#include <glm/glm.hpp>
@@ -47,7 +48,10 @@ namespace Bagnall {
 
 		for (int i = 0; i < 2; ++i) {
 			Shader& s = shaders[i];
-			s.source = readShaderSource(s.filename);
+			//s.source = readShaderSource(s.filename);
+			auto source = Util::ReadAllBytes(s.filename);
+			source.push_back('\0');
+			s.source = source.data();
 			if (shaders[i].source == NULL) {
 				std::cerr << "Failed to read " << s.filename << std::endl;
 				system("pause");
@@ -73,7 +77,7 @@ namespace Bagnall {
 				exit(EXIT_FAILURE);
 			}
 
-			delete[] s.source;
+			//delete[] s.source;
 
 			glAttachShader(program, shader);
 		}

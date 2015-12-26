@@ -117,6 +117,9 @@
     <ClCompile Include="HeightMapTerrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TerrainVertexMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vertex\vshader_cubemap.glsl">
@@ -260,6 +263,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HeightMapTerrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainVertexMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

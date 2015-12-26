@@ -28,6 +28,11 @@ namespace Bagnall
 		texture = 0;
 	}
 
+	VertexMesh::~VertexMesh()
+	{
+		if (renderNode != NULL)
+			renderNode->meshes.erase(std::find(renderNode->meshes.begin(), renderNode->meshes.end(), this));
+	}
 
 	void VertexMesh::AddVertexMeshPrototype(const char *name, const Material& mat, int vOffset, int vCount, bool tStrip)
 	{

@@ -20,7 +20,7 @@ namespace Bagnall
 
 		void SendTransformToGPU();
 
-		void AddVertexMesh(const VertexMesh& vertexMesh);
+		void AddVertexMesh(VertexMesh *vertexMesh);
 
 		void SetEmissive(bool e);
 
@@ -52,7 +52,7 @@ namespace Bagnall
 		bool renderEnabled;
 
 	protected:
-		std::vector<VertexMesh> vertexMeshes;
+		std::vector<VertexMesh*> vertexMeshes;
 
 		void init();
 

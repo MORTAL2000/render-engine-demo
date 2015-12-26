@@ -31,7 +31,7 @@ namespace Bagnall
 	{
 		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("cube");
 		mesh.SetOwner(this);
-		vertexMeshes.push_back(mesh);
+		vertexMeshes.push_back(new VertexMesh(mesh));
 	}
 
 	//void Cube::Draw() const

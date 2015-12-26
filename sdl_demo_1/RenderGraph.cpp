@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "Shadow.h"
 #include "Game.h"
+#include "TerrainVertexMesh.h"
 
 namespace Bagnall
 {
@@ -194,6 +195,33 @@ namespace Bagnall
 		}
 	}
 
+	void RenderGraph::AddTerrainVertexMesh(TerrainVertexMesh *o)
+	{
+		if (!o->GetBumpMapEnabled())
+		{
+			auto it = std::find(terrainVertexMeshes.begin(), terrainVertexMeshes.end(), o);
+			if (it == terrainVertexMeshes.end())
+				terrainVertexMeshes.push_back(o);
+		}
+		else
+		{
+			auto it = std::find(terrainVertexMeshesWithBump.begin(), terrainVertexMeshesWithBump.end(), o);
+			if (it == terrainVertexMeshesWithBump.end())
+				terrainVertexMeshesWithBump.push_back(o);
+		}
+	}
+
+	void RenderGraph::RemoveTerrainVertexMesh(TerrainVertexMesh *o)
+	{
+		auto it = std::find(terrainVertexMeshes.begin(), terrainVertexMeshes.end(), o);
+		if (it != terrainVertexMeshes.end())
+			terrainVertexMeshes.erase(it);
+
+		it = std::find(terrainVertexMeshesWithBump.begin(), terrainVertexMeshesWithBump.end(), o);
+		if (it != terrainVertexMeshesWithBump.end())
+			terrainVertexMeshesWithBump.erase(it);
+	}
+
 	void RenderGraph::Render() const
 	{
 		// render emissive objects
@@ -235,6 +263,16 @@ namespace Bagnall
 		Shader::SetProgram("cubemap_bump");
 		for (auto it = cubeMapBumpNodeMap.begin(); it != cubeMapBumpNodeMap.end(); ++it)
 			(*it).second->Render();
+
+		// render terrain without bump maps
+		/*Shader::SetProgram("terrain_texture");
+		for (auto it = terrainVertexMeshes.begin(); it != terrainVertexMeshes.end(); ++it)
+			(*it)->DrawWithoutBumpMap();*/
+
+		// render terrain with bump maps
+		Shader::SetProgram("terrain_texture_bump");
+		for (auto it = terrainVertexMeshesWithBump.begin(); it != terrainVertexMeshesWithBump.end(); ++it)
+			(*it)->DrawWithBumpMap();
 	}
 
 	void RenderGraph::SetShadowMode(int s)
@@ -258,6 +296,10 @@ namespace Bagnall
 		Shadow::BindToGPU(shadowMode);
 
 		Shader::SetProgram("cubemap_bump");
+		Shader::SetShadowMode(s);
+		Shadow::BindToGPU(shadowMode);
+
+		Shader::SetProgram("terrain_texture_bump");
 		Shader::SetShadowMode(s);
 		Shadow::BindToGPU(shadowMode);
 	}
@@ -286,6 +328,9 @@ namespace Bagnall
 		Shader::SetShadowZRange(zRange);
 
 		Shader::SetProgram("cubemap_bump");
+		Shader::SetShadowZRange(zRange);
+
+		Shader::SetProgram("terrain_texture_bump");
 		Shader::SetShadowZRange(zRange);
 	}
 }

@@ -46,17 +46,23 @@ void main()
 	//texColor *= d;
 	
 	vec4 ambientProduct, diffuseProduct, specularProduct;
+	float shininess;
 	if (textureBlend)
 	{
 		ambientProduct = mix(materialAmbient, texColor, 0.5) * lightSource[0];
 		diffuseProduct = mix(materialDiffuse, texColor, 0.5) * lightSource[1];
 		specularProduct = mix(materialSpecular, texColor, 0.5) * lightSource[2];
+		shininess = materialShininess;
+		/*ambientProduct = texColor * materialAmbient * lightSource[0];
+		diffuseProduct = texColor * materialDiffuse * lightSource[1];
+		specularProduct = texColor * materialSpecular * lightSource[2];*/
 	}
 	else
 	{
 		ambientProduct = 0.5 * texColor * lightSource[0];
 		diffuseProduct = texColor * lightSource[1];
 		specularProduct = texColor * lightSource[2];
+		shininess = 32.0;
 	}
 
 	float distance;
@@ -80,7 +86,7 @@ void main()
 
 	// specular
 	vec3 H = normalize(LL+EE);
-	float Ks = pow(max(dot(NN, H), 0.0), materialShininess) / distance;
+	float Ks = pow(max(dot(NN, H), 0.0), shininess) / distance;
 	if (LdotN < 0.0)
 		specular = vec4(0.0, 0.0, 0.0, 1.0);
 	else
@@ -91,14 +97,19 @@ void main()
 		//vec3 posLight = (lightProjection * vPositionWorld).xyz;
 		//vec3 coordDepth = vec3((posLight.x + 1.0) / 2.0, (posLight.y + 1.0) / 2.0, (posLight.z + 1.0) / 2.0 * 0.90);
 		//float shadowVal = shadow2D(shadowTex, coordDepth);
-		float shadowVal = shadow2D(shadowTex, shadowCoordDepth);
+		float shadowVal = shadow2D(shadowTex, shadowCoordDepth).x;
 		diffuse = diffuse * shadowVal;
 		specular = specular * shadowVal;
 	}
 	else if (shadowMode == 2)
 	{
 		vec3 lightDir = -L;
-		float d = vecToDepth(lightDir) - 0.002;
+		
+		float bias = 0.005*tan(acos(dot(NN, LL)));
+		bias = clamp(bias, 0, 0.01);
+		//float bias = 0.002;
+		
+		float d = vecToDepth(lightDir) - bias;
 		float shadowVal = shadowCube(shadowCubeMap, vec4(lightDir, d)).x;
 		diffuse = diffuse * shadowVal;
 		specular = specular * shadowVal;

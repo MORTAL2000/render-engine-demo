@@ -9,6 +9,7 @@
 namespace Bagnall
 {
 	class VertexMesh;
+	class TerrainVertexMesh;
 
 	struct RenderNode
 	{
