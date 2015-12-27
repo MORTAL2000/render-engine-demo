@@ -12,7 +12,6 @@ namespace Bagnall
 
 	RenderGraph::RenderGraph()
 	{
-		shadowMode = SHADOW_MODE_NONE;
 	}
 
 	RenderNode* RenderGraph::AddVertexMesh(VertexMesh *o)
@@ -273,64 +272,5 @@ namespace Bagnall
 		Shader::SetProgram("terrain_texture_bump");
 		for (auto it = terrainVertexMeshesWithBump.begin(); it != terrainVertexMeshesWithBump.end(); ++it)
 			(*it)->DrawWithBumpMap();
-	}
-
-	void RenderGraph::SetShadowMode(int s)
-	{
-		shadowMode = s;
-
-		Shader::SetProgram("material");
-		Shader::SetShadowMode(s);
-		Shadow::BindToGPU(shadowMode);
-
-		Shader::SetProgram("texture");
-		Shader::SetShadowMode(s);
-		Shadow::BindToGPU(shadowMode);
-
-		Shader::SetProgram("texture_bump");
-		Shader::SetShadowMode(s);
-		Shadow::BindToGPU(shadowMode);
-
-		Shader::SetProgram("cubemap");
-		Shader::SetShadowMode(s);
-		Shadow::BindToGPU(shadowMode);
-
-		Shader::SetProgram("cubemap_bump");
-		Shader::SetShadowMode(s);
-		Shadow::BindToGPU(shadowMode);
-
-		Shader::SetProgram("terrain_texture_bump");
-		Shader::SetShadowMode(s);
-		Shadow::BindToGPU(shadowMode);
-	}
-
-	int RenderGraph::GetShadowMode() const
-	{
-		return shadowMode;
-	}
-
-	void RenderGraph::SetShadowZRange(float zNear, float zFar)
-	{
-		vec2 zRange = vec2(zNear, zFar);
-
-		Shadow::SetZRange(zRange);
-
-		Shader::SetProgram("material");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("texture");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("texture_bump");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("cubemap");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("cubemap_bump");
-		Shader::SetShadowZRange(zRange);
-
-		Shader::SetProgram("terrain_texture_bump");
-		Shader::SetShadowZRange(zRange);
 	}
 }

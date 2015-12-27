@@ -55,15 +55,6 @@ namespace Bagnall
 
 		// render everything
 		void Render() const;
-
-		// shadowsEnabled getter/setter
-		void SetShadowMode(int s);
-		int GetShadowMode() const;
-
-		void SetShadowZRange(float zNear, float zFar);
-
-	private:
-		int shadowMode;
 	};
 }
 

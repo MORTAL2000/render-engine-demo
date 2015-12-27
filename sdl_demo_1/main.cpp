@@ -82,14 +82,13 @@ void init(void)
 	EnvironmentMap::Init();
 	Schematic::Init();
 
-	terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\terrain.png", 25.0f, 25.0f, 0.5f));
+	terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\terrain3.jpg", 25.0f, 25.0f, 1.0f));
 	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\west_norway.png", 50.0f, 50.0f, 0.25f));
 	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("textures\\bill.png", 25.0f, 25.0f, 0.1f));
 	terrainMesh->SetTexture1(Texture::GetTextureByName("sand1"));
 	terrainMesh->SetTexture2(Texture::GetTextureByName("grass1"));
 	terrainMesh->SetTexture3(Texture::GetTextureByName("stone1"));
 	terrainMesh->SetTexture4(Texture::GetTextureByName("snow1"));
-	//terrainMesh->SetMaterial(Material::Rubber(vec4(0.5f, 0.5f, 0.5f, 1.0f)));
 	terrainMesh->SetTextureHeights(vec4(0.0f, 0.3f, 0.5f, 0.9f));
 
 	// do this after all vertex data is loaded
@@ -143,18 +142,18 @@ void init(void)
 
 	// MANY CUBES
 	int range = Game::WorldSize * 0.75f;
-	//for (int i = 0; i < 25; ++i)
-	//{
-	//	Cube *cube = new Cube(objectContainer);
-	//	cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
-	//	//cube->SetTexture(Texture::GetTextureByName("shrek"));
-	//	cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 5]));
-	//	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
-	//	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
-	//	cube->Scale(5.0f);
-	//	objects.push_back(cube);
-	//	//cube->Cull();
-	//}
+	for (int i = 0; i < 25; ++i)
+	{
+		Cube *cube = new Cube(objectContainer);
+		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		//cube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
+		cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 5]));
+		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		cube->Scale(5.0f);
+		objects.push_back(cube);
+		//cube->Cull();
+	}
 
 	//// R2D2S LOL
 	//for (int i = 0; i < 15; ++i)
@@ -230,9 +229,9 @@ void init(void)
 	//player->SetTexture(Texture::GetTextureByName("shrek"));
 	//player->SetMaterial(Material::Plastic(vec4(0.25f, 0.25f, 0.25f, 1.0f)));
 	//player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-	//colorCubemap = EnvironmentMap::GenerateCubeMap();
-	//player->SetCubeMap(colorCubemap);
-	//player->SetReflectiveCubeMap(true);
+	colorCubemap = EnvironmentMap::GenerateCubeMap();
+	player->SetCubeMap(colorCubemap);
+	player->SetReflectiveCubeMap(true);
 	player->Scale(1.0f);
 
 	// GIANT SKY CUBE
@@ -339,16 +338,17 @@ void init(void)
 	terrain = new DrawableObject(rootObject);
 	terrain->AddVertexMesh(terrainMesh);
 	terrain->SetScale(10.0f);
-	//terrain->Translate(vec4(-2000.0f, -2000.0f, -2500.0f, 0.0f));
+	terrain->Translate(vec4(-2000.0f, -2000.0f, -2500.0f, 0.0f));
 
 	// SET SHADOW NEAR AND FAR PLANES
-	Game::MainRenderGraph->SetShadowZRange(100.0f, Game::ViewDistance);
+	Shadow::SetZRange(100.0f, Game::ViewDistance);
 
 	// ENABLE SHADOWS
 	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
 	//Game::MainRenderGraph->SetShadowMode(SHADOW_MODE_OMNI);
 	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
-	Game::MainRenderGraph->SetShadowMode(SHADOW_MODE_UNI);
+	Shadow::SetMode(SHADOW_MODE_UNI);
+	Shadow::SetResolution(SHADOW_RESOLUTION_EXTRA_HIGH);
 }
 
 //----------------------------------------------------------------------------
@@ -629,7 +629,7 @@ int update()
 
 void draw()
 {
-	//EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
+	EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
 	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
 	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
 

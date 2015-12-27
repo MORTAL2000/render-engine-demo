@@ -12,6 +12,9 @@ namespace Bagnall
 	public:
 		static void Init();
 
+		static GLuint LoadTexture(const char *name, const char *filePath, const char *bumpPath = nullptr);
+		static GLuint LoadCubeMap(const char *name, const char *filePath, const char *bumpPath = nullptr);
+
 		static GLuint GetTextureByName(std::string name);
 		static GLuint GetTextureByFile(std::string path);
 		static GLuint GetBumpMapByTexture(GLuint tex);

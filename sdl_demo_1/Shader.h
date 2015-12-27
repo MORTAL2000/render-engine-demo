@@ -8,6 +8,7 @@
 namespace Bagnall
 {
 	struct Material;
+	enum ShadowMode;
 
 	enum TextureSampler
 	{
@@ -55,7 +56,7 @@ namespace Bagnall
 		static void SetLightProjection(const mat4& lightProj);
 		static void SetEmissionColor(const vec4& emissionColor);
 		static void SetTextureBlend(bool textureBlendb);
-		static void SetShadowMode(int shadowMode);
+		static void SetShadowMode(ShadowMode shadowMode);
 		static void SetShadowZRange(const vec2& shadowZRange);
 		static void SetReflectiveCubeMap(bool b);
 
@@ -65,16 +66,22 @@ namespace Bagnall
 		static void SetTerrainMaxHeight(int z);
 		static void SetTexHeights(const vec4& texHeights);
 
+		// either depth texture or depth cubemap
+		static void BindShadowMap(GLuint shadowMap, ShadowMode mode);
+
 	private:
 		static GLuint vertexBuffer;
 		static GLuint elementBuffer;
 		static GLuint currentProgram;
+		static std::string currentProgramName;
 
 		static mat4 camera;
 		static vec4 cameraPosition;
 		static mat4 projection;
 		static mat4 lightSource;
 		static mat4 lightProjection;
+		static ShadowMode shadowMode;
+		static vec2 shadowZRange;
 
 		static std::unordered_map<const char*, GLuint> nameToProgramMap;
 		static std::unordered_map<GLuint, GLuint> programToVaoMap;

@@ -15,84 +15,92 @@ namespace Bagnall
 		GLuint bump;
 
 		// SHREK
-		tex = loadTexture("textures\\Shrek-and-Yoda.jpg");
-		if (tex != 0)
-		{
-			textureMap.emplace("shrek", tex);
-			bump = loadTexture("bumpmaps\\Shrek-and-Yoda_NRM.jpg");
-			if (bump != 0)
-				bumpMapMap.emplace(tex, bump);
-		}
+		LoadTexture("shrek", "textures\\Shrek-and-Yoda.jpg", "bumpmaps\\Shrek-and-Yoda_NRM.jpg");
+		//tex = loadTexture("textures\\Shrek-and-Yoda.jpg");
+		//if (tex != 0)
+		//{
+		//	textureMap.emplace("shrek", tex);
+		//	bump = loadTexture("bumpmaps\\Shrek-and-Yoda_NRM.jpg");
+		//	if (bump != 0)
+		//		bumpMapMap.emplace(tex, bump);
+		//}
 
 		// BEN
-		tex = loadTexture("textures\\ben.jpg");
+		LoadTexture("ben", "textures\\ben.jpg", "bumpmaps\\ben_NRM.jpg");
+		/*tex = loadTexture("textures\\ben.jpg");
 		if (tex != 0)
 		{
 			textureMap.emplace("ben", tex);
 			bump = loadTexture("bumpmaps\\ben_NRM.jpg");
 			if (bump != 0)
 				bumpMapMap.emplace(tex, bump);
-		}
+		}*/
 
 		// STONE WALL
-		tex = loadTexture("textures\\stone_wall.jpg");
+		LoadTexture("stone_wall", "textures\\stone_wall.jpg", "bumpmaps\\stone_wall_NRM.jpg");
+		/*tex = loadTexture("textures\\stone_wall.jpg");
 		if (tex != 0)
 		{
 			textureMap.emplace("stone_wall", tex);
 			bump = loadTexture("bumpmaps\\stone_wall_NRM.jpg");
 			if (bump != 0)
 				bumpMapMap.emplace(tex, bump);
-		}
+		}*/
 
 		// COSTANZA
-		tex = loadTexture("textures\\costanza.jpg");
+		LoadTexture("costanza", "textures\\costanza.jpg", "bumpmaps\\costanza_NRM.jpg");
+		/*tex = loadTexture("textures\\costanza.jpg");
 		if (tex != 0)
 		{
 			textureMap.emplace("costanza", tex);
 			bump = loadTexture("bumpmaps\\costanza_NRM.jpg");
 			if (bump != 0)
 				bumpMapMap.emplace(tex, bump);
-		}
+		}*/
 
 		// DOWM FURRY
-		tex = loadTexture("textures\\dowm furry.jpg");
+		LoadTexture("dowm_furry", "textures\\dowm furry.jpg", "bumpmaps\\dowm furry_NRM.jpg");
+		/*tex = loadTexture("textures\\dowm furry.jpg");
 		if (tex != 0)
 		{
 			textureMap.emplace("dowm_furry", tex);
 			bump = loadTexture("bumpmaps\\dowm furry_NRM.jpg");
 			if (bump != 0)
 				bumpMapMap.emplace(tex, bump);
-		}
+		}*/
 
 		// ISAAC FINAL FORM
-		tex = loadTexture("textures\\finalformsquare.jpg");
+		LoadTexture("isaac_final_form", "textures\\finalformsquare.jpg", "bumpmaps\\finalformsquare_NRM.jpg");
+		/*tex = loadTexture("textures\\finalformsquare.jpg");
 		if (tex != 0)
 		{
 			textureMap.emplace("isaac_final_form", tex);
 			bump = loadTexture("bumpmaps\\finalformsquare_NRM.jpg");
 			if (bump != 0)
 				bumpMapMap.emplace(tex, bump);
-		}
+		}*/
 
 		// BILL
-		tex = loadTexture("textures\\bill.png");
+		LoadTexture("bill", "textures\\bill.png", "bumpmaps\\bill_NRM.jpg");
+		/*tex = loadTexture("textures\\bill.png");
 		if (tex != 0)
 		{
 			textureMap.emplace("bill", tex);
 			bump = loadTexture("bumpmaps\\bill_NRM.png");
 			if (bump != 0)
 				bumpMapMap.emplace(tex, bump);
-		}
+		}*/
 
 		// CUBEMAP TEST 1
-		GLuint cubeMap = loadCubeMap("textures\\cubemap_test_1.jpg");
+		LoadCubeMap("cubemap_test_1", "textures\\cubemap_test_1.jpg", "bumpmaps\\cubemap_test_1_NRM.jpg");
+		/*GLuint cubeMap = loadCubeMap("textures\\cubemap_test_1.jpg");
 		if (cubeMap != 0)
 		{
 			cubeMapMap.emplace("cubemap_test_1", cubeMap);
 			bump = loadCubeMap("bumpmaps\\cubemap_test_1_NRM.jpg");
 			if (bump != 0)
 				cubeBumpMapMap.emplace(cubeMap, bump);
-		}
+		}*/
 
 		// MILLENNIUM FALCON TOP
 		tex = loadTexture("textures\\Millennium_Falcon_Top_D.tga");
@@ -184,6 +192,32 @@ namespace Bagnall
 
 		// release texture loading stuff
 		IMG_Quit();
+	}
+
+	GLuint Texture::LoadTexture(const char *name, const char *filePath, const char *bumpPath)
+	{
+		GLuint tex = loadTexture(filePath);
+		if (tex != 0)
+		{
+			textureMap.emplace(name, tex);
+			GLuint bump = loadTexture(bumpPath);
+			if (bump != 0)
+				bumpMapMap.emplace(tex, bump);
+		}
+		return tex;
+	}
+
+	GLuint Texture::LoadCubeMap(const char *name, const char *filePath, const char *bumpPath)
+	{
+		GLuint cubeMap = loadCubeMap(filePath);
+		if (cubeMap != 0)
+		{
+			cubeMapMap.emplace(name, cubeMap);
+			GLuint bump = loadCubeMap(bumpPath);
+			if (bump != 0)
+				cubeBumpMapMap.emplace(cubeMap, bump);
+		}
+		return cubeMap;
 	}
 
 	GLuint Texture::GetTextureByName(std::string name)

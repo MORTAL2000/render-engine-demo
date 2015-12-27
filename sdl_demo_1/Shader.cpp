@@ -1,6 +1,7 @@
 #include "Shader.h"
 #include "InitShader.h"
 #include "Material.h"
+#include "Shadow.h"
 #include <iostream>
 
 namespace Bagnall
@@ -84,6 +85,7 @@ namespace Bagnall
 			std::cerr << "unable to bind shader program: " << programName << std::endl;
 		else
 		{
+			currentProgramName = programName;
 			currentProgram = nameToProgramMap[programName];
 			glUseProgram(currentProgram);
 			glBindVertexArray(programToVaoMap[currentProgram]);
@@ -94,12 +96,22 @@ namespace Bagnall
 			GLuint loc = getUniformFromCurrentProgram("lightSource");
 			if (loc != -1)
 				glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lightSource));
+
 			loc = getUniformFromCurrentProgram("cameraPosition");
 			if (loc != -1)
 				glUniform4fv(loc, 1, value_ptr(cameraPosition));
+
 			loc = getUniformFromCurrentProgram("lightProjection");
 			if (loc != -1)
 				glUniformMatrix4fv(loc, 1, GL_FALSE, value_ptr(lightProjection));
+
+			loc = getUniformFromCurrentProgram("shadowMode");
+			if (loc != -1)
+				glUniform1i(loc, shadowMode);
+
+			loc = getUniformFromCurrentProgram("shadowZRange");
+			if (loc != -1)
+				glUniform2fv(loc, 1, value_ptr(shadowZRange));
 		}
 	}
 
@@ -214,18 +226,21 @@ namespace Bagnall
 			glUniform1i(loc, textureBlend);
 	}
 
-	void Shader::SetShadowMode(int shadowMode)
+	void Shader::SetShadowMode(ShadowMode mode)
 	{
+		shadowMode = mode;
+
 		GLuint loc = programToUniformMap[currentProgram]["shadowMode"];
 		glUniform1i(loc, shadowMode);
 	}
 
-	void Shader::SetShadowZRange(const vec2& shadowZRange)
+	void Shader::SetShadowZRange(const vec2& zRange)
 	{
+		shadowZRange = zRange;
 		//GLuint loc = getUniformFromCurrentProgram("shadowZRange");
 		//if (loc != -1)
 		GLuint loc = programToUniformMap[currentProgram]["shadowZRange"];
-			glUniform2fv(loc, 1, value_ptr(shadowZRange));
+		glUniform2fv(loc, 1, value_ptr(shadowZRange));
 	}
 
 	void Shader::SetReflectiveCubeMap(bool b)
@@ -258,17 +273,43 @@ namespace Bagnall
 		glUniform4fv(loc, 1, value_ptr(texHeights));
 	}
 
+	void Shader::BindShadowMap(GLuint shadowMap, ShadowMode mode)
+	{
+		std::string programName = currentProgramName;
+
+		for (auto it = nameToProgramMap.begin(); it != nameToProgramMap.end(); ++it)
+		{
+			SetProgram((*it).first);
+
+			if (mode == SHADOW_MODE_UNI)
+			{
+				glActiveTexture(GL_TEXTURE0 + TEXTURE_SHADOW_2D);
+				glBindTexture(GL_TEXTURE_2D, shadowMap);
+			}
+			else if (mode == SHADOW_MODE_OMNI)
+			{
+				glActiveTexture(GL_TEXTURE0 + TEXTURE_SHADOW_CUBE);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMap);
+			}
+		}
+
+		SetProgram(programName.c_str());
+	}
+
 	// PRIVATE
 
 	GLuint Shader::vertexBuffer;
 	GLuint Shader::elementBuffer;
 	GLuint Shader::currentProgram;
+	std::string Shader::currentProgramName;
 
 	mat4 Shader::camera;
 	vec4 Shader::cameraPosition;
 	mat4 Shader::projection;
 	mat4 Shader::lightSource;
 	mat4 Shader::lightProjection;
+	ShadowMode Shader::shadowMode;
+	vec2 Shader::shadowZRange;
 
 	std::unordered_map<const char*, GLuint> Shader::nameToProgramMap;
 	std::unordered_map<GLuint, GLuint> Shader::programToVaoMap;

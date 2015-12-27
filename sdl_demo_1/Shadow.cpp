@@ -81,11 +81,10 @@ namespace Bagnall
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
 
-		glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+		glViewport(0, 0, resolution, resolution);
 
-		mat4 cam;// = lookAt(sourcePos, destPos, vec3(0.0f, 0.0f, 1.0f));
-
-		auto proj = computeOrthoCamAndProjection(lightDir, cam);
+		mat4 cam;
+		mat4 proj = computeOrthoCamAndProjection(lightDir, cam);
 
 		//mat4 projection = ortho(-zRange.y / 2.0f, zRange.y / 2.0f, -zRange.y / 2.0f, zRange.y / 2.0f, -zRange.y, zRange.y);
 		//mat4 projection = ortho(-zRange.y, zRange.y, -zRange.y, zRange.y, zRange.x, zRange.y);
@@ -113,7 +112,7 @@ namespace Bagnall
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
 
-		glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
+		glViewport(0, 0, resolution, resolution);
 
 		mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zRange.x, zRange.y);
 		Shader::SetProjection(projection);
@@ -156,20 +155,6 @@ namespace Bagnall
 			source->EnableRender();
 	}
 
-	void Shadow::BindToGPU(int shadowMode)
-	{
-		if (shadowMode == SHADOW_MODE_UNI)
-		{
-			glActiveTexture(GL_TEXTURE0 + TEXTURE_SHADOW_2D);
-			glBindTexture(GL_TEXTURE_2D, depthBuffer);
-		}
-		else if (shadowMode == SHADOW_MODE_OMNI)
-		{
-			glActiveTexture(GL_TEXTURE0 + TEXTURE_SHADOW_CUBE);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
-		}
-	}
-
 	void Shadow::AddToDepthRenderList(VertexMesh *o)
 	{
 		auto it = std::find(depthRenderList.begin(), depthRenderList.end(), o);
@@ -184,9 +169,32 @@ namespace Bagnall
 			depthRenderList.erase(it);
 	}
 
-	void Shadow::SetZRange(const vec2& zr)
+	ShadowMode Shadow::GetMode()
 	{
-		zRange = zr;
+		return mode;
+	}
+
+	void Shadow::SetMode(ShadowMode m)
+	{
+		mode = m;
+
+		Shader::SetShadowMode(mode);
+
+		if (mode == SHADOW_MODE_UNI)
+			Shader::BindShadowMap(depthBuffer, mode);
+		else
+			Shader::BindShadowMap(depthCubeMap, mode);
+	}
+
+	void Shadow::SetZRange(float zNear, float zFar)
+	{
+		zRange = vec2(zNear, zFar);
+		Shader::SetShadowZRange(zRange);
+	}
+
+	void Shadow::SetResolution(ShadowResolution res)
+	{
+		resolution = res;
 	}
 
 	// PRIVATE
@@ -195,6 +203,8 @@ namespace Bagnall
 	GLuint Shadow::depthBuffer;
 	GLuint Shadow::depthCubeMap;
 	vec2 Shadow::zRange = vec2(1.0f, 2.0f);
+	ShadowMode Shadow::mode = SHADOW_MODE_NONE;
+	int Shadow::resolution = SHADOW_RESOLUTION_MEDIUM;
 
 	std::vector<VertexMesh*> Shadow::depthRenderList;
 
@@ -239,7 +249,7 @@ namespace Bagnall
 
 		vec4 centroid = sum / static_cast<float>(NUM_CORNERS);
 
-		cam = lookAt(vec3(centroid) + normalize(lightDir) * Game::ViewDistance, vec3(centroid), vec3(0.0f, 0.0f, 1.0f));
+		cam = lookAt(vec3(centroid) + normalize(lightDir) * Game::ViewDistance * 1.25f, vec3(centroid), vec3(0.0f, 0.0f, 1.0f));
 
 		std::vector<vec4> cornersInLightViewSpace;
 		for (int i = 0; i < NUM_CORNERS; ++i)

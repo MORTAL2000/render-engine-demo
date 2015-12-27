@@ -3,8 +3,8 @@
 
 //#define SHADOW_MAP_SIZE 512
 //#define SHADOW_MAP_SIZE 1024
-#define SHADOW_MAP_SIZE 2048
-//#define SHADOW_MAP_SIZE 4096
+//#define SHADOW_MAP_SIZE 2048
+#define SHADOW_MAP_SIZE 4096
 
 #include <GL/glew.h>
 #include <glm/vec2.hpp>
@@ -24,6 +24,14 @@ namespace Bagnall
 		SHADOW_MODE_OMNI
 	};
 
+	enum ShadowResolution
+	{
+		SHADOW_RESOLUTION_LOW = 512,
+		SHADOW_RESOLUTION_MEDIUM = 1024,
+		SHADOW_RESOLUTION_HIGH = 2048,
+		SHADOW_RESOLUTION_EXTRA_HIGH = 4096
+	};
+
 	class Shadow
 	{
 	public:
@@ -33,21 +41,24 @@ namespace Bagnall
 
 		static void RenderShadowCubeMap(const glm::vec3& sourcePos, DrawableObject* source);
 
-		static void BindToGPU(int shadowMode);
-
 		static void AddToDepthRenderList(VertexMesh *o);
 
 		static void RemoveFromDepthRenderList(VertexMesh *o);
 
-		static void SetZRange(const glm::vec2& zr);
+		static ShadowMode GetMode();
+		static void SetMode(ShadowMode mode);
 
-		static GLuint depthBuffer; // for shadow ortho map
+		static void SetZRange(float zNear, float zFar);
+
+		static void SetResolution(ShadowResolution res);
 
 	private:
 		static GLuint frameBuffer;
-		//static GLuint depthBuffer; // for shadow ortho map
+		static GLuint depthBuffer; // for shadow ortho map
 		static GLuint depthCubeMap; // for shadow cube map
 		static glm::vec2 zRange;
+		static ShadowMode mode;
+		static int resolution;
 
 		static std::vector<VertexMesh*> depthRenderList;
 
