@@ -195,11 +195,17 @@ namespace Bagnall
 			// TEXTURE
 			aiString texturePath;
 			aiMat->GetTexture(aiTextureType_DIFFUSE, 0, &texturePath);
+			aiString bumpMapPath;
+			aiMat->GetTexture(aiTextureType_HEIGHT, 0, &bumpMapPath);
 
 			// CREATE AND ADD MESH OBJECT TO SCHEMATIC
 			//VertexMesh vMesh(NULL, Material::Rubber(vec4(1.0f, 1.0f, 1.0f, 1.0f)), indexOffset, indexCount, false);
 			VertexMesh vMesh(NULL, Material::None(), indexOffset, indexCount, false);
-			vMesh.SetTexture(Texture::GetTextureByFile(texturePath.C_Str()));
+			std::string texName = texturePath.C_Str();
+			std::string texPath = "textures\\" + texName;
+			std::string bumpPath = "bumpmaps\\" + std::string(bumpMapPath.C_Str());
+			GLuint texture = Texture::LoadTexture(texName.c_str(), texPath.c_str(), bumpPath.c_str());
+			vMesh.SetTexture(texture);
 
 			schematicNode->vertexMeshes.push_back(vMesh);
 		}

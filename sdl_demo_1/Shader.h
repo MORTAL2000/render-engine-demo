@@ -4,6 +4,7 @@
 #include "Bagnall.h"
 #include <vector>
 #include <unordered_map>
+#include <string>
 
 namespace Bagnall
 {
@@ -41,7 +42,7 @@ namespace Bagnall
 
 		static void Init();
 
-		static void SetProgram(const char* programName);
+		static void SetProgram(std::string programName);
 
 		static void SetMaterialAmbient(const vec4& materialAmbient);
 		static void SetMaterialDiffuse(const vec4& materialDiffuse);
@@ -83,9 +84,9 @@ namespace Bagnall
 		static ShadowMode shadowMode;
 		static vec2 shadowZRange;
 
-		static std::unordered_map<const char*, GLuint> nameToProgramMap;
+		static std::unordered_map<std::string, GLuint> nameToProgramMap;
 		static std::unordered_map<GLuint, GLuint> programToVaoMap;
-		static std::unordered_map<GLuint, std::unordered_map<const char*, GLuint>> programToUniformMap;
+		static std::unordered_map<GLuint, std::unordered_map<std::string, GLuint>> programToUniformMap;
 
 		static void initEmissiveColorProgram();
 		static void initEmissiveTextureProgram();
@@ -98,9 +99,9 @@ namespace Bagnall
 		static void initCubeMapBumpProgram();
 		static void initTerrainTextureBumpProgram();
 
-		static GLuint getUniform(GLuint program, const char* name);
+		static GLuint getUniform(GLuint program, std::string name);
 
-		static int getUniformFromCurrentProgram(const char* uniformName);
+		static int getUniformFromCurrentProgram(std::string uniformName);
 	};
 }
 

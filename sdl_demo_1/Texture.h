@@ -33,8 +33,8 @@ namespace Bagnall
 		static std::unordered_map<GLuint, GLuint> cubeBumpMapMap;
 
 		static GLuint loadTexture(const char *path);
-
 		static GLuint loadCubeMap(const char *path);
+		static GLuint loadSkyboxCubeMap(const char *path);
 	};
 }
 

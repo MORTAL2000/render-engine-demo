@@ -48,6 +48,8 @@ namespace Bagnall
 
 		void SetReflectiveCubeMap(bool b);
 
+		void DisableShadowCasting();
+
 	private:
 		bool renderEnabled;
 

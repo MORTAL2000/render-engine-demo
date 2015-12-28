@@ -3,6 +3,7 @@
 #include "Material.h"
 #include "Shadow.h"
 #include <iostream>
+#include <string>
 
 namespace Bagnall
 {
@@ -78,7 +79,7 @@ namespace Bagnall
 		glUseProgram(nameToProgramMap["emissive_color"]);
 	}
 
-	void Shader::SetProgram(const char* programName)
+	void Shader::SetProgram(std::string programName)
 	{
 		GLuint program = nameToProgramMap[programName];
 		if (program == 0)
@@ -311,9 +312,9 @@ namespace Bagnall
 	ShadowMode Shader::shadowMode;
 	vec2 Shader::shadowZRange;
 
-	std::unordered_map<const char*, GLuint> Shader::nameToProgramMap;
+	std::unordered_map<std::string, GLuint> Shader::nameToProgramMap;
 	std::unordered_map<GLuint, GLuint> Shader::programToVaoMap;
-	std::unordered_map<GLuint, std::unordered_map<const char*, GLuint>> Shader::programToUniformMap;
+	std::unordered_map<GLuint, std::unordered_map<std::string, GLuint>> Shader::programToUniformMap;
 
 	void Shader::initEmissiveColorProgram()
 	{
@@ -334,7 +335,7 @@ namespace Bagnall
 		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -367,7 +368,7 @@ namespace Bagnall
 		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -404,7 +405,7 @@ namespace Bagnall
 		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -441,7 +442,7 @@ namespace Bagnall
 		glVertexAttribPointer(vPositionLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -473,7 +474,7 @@ namespace Bagnall
 		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -526,7 +527,7 @@ namespace Bagnall
 		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -591,7 +592,7 @@ namespace Bagnall
 		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -646,7 +647,7 @@ namespace Bagnall
 		glVertexAttribPointer(vNormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -709,7 +710,7 @@ namespace Bagnall
 		glVertexAttribPointer(vBinormalLoc, 4, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -778,7 +779,7 @@ namespace Bagnall
 		glVertexAttribPointer(vTextureCoordinateLoc, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(vec4)*Shader::Vertices.size() + sizeof(vec4)*Shader::Normals.size() + sizeof(vec4)*Shader::Tangents.size() + sizeof(vec4)*Shader::Binormals.size()));
 
 		// get uniform locations
-		std::unordered_map<const char*, GLuint> uniformMap;
+		std::unordered_map<std::string, GLuint> uniformMap;
 		uniformMap.emplace("model", getUniform(program, "model"));
 		uniformMap.emplace("camera", getUniform(program, "camera"));
 		uniformMap.emplace("projection", getUniform(program, "projection"));
@@ -826,15 +827,15 @@ namespace Bagnall
 		glUniform1i(uniformMap["bumpTex4"], TEXTURE_TERRAIN_BUMP_4);
 	}
 
-	GLuint Shader::getUniform(GLuint program, const char* name)
+	GLuint Shader::getUniform(GLuint program, std::string name)
 	{
-		GLuint loc = glGetUniformLocation(program, name);
+		GLuint loc = glGetUniformLocation(program, name.c_str());
 		if (loc == -1)
 			std::cerr << "unable to get " << name << " parameter from shader program\n";
 		return loc;
 	}
 
-	int Shader::getUniformFromCurrentProgram(const char* uniformName)
+	int Shader::getUniformFromCurrentProgram(std::string uniformName)
 	{
 		auto it = programToUniformMap[currentProgram].find(uniformName);
 		if (it != programToUniformMap[currentProgram].end())

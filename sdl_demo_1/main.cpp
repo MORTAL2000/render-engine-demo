@@ -82,14 +82,14 @@ void init(void)
 	EnvironmentMap::Init();
 	Schematic::Init();
 
-	terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\terrain3.jpg", 25.0f, 25.0f, 1.0f));
-	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\west_norway.png", 50.0f, 50.0f, 0.25f));
-	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("textures\\bill.png", 25.0f, 25.0f, 0.1f));
-	terrainMesh->SetTexture1(Texture::GetTextureByName("sand1"));
-	terrainMesh->SetTexture2(Texture::GetTextureByName("grass1"));
-	terrainMesh->SetTexture3(Texture::GetTextureByName("stone1"));
-	terrainMesh->SetTexture4(Texture::GetTextureByName("snow1"));
-	terrainMesh->SetTextureHeights(vec4(0.0f, 0.3f, 0.5f, 0.9f));
+	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\terrain3.jpg", 25.0f, 25.0f, 1.0f));
+	////terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\west_norway.png", 50.0f, 50.0f, 0.25f));
+	////terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("textures\\bill.png", 25.0f, 25.0f, 0.1f));
+	//terrainMesh->SetTexture1(Texture::GetTextureByName("sand1"));
+	//terrainMesh->SetTexture2(Texture::GetTextureByName("grass1"));
+	//terrainMesh->SetTexture3(Texture::GetTextureByName("stone1"));
+	//terrainMesh->SetTexture4(Texture::GetTextureByName("snow1"));
+	//terrainMesh->SetTextureHeights(vec4(0.0f, 0.3f, 0.5f, 0.9f));
 
 	// do this after all vertex data is loaded
 	Shader::Init();
@@ -170,20 +170,20 @@ void init(void)
 	//	//cube->Cull();
 	//}
 
-	//// C3POS LMAO
-	//for (int i = 0; i < 15; ++i)
-	//{
-	//	DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("c3po"));
-	//	o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
-	//	o->RotateX(-M_PI / 2.0f);
-	//	//cube->SetTexture(Texture::GetTextureByName("shrek"));
-	//	//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
-	//	//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
-	//	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
-	//	o->Scale(5.0f);
-	//	objects.push_back(o);
-	//	//cube->Cull();
-	//}
+	// C3POS LMAO
+	for (int i = 0; i < 15; ++i)
+	{
+		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("c3po"));
+		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		o->RotateX(-M_PI / 2.0f);
+		//cube->SetTexture(Texture::GetTextureByName("shrek"));
+		//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+		//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		o->Scale(5.0f);
+		objects.push_back(o);
+		//cube->Cull();
+	}
 
 	// MIDDLE CUBE
 	//middleCube = new Cube(objectContainer);
@@ -235,10 +235,18 @@ void init(void)
 	player->Scale(1.0f);
 
 	// GIANT SKY CUBE
-	/*Skybox *skybox = new Skybox(rootObject);
-	skybox->SetTexture(Texture::GetTextureByName("shrek"));
-	skybox->SetMaterial(Material::WhiteRubber());
-	skybox->SetScale(Game::WorldSize);*/
+	Skybox *skybox = new Skybox(camera);
+	//skybox->SetTexture(Texture::GetTextureByName("shrek"));
+	skybox->SetCubeMap(Texture::GetCubeMapByName("skybox_2"));
+	//skybox->SetTexture(Texture::GetTextureByName("skybox_2"));
+	//skybox->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
+	skybox->SetEmissive(true);
+	//skybox->SetMaterial(Material::WhiteRubber());
+	skybox->SetScale(Game::ViewDistance);
+	skybox->RotateX(-M_PI / 2.0f);
+	skybox->RotateZ(M_PI);
+	skybox->DisableShadowCasting();
+	skybox->AddIgnoreParentModelFlag(IGNORE_PARENT_ROTATIONX | IGNORE_PARENT_ROTATIONY | IGNORE_PARENT_ROTATIONZ);
 
 	//// FLOOR
 	//float floorScale = Game::WorldSize / 10.0f;
@@ -335,10 +343,10 @@ void init(void)
 	//eastWall->SetRotationZ(M_PI / 2.0);
 	//eastWall->Translate(vec4(Game::WorldSize / 2.0f, 0.0, 0.0, 0.0));
 
-	terrain = new DrawableObject(rootObject);
+	/*terrain = new DrawableObject(rootObject);
 	terrain->AddVertexMesh(terrainMesh);
 	terrain->SetScale(10.0f);
-	terrain->Translate(vec4(-2000.0f, -2000.0f, -2500.0f, 0.0f));
+	terrain->Translate(vec4(-2000.0f, -2000.0f, -2500.0f, 0.0f));*/
 
 	// SET SHADOW NEAR AND FAR PLANES
 	Shadow::SetZRange(100.0f, Game::ViewDistance);

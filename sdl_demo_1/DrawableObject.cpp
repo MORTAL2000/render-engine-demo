@@ -152,6 +152,14 @@ namespace Bagnall
 			(*it)->SetReflectiveCubeMap(b);
 	}
 
+	void DrawableObject::DisableShadowCasting()
+	{
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			Shadow::RemoveFromDepthRenderList(*it);
+		for (auto it = children.begin(); it != children.end(); ++it)
+			static_cast<DrawableObject*>(*it)->DisableShadowCasting();
+	};
+
 	// PRIVATE
 
 	void DrawableObject::init()

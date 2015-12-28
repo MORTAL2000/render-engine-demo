@@ -5,7 +5,8 @@ namespace Bagnall
 {
 	// PUBLIC
 
-	float Game::WorldSize = 5000.0f;
+	float Game::WorldSize = 500.0f;
+	//float Game::WorldSize = 10000.0f;
 	float Game::ViewDistance;
 
 	mat4 Game::Projection;

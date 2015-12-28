@@ -10,13 +10,13 @@ namespace Bagnall
 	public:
 		static void Init();
 
-		Skybox(Object *par) : DrawableObject(par) {}
+		Skybox(Object *par);
 
 		void Draw() const;
 
 	private:
-		static int globalVertexOffset;
-		static int vertexCount;
+		static int indexOffset;
+		static int indexCount;
 
 		static void createPrototypeVertices();
 	};

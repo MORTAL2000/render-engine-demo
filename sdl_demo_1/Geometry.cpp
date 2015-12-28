@@ -486,12 +486,19 @@ namespace Bagnall
 		std::vector<vec2> texCoords;
 
 		// FRONT
-		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
+		/*texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
 		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
 		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
 		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
 		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));*/
+
+		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
+		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
 		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
+		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 1.0 / 3.0));
 
 		// BACK
 		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.75, 1.0 / 3.0));
@@ -509,7 +516,7 @@ namespace Bagnall
 		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.0, 1.0 / 3.0));
 		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.0, 1.0 / 3.0));
 
-		// TOP
+		// BOTTOM
 		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
 		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
 		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
@@ -517,22 +524,30 @@ namespace Bagnall
 		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
 		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
 
+		/*texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
+		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));
+		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 2.0 / 3.0));*/
+
 
 		// RIGHT
-		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
-		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
-		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
-		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
 		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
-		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
+		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
 
-		// BOTTOM
-		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) * 0.98f + vec2(0.25, 0.0));
-		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) * 0.98f + vec2(0.25, 0.0));
-		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) * 0.98f + vec2(0.25, 0.0));
-		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) * 0.98f + vec2(0.25, 0.0));
-		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) * 0.98f + vec2(0.25, 0.0));
-		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) * 0.98f + vec2(0.25, 0.0));
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
+		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
+		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.5, 1.0 / 3.0));
+
+		// TOP
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 0.0));
+		texCoords.push_back(vec2(0.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 0.0));
+		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 0.0));
+		texCoords.push_back(vec2(1.0, 1.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 0.0));
+		texCoords.push_back(vec2(1.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 0.0));
+		texCoords.push_back(vec2(0.0, 0.0) * vec2(0.25, 1.0 / 3.0) + vec2(0.25, 0.0));
 
 		return texCoords;
 	}
