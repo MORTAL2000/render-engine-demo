@@ -24,14 +24,16 @@ namespace Bagnall
 	public:
 		static void Init();
 
-		static void InitSchematic(const char *filepath, const char *name);
+		static void Cleanup();
+
+		static int InitSchematic(const char *filepath, const char *name, std::string subdirectory = "");
 
 		static SchematicNode* GetSchematicByName(const char *name);
 
 	private:
 		static std::unordered_map<const char*, SchematicNode*> schematicNodeMap;
 
-		static SchematicNode* buildSchematic(const aiScene *scene, aiNode *node);
+		static SchematicNode* buildSchematic(const aiScene *scene, aiNode *node, std::string subdirectory);
 	};
 }
 

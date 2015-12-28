@@ -127,17 +127,11 @@ namespace Bagnall
 		}
 
 		Shader::Vertices.insert(Shader::Vertices.end(), vertices.begin(), vertices.end());
-		//vertices.clear();
 		Shader::Normals.insert(Shader::Normals.end(), normals.begin(), normals.end());
-		//normals.clear();
 		Shader::Tangents.insert(Shader::Tangents.end(), tangents.begin(), tangents.end());
-		//tangents.clear();
 		Shader::Binormals.insert(Shader::Binormals.end(), binormals.begin(), binormals.end());
-		//binormals.clear();
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), textureCoords.begin(), textureCoords.end());
-		//textureCoords.clear();
 		Shader::VertexIndices.insert(Shader::VertexIndices.end(), indices.begin(), indices.end());
-		//indices.clear();
 
 		TerrainVertexMesh mesh = TerrainVertexMesh(Material::Plastic(vec4(0.5f, 0.5f, 0.5f, 1.0f)), indexOffset, indices.size());
 		mesh.SetGroundCoordZ(0.0f);

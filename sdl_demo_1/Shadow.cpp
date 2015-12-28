@@ -100,7 +100,7 @@ namespace Bagnall
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		Shader::SetCamera(Game::Camera);
+		Shader::SetCamera(Game::CameraMatrix);
 	}
 
 	void Shadow::RenderShadowCubeMap(const vec3& sourcePos, DrawableObject* source)
@@ -149,7 +149,7 @@ namespace Bagnall
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-		Shader::SetCamera(Game::Camera);
+		Shader::SetCamera(Game::CameraMatrix);
 
 		if (source != NULL)
 			source->EnableRender();
@@ -233,7 +233,7 @@ namespace Bagnall
 			vec4(1.0f, -1.0f, 1.0f, 1.0f)
 		};
 
-		mat4 inverseProj = inverse(Game::Projection * Game::Camera);
+		mat4 inverseProj = inverse(Game::ProjectionMatrix * Game::CameraMatrix);
 
 		std::vector<vec4> cornersInWorldSpace;
 		for (int i = 0; i < NUM_CORNERS; ++i)

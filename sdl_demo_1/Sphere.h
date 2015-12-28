@@ -10,7 +10,7 @@ namespace Bagnall
 	public:
 		static void Init();
 
-		Sphere(Object *par);
+		Sphere(const Object *par);
 
 		//void Draw() const;
 

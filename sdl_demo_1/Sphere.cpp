@@ -12,7 +12,7 @@ namespace Bagnall
 		createPrototypeVertices();
 	}
 
-	Sphere::Sphere(Object *par) : DrawableObject(par)
+	Sphere::Sphere(const Object *par) : DrawableObject(par)
 	{
 		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("sphere");
 		mesh.SetOwner(this);

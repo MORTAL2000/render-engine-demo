@@ -40,7 +40,7 @@ namespace Bagnall
 	class Object
 	{
 	public:
-		Object(Object *parent);
+		Object(const Object *parent);
 
 		virtual ~Object();
 

@@ -107,7 +107,7 @@ namespace Bagnall
 			source->EnableRender();
 
 		Shader::SetShadowMode(shadowMode);
-		Shader::SetCamera(Game::Camera);
+		Shader::SetCamera(Game::CameraMatrix);
 	}
 	
 	// PRIVATE

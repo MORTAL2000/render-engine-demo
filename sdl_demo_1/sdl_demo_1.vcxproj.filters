@@ -185,6 +185,12 @@
     <None Include="model\Millennium_Falcon.mtl">
       <Filter>Resource Files\models</Filter>
     </None>
+    <None Include="shaders\fragment\fshader_terrain_texture_bump.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_terrain_texture_bump.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bagnall.h">

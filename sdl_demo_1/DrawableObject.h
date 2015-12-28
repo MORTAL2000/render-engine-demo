@@ -12,9 +12,9 @@ namespace Bagnall
 	class DrawableObject : public Object
 	{
 	public:
-		DrawableObject(Object *par);
+		DrawableObject(const Object *par);
 
-		DrawableObject(Object *par, SchematicNode *schematic);
+		DrawableObject(const Object *par, SchematicNode *schematic);
 
 		virtual void Draw() const;
 

@@ -9,7 +9,7 @@ namespace Bagnall
 {
 	// PUBLIC
 
-	Object::Object(Object *parent)
+	Object::Object(const Object *parent)
 	{
 		position = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 		oldPosition = position;

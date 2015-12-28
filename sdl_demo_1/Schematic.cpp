@@ -15,35 +15,32 @@ namespace Bagnall
 
 	void Schematic::Init()
 	{
-		aiLogStream stream;
-		// get a handle to the predefined STDOUT log stream and attach
-		// it to the logging system. It remains active for all further
-		// calls to aiImportFile(Ex) and aiApplyPostProcessing.
-		stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, NULL);
-		aiAttachLogStream(&stream);
-		// ... same procedure, but this stream now writes the
-		// log messages to assimp_log.txt
-		stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
-		aiAttachLogStream(&stream);
+		//aiLogStream stream;
+		//// get a handle to the predefined STDOUT log stream and attach
+		//// it to the logging system. It remains active for all further
+		//// calls to aiImportFile(Ex) and aiApplyPostProcessing.
+		//stream = aiGetPredefinedLogStream(aiDefaultLogStream_STDOUT, NULL);
+		//aiAttachLogStream(&stream);
+		//// ... same procedure, but this stream now writes the
+		//// log messages to assimp_log.txt
+		//stream = aiGetPredefinedLogStream(aiDefaultLogStream_FILE, "assimp_log.txt");
+		//aiAttachLogStream(&stream);
+	}
 
-		InitSchematic("models\\Millennium_Falcon.obj", "millennium_falcon");
-
-		InitSchematic("models\\R2-D2.obj", "r2d2");
-
-		InitSchematic("models\\C-3PO_v2.obj", "c3po");
-
+	void Schematic::Cleanup()
+	{
 		// We added a log stream to the library, it's our job to disable it
 		// again. This will definitely release the last resources allocated
 		// by Assimp.
 		aiDetachAllLogStreams();
 	}
 
-	void Schematic::InitSchematic(const char *filepath, const char *name)
+	int Schematic::InitSchematic(const char *filepath, const char *name, std::string subdirectory)
 	{
 		if (schematicNodeMap.find(name) != schematicNodeMap.end())
 		{
 			std::cerr << "schematic with name " << name << ". already exists\n";
-			return;
+			return -1;
 		}
 
 		const aiScene *scene = NULL;
@@ -51,19 +48,22 @@ namespace Bagnall
 		if ((scene = aiImportFile(filepath, aiProcessPreset_TargetRealtime_MaxQuality)) != NULL)
 		//if ((scene = aiImportFile("model\\Millennium_Falcon.obj", aiProcessPreset_TargetRealtime_Fast)) != NULL)
 		{
-			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode);
+			SchematicNode *schematic = buildSchematic(scene, scene->mRootNode, subdirectory);
 
 			schematicNodeMap.emplace(name, schematic);
 		}
 		else
 		{
 			std::cerr << aiGetErrorString() << std::endl;
+			return -2;
 		}
 
 		// cleanup - calling 'aiReleaseImport' is important, as the library 
 		// keeps internal resources until the scene is freed again. Not 
 		// doing so can cause severe resource leaking.
 		aiReleaseImport(scene);
+
+		return 0;
 	}
 
 	SchematicNode* Schematic::GetSchematicByName(const char *name)
@@ -74,7 +74,7 @@ namespace Bagnall
 	// PRIVATE
 	std::unordered_map<const char*, SchematicNode*> Schematic::schematicNodeMap;
 
-	SchematicNode* Schematic::buildSchematic(const aiScene *scene, aiNode *node)
+	SchematicNode* Schematic::buildSchematic(const aiScene *scene, aiNode *node, std::string subdirectory)
 	{
 		SchematicNode *schematicNode = new SchematicNode();
 
@@ -202,9 +202,13 @@ namespace Bagnall
 			//VertexMesh vMesh(NULL, Material::Rubber(vec4(1.0f, 1.0f, 1.0f, 1.0f)), indexOffset, indexCount, false);
 			VertexMesh vMesh(NULL, Material::None(), indexOffset, indexCount, false);
 			std::string texName = texturePath.C_Str();
-			std::string texPath = "textures\\" + texName;
-			std::string bumpPath = "bumpmaps\\" + std::string(bumpMapPath.C_Str());
-			GLuint texture = Texture::LoadTexture(texName.c_str(), texPath.c_str(), bumpPath.c_str());
+			std::string texPath = "textures\\" + subdirectory + "\\" + texName;
+			std::string bumpPath = "bumpmaps\\" + subdirectory + "\\" + std::string(bumpMapPath.C_Str());
+			GLuint texture = 0;
+			if (texName != "")
+				texture = Texture::LoadTexture(texName.c_str(), texPath.c_str(), bumpPath.c_str());
+			else
+				vMesh.SetMaterial(mat);
 			vMesh.SetTexture(texture);
 
 			schematicNode->vertexMeshes.push_back(vMesh);
@@ -213,7 +217,7 @@ namespace Bagnall
 		// recursively build children schematic nodes
 		for (uint i = 0; i < node->mNumChildren; ++i)
 		{
-			SchematicNode *childNode = buildSchematic(scene, node->mChildren[i]);
+			SchematicNode *childNode = buildSchematic(scene, node->mChildren[i], subdirectory);
 			if (childNode != NULL)
 				schematicNode->children.push_back(childNode);
 		}

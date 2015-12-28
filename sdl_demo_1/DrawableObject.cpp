@@ -13,12 +13,12 @@ namespace Bagnall
 {
 	// PUBLIC
 
-	DrawableObject::DrawableObject(Object *par) : Object(par)
+	DrawableObject::DrawableObject(const Object *par) : Object(par)
 	{
 		init();
 	}
 
-	DrawableObject::DrawableObject(Object *par, SchematicNode *schematic) : DrawableObject(par)
+	DrawableObject::DrawableObject(const Object *par, SchematicNode *schematic) : DrawableObject(par)
 	{
 		for (auto it = schematic->vertexMeshes.begin(); it != schematic->vertexMeshes.end(); ++it)
 		{
