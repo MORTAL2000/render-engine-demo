@@ -10,10 +10,12 @@ namespace Bagnall
 	class Texture
 	{
 	public:
-		static void Init();
+		static void InitTextureLoading();
+		static void EndTextureLoading();
 
 		static GLuint LoadTexture(const char *name, const char *filePath, const char *bumpPath = nullptr);
 		static GLuint LoadCubeMap(const char *name, const char *filePath, const char *bumpPath = nullptr);
+		static GLuint LoadCubeMapMirrored(const char *name, const char *filePath, const char *bumpPath = nullptr);
 
 		static GLuint GetTextureByName(std::string name);
 		static GLuint GetTextureByFile(std::string path);
@@ -34,7 +36,7 @@ namespace Bagnall
 
 		static GLuint loadTexture(const char *path);
 		static GLuint loadCubeMap(const char *path);
-		static GLuint loadSkyboxCubeMap(const char *path);
+		static GLuint loadCubeMapMirrored(const char *path);
 	};
 }
 

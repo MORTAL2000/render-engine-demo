@@ -71,7 +71,6 @@ namespace Bagnall
 		Sphere::Init();
 		Skybox::Init();
 		LightSource::Init();
-		Texture::Init();
 		Shadow::Init();
 		EnvironmentMap::Init();
 		Schematic::Init();
@@ -93,6 +92,9 @@ namespace Bagnall
 
 		// SET SHADOW NEAR AND FAR PLANES
 		Shadow::SetZRange(2.0f, Game::ViewDistance);
+
+		// enable seamless cube maps
+		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
 		std::cout << "Puddi initialization complete.\n";
 

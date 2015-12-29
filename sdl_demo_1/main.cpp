@@ -46,6 +46,26 @@ GLuint tempTexture;
 
 void init(void)
 {
+	Texture::InitTextureLoading();
+
+	Texture::LoadTexture("shrek", "textures\\Shrek-and-Yoda.jpg", "bumpmaps\\Shrek-and-Yoda_NRM.jpg");
+	Texture::LoadTexture("ben", "textures\\ben.jpg", "bumpmaps\\ben_NRM.jpg");
+	Texture::LoadTexture("stone_wall", "textures\\stone_wall.jpg", "bumpmaps\\stone_wall_NRM.jpg");
+	Texture::LoadTexture("costanza", "textures\\costanza.jpg", "bumpmaps\\costanza_NRM.jpg");
+	Texture::LoadTexture("dowm_furry", "textures\\dowm furry.jpg", "bumpmaps\\dowm furry_NRM.jpg");
+	Texture::LoadTexture("isaac_final_form", "textures\\finalformsquare.jpg", "bumpmaps\\finalformsquare_NRM.jpg");
+	Texture::LoadTexture("bill", "textures\\bill.png", "bumpmaps\\bill_NRM.jpg");
+	Texture::LoadCubeMap("cubemap_test_1", "textures\\cubemap_test_1.jpg", "bumpmaps\\cubemap_test_1_NRM.jpg");
+	Texture::LoadTexture("skybox_2", "textures\\skybox2.jpg");
+	//Texture::LoadCubeMap("skybox_2", "textures\\skybox2.jpg");
+	Texture::LoadCubeMapMirrored("skybox_2", "textures\\skybox2.jpg");
+	Texture::LoadTexture("sand1", "textures\\sand1.jpg", "bumpmaps\\sand1_NRM.jpg");
+	Texture::LoadTexture("grass1", "textures\\grass1.jpg", "bumpmaps\\grass1_NRM.jpg");
+	Texture::LoadTexture("stone1", "textures\\stone1.jpg", "bumpmaps\\stone1_NRM.jpg");
+	Texture::LoadTexture("snow1", "textures\\snow1.jpg", "bumpmaps\\snow1_NRM.jpg");
+
+	Texture::EndTextureLoading();
+
 	if (Schematic::InitSchematic("models\\Millennium_Falcon.obj", "millennium_falcon") < 0)
 		std::cerr << "error loading Millennium_Falcon model\n";
 	if (Schematic::InitSchematic("models\\R2-D2.obj", "r2d2") < 0)

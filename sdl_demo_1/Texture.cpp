@@ -9,56 +9,13 @@ namespace Bagnall
 {
 	// PUBLIC
 
-	void Texture::Init()
+	void Texture::InitTextureLoading()
 	{
 		IMG_Init(IMG_INIT_JPG | IMG_INIT_PNG);
+	}
 
-		// enable seamless cube maps
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-
-		GLuint tex;
-		GLuint bump;
-
-		// SHREK
-		LoadTexture("shrek", "textures\\Shrek-and-Yoda.jpg", "bumpmaps\\Shrek-and-Yoda_NRM.jpg");
-
-		// BEN
-		LoadTexture("ben", "textures\\ben.jpg", "bumpmaps\\ben_NRM.jpg");
-
-		// STONE WALL
-		LoadTexture("stone_wall", "textures\\stone_wall.jpg", "bumpmaps\\stone_wall_NRM.jpg");
-
-		// COSTANZA
-		LoadTexture("costanza", "textures\\costanza.jpg", "bumpmaps\\costanza_NRM.jpg");
-
-		// DOWM FURRY
-		LoadTexture("dowm_furry", "textures\\dowm furry.jpg", "bumpmaps\\dowm furry_NRM.jpg");
-
-		// ISAAC FINAL FORM
-		LoadTexture("isaac_final_form", "textures\\finalformsquare.jpg", "bumpmaps\\finalformsquare_NRM.jpg");
-
-		// BILL
-		LoadTexture("bill", "textures\\bill.png", "bumpmaps\\bill_NRM.jpg");
-
-		// CUBEMAP TEST 1
-		LoadCubeMap("cubemap_test_1", "textures\\cubemap_test_1.jpg", "bumpmaps\\cubemap_test_1_NRM.jpg");
-
-		// skybox 1
-		LoadTexture("skybox_2", "textures\\skybox2.jpg");
-		LoadCubeMap("skybox_2", "textures\\skybox2.jpg");
-
-		// sand1
-		LoadTexture("sand1", "textures\\sand1.jpg", "bumpmaps\\sand1_NRM.jpg");
-
-		// grass1
-		LoadTexture("grass1", "textures\\grass1.jpg", "bumpmaps\\grass1_NRM.jpg");
-
-		// stone1
-		LoadTexture("stone1", "textures\\stone1.jpg", "bumpmaps\\stone1_NRM.jpg");
-
-		// snow1
-		LoadTexture("snow1", "textures\\snow1.jpg", "bumpmaps\\snow1_NRM.jpg");
-
+	void Texture::EndTextureLoading()
+	{
 		// release texture loading stuff
 		IMG_Quit();
 	}
@@ -83,6 +40,19 @@ namespace Bagnall
 		{
 			cubeMapMap.emplace(name, cubeMap);
 			GLuint bump = loadCubeMap(bumpPath);
+			if (bump != 0)
+				cubeBumpMapMap.emplace(cubeMap, bump);
+		}
+		return cubeMap;
+	}
+
+	GLuint Texture::LoadCubeMapMirrored(const char *name, const char *filePath, const char *bumpPath)
+	{
+		GLuint cubeMap = LoadCubeMapMirrored(filePath);
+		if (cubeMap != 0)
+		{
+			cubeMapMap.emplace(name, cubeMap);
+			GLuint bump = LoadCubeMapMirrored(bumpPath);
 			if (bump != 0)
 				cubeBumpMapMap.emplace(cubeMap, bump);
 		}
@@ -289,7 +259,7 @@ namespace Bagnall
 		return cubeMap;
 	}
 
-	GLuint Texture::loadSkyboxCubeMap(const char *path)
+	GLuint Texture::loadCubeMapMirrored(const char *path)
 	{
 		if (path == nullptr)
 			return 0;
@@ -315,42 +285,39 @@ namespace Bagnall
 		rect.w = surface->w / 4;
 		rect.h = surface->h / 3;
 		SDL_Surface *subSurface = SDL_CreateRGBSurface(0, rect.w, rect.h, 32, 0, 0, 0, 0);
-		SDL_Surface *subSurfaceMirrored = nullptr;
 
 		// LEFT
-		rect.x = 0;
+		rect.x = rect.w * 3;
 		rect.y = rect.h;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
-		subSurfaceMirrored = SDLUtil::mirrorSurfaceX(subSurface);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurfaceMirrored->pixels);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// FRONT
-		rect.x = rect.w;
+		rect.x = rect.w * 2;
 		rect.y = rect.h;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// RIGHT
-		rect.x = rect.w * 2;
+		rect.x = rect.w;
 		rect.y = rect.h;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
-		//subSurfaceRotated = rotozoomSurface(subSurface, 90.0, 1.0, 0);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// BACK
-		rect.x = rect.w * 3;
+		rect.x = 0;
 		rect.y = rect.h;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// TOP
-		rect.x = rect.w;
+		rect.x = rect.w * 2;
 		rect.y = 0;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// BOTTOM
-		rect.x = rect.w;
+		rect.x = rect.w * 2;
 		rect.y = rect.h * 2;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
@@ -361,7 +328,6 @@ namespace Bagnall
 		// free the surface resources
 		SDL_FreeSurface(surface);
 		SDL_FreeSurface(subSurface);
-		SDL_FreeSurface(subSurfaceMirrored);
 
 		return cubeMap;
 	}
