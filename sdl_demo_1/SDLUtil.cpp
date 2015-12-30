@@ -100,7 +100,7 @@ namespace Bagnall
 		}
 	}
 
-	SDL_Surface* SDLUtil::mirrorSurfaceX(SDL_Surface *screen)
+	/*SDL_Surface* SDLUtil::mirrorSurfaceX(SDL_Surface *screen)
 	{
 		SDL_Surface* newimg = SDL_CreateRGBSurface(0, screen->w, screen->h, screen->format->BitsPerPixel, screen->format->Rmask, screen->format->Gmask, screen->format->Bmask, screen->format->Amask);
 
@@ -113,7 +113,7 @@ namespace Bagnall
 		}
 
 		return newimg;
-	}
+	}*/
 
 	SDL_Surface* SDLUtil::mirrorSurfaceY(SDL_Surface *screen)
 	{
@@ -128,5 +128,29 @@ namespace Bagnall
 		}
 
 		return newimg;
+	}
+
+	void SDLUtil::mirrorSurfaceX(SDL_Surface *surface)
+	{
+		Uint32 *pixels = (Uint32*)surface->pixels;
+		Uint32 *mirroredPixels = new Uint32[surface->h * surface->w];
+
+		for (int i = 0; i < surface->h; ++i)
+		{
+			for (int j = 0; j < surface->w; ++j)
+			{
+				mirroredPixels[i * surface->w + j] = pixels[i * surface->w + (surface->w - j)];
+			}
+		}
+
+		for (int i = 0; i < surface->h; ++i)
+		{
+			for (int j = 0; j < surface->w; ++j)
+			{
+				pixels[i * surface->w + j] = mirroredPixels[i * surface->w + j];
+			}
+		}
+		//memcpy(pixels, mirroredPixels, surface->h * surface->w * sizeof(Uint32));
+		delete[] mirroredPixels;
 	}
 }

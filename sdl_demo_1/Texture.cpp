@@ -48,11 +48,11 @@ namespace Bagnall
 
 	GLuint Texture::LoadCubeMapMirrored(const char *name, const char *filePath, const char *bumpPath)
 	{
-		GLuint cubeMap = LoadCubeMapMirrored(filePath);
+		GLuint cubeMap = loadCubeMapMirrored(filePath);
 		if (cubeMap != 0)
 		{
 			cubeMapMap.emplace(name, cubeMap);
-			GLuint bump = LoadCubeMapMirrored(bumpPath);
+			GLuint bump = loadCubeMapMirrored(bumpPath);
 			if (bump != 0)
 				cubeBumpMapMap.emplace(cubeMap, bump);
 		}
@@ -259,6 +259,90 @@ namespace Bagnall
 		return cubeMap;
 	}
 
+	//GLuint Texture::loadCubeMapMirrored(const char *path)
+	//{
+	//	if (path == nullptr)
+	//		return 0;
+
+	//	SDL_Surface *surface = IMG_Load(path);
+
+	//	if (surface == NULL)
+	//	{
+	//		std::cerr << "unable to load file " << path << std::endl;
+	//		return 0;
+	//	}
+
+	//	GLuint cubeMap;
+	//	glGenTextures(1, &cubeMap);
+	//	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
+
+	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
+	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
+	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	//	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	//	SDL_Rect rect;
+	//	rect.w = surface->w / 4;
+	//	rect.h = surface->h / 3;
+	//	SDL_Surface *subSurface = SDL_CreateRGBSurface(0, rect.w, rect.h, 32, 0, 0, 0, 0);
+
+	//	// LEFT
+	//	rect.x = rect.w * 3;
+	//	rect.y = rect.h;
+	//	SDL_BlitSurface(surface, &rect, subSurface, NULL);
+	//	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+	//	// BACK
+	//	rect.x = rect.w * 2;
+	//	rect.y = rect.h;
+	//	SDL_BlitSurface(surface, &rect, subSurface, NULL);
+	//	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+	//	// RIGHT
+	//	rect.x = rect.w;
+	//	rect.y = rect.h;
+	//	SDL_BlitSurface(surface, &rect, subSurface, NULL);
+	//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+	//	// FRONT
+	//	rect.x = 0;
+	//	rect.y = rect.h;
+	//	SDL_BlitSurface(surface, &rect, subSurface, NULL);
+	//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+	//	// TOP
+	//	rect.x = rect.w * 2;
+	//	rect.y = 0;
+	//	SDL_BlitSurface(surface, &rect, subSurface, NULL);
+	//	Uint32* pixels = (Uint32*)subSurface->pixels;
+	//	for (int i = 0; i < subSurface->h; ++i)
+	//	{
+	//		for (int j = 0; j < subSurface->w; ++j)
+	//		{
+	//			//pixels[i * subSurface->w + j] = pixels[j * subSurface->w + i];
+	//			//pixels[i * subSurface->w + j] = 255;
+	//			//pixels[i * subSurface->w + j] = pixels[(subSurface->h - i) * subSurface->w + (subSurface->w - j)];
+	//			pixels[i * subSurface->w + j] = pixels[i * subSurface->w + (subSurface->w - j)];
+	//		}
+	//	}
+	//	glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+	//	// BOTTOM
+	//	rect.x = rect.w * 2;
+	//	rect.y = rect.h * 2;
+	//	SDL_BlitSurface(surface, &rect, subSurface, NULL);
+	//	glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+	//	// Unbind the texture
+	//	glBindTexture(GL_TEXTURE_CUBE_MAP, NULL);
+
+	//	// free the surface resources
+	//	SDL_FreeSurface(surface);
+	//	SDL_FreeSurface(subSurface);
+
+	//	return cubeMap;
+	//}
+
 	GLuint Texture::loadCubeMapMirrored(const char *path)
 	{
 		if (path == nullptr)
@@ -287,39 +371,45 @@ namespace Bagnall
 		SDL_Surface *subSurface = SDL_CreateRGBSurface(0, rect.w, rect.h, 32, 0, 0, 0, 0);
 
 		// LEFT
-		rect.x = rect.w * 3;
-		rect.y = rect.h;
-		SDL_BlitSurface(surface, &rect, subSurface, NULL);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
-
-		// FRONT
-		rect.x = rect.w * 2;
-		rect.y = rect.h;
-		SDL_BlitSurface(surface, &rect, subSurface, NULL);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
-
-		// RIGHT
-		rect.x = rect.w;
-		rect.y = rect.h;
-		SDL_BlitSurface(surface, &rect, subSurface, NULL);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
-
-		// BACK
 		rect.x = 0;
 		rect.y = rect.h;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		SDLUtil::mirrorSurfaceX(subSurface);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+		// FRONT
+		rect.x = rect.w;
+		rect.y = rect.h;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		SDLUtil::mirrorSurfaceX(subSurface);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+		// RIGHT
+		rect.x = rect.w * 2;
+		rect.y = rect.h;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		SDLUtil::mirrorSurfaceX(subSurface);
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
+
+		// BACK
+		rect.x = rect.w * 3;
+		rect.y = rect.h;
+		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		SDLUtil::mirrorSurfaceX(subSurface);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// TOP
-		rect.x = rect.w * 2;
+		rect.x = rect.w;
 		rect.y = 0;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		SDLUtil::mirrorSurfaceX(subSurface);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// BOTTOM
-		rect.x = rect.w * 2;
+		rect.x = rect.w;
 		rect.y = rect.h * 2;
 		SDL_BlitSurface(surface, &rect, subSurface, NULL);
+		SDLUtil::mirrorSurfaceX(subSurface);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA8, rect.w, rect.h, 0, GL_BGRA, GL_UNSIGNED_BYTE, subSurface->pixels);
 
 		// Unbind the texture
