@@ -57,8 +57,8 @@ void init(void)
 	Texture::LoadTexture("bill", "textures\\bill.png", "bumpmaps\\bill_NRM.jpg");
 	Texture::LoadCubeMap("cubemap_test_1", "textures\\cubemap_test_1.jpg", "bumpmaps\\cubemap_test_1_NRM.jpg");
 	Texture::LoadTexture("skybox_2", "textures\\skybox2.jpg");
-	//Texture::LoadCubeMap("skybox_2", "textures\\skybox2.jpg");
-	Texture::LoadCubeMapMirrored("skybox_2", "textures\\skybox2.jpg");
+	Texture::LoadCubeMap("skybox_2", "textures\\skybox2.jpg");
+	//Texture::LoadCubeMapMirrored("skybox_2", "textures\\skybox2.jpg");
 	Texture::LoadTexture("sand1", "textures\\sand1.jpg", "bumpmaps\\sand1_NRM.jpg");
 	Texture::LoadTexture("grass1", "textures\\grass1.jpg", "bumpmaps\\grass1_NRM.jpg");
 	Texture::LoadTexture("stone1", "textures\\stone1.jpg", "bumpmaps\\stone1_NRM.jpg");

@@ -132,6 +132,7 @@
     <ClCompile Include="FpsTracker.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="HeightMap.cpp" />
     <ClCompile Include="HeightMapTerrain.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="LightSource.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="FpsTracker.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="HeightMap.h" />
     <ClInclude Include="HeightMapTerrain.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="LightSource.h" />
