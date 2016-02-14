@@ -4,7 +4,7 @@
 //#include "Shader.h"
 //#include <glm/vec2.hpp>
 //#include <glm/vec4.hpp>
-#include <GL/glew.h>
+#include <GL\glew.h>
 #include <unordered_map>
 
 namespace Bagnall
