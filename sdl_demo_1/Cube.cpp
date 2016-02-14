@@ -16,6 +16,7 @@ Date:				December 9, 2015
 #include "Util.h"
 #include "Shader.h"
 #include "VertexMesh.h"
+#include "Material.h"
 
 namespace Bagnall
 {
@@ -28,7 +29,9 @@ namespace Bagnall
 
 	Cube::Cube(Object *par) : DrawableObject(par)
 	{
-		vertexMesh = VertexMesh::GetVertexMeshByName("cube");
+		auto mesh = VertexMesh::GetVertexMeshPrototypeByName("cube");
+		mesh.SetOwner(this);
+		vertexMeshes.push_back(new VertexMesh(mesh));
 	}
 
 	//void Cube::Draw() const
@@ -50,7 +53,7 @@ namespace Bagnall
 
 	// PRIVATE
 
-	int Cube::globalVertexOffset, Cube::vertexCount;
+	int Cube::indexOffset, Cube::indexCount;
 
 	void Cube::createPrototypeVertices()
 	{
@@ -58,18 +61,23 @@ namespace Bagnall
 		std::vector<vec4> normals = Geometry::CreateCubeNormals();
 		std::vector<vec4> tangents = Geometry::CreateCubeTangents();
 		std::vector<vec4> binormals = Geometry::CreateCubeBiNormals();
+		std::vector<vec2> texCoords = Geometry::CreateCubeTextureCoordinates();
 
-		vertexCount = cube.size();
-		globalVertexOffset = Shader::Vertices.size();
+		int vertexOffset = Shader::Vertices.size();
+		indexOffset = Shader::VertexIndices.size();
+		indexCount = cube.size();
+
+		std::vector<uint> indices;
+		for (int i = 0; i < indexCount; ++i)
+			indices.push_back(vertexOffset + i);
+
 		Shader::Vertices.insert(Shader::Vertices.end(), cube.begin(), cube.end());
 		Shader::Normals.insert(Shader::Normals.end(), normals.begin(), normals.end());
 		Shader::Tangents.insert(Shader::Tangents.end(), tangents.begin(), tangents.end());
 		Shader::Binormals.insert(Shader::Binormals.end(), binormals.begin(), binormals.end());
-
-		//std::vector<vec2> texCoords = Util::Vec4toVec2(cube);
-		std::vector<vec2> texCoords = Geometry::CreateCubeTextureCoordinates();
 		Shader::TextureCoordinates.insert(Shader::TextureCoordinates.end(), texCoords.begin(), texCoords.end());
+		Shader::VertexIndices.insert(Shader::VertexIndices.end(), indices.begin(), indices.end());
 
-		VertexMesh::AddVertexMesh("cube", globalVertexOffset, vertexCount, false);
+		VertexMesh::AddVertexMeshPrototype("cube", Material::Plastic(vec4(0.0, 0.0, 0.0, 1.0)), indexOffset, indexCount, false);
 	}
 }

@@ -16,6 +16,10 @@
 #include "Texture.h"
 #include "Shadow.h"
 #include "EnvironmentMap.h"
+#include "Schematic.h"
+#include "VertexMesh.h"
+#include "TerrainVertexMesh.h"
+#include "HeightMapTerrain.h"
 #include <vector>
 #include <iostream>
 
@@ -24,127 +28,187 @@
 
 using namespace Bagnall;
 
-SDL_Window *window;
-SDL_GLContext glcontext;
-
-Camera *camera;
 Sphere *sun;
-//Cube *cameraCube;
-Sphere *player;
+DrawableObject *player;
 LightSource *lightSource;
-Object *cubeContainer;
-std::vector<Cube*> cubes;
+Object *objectContainer;
+std::vector<DrawableObject*> objects;
+DrawableObject *middleCube;
 
 Object *groundContainer;
 
-UpdateNode *rootUpdateNode;
-ModelNode *rootModelNode;
+DrawableObject *terrain;
+TerrainVertexMesh *terrainMesh;
 
-//GLuint frameBuffer;
-//GLuint depthBuffer;
 GLuint colorCubemap;
-//GLuint depthCubemap;
 
 GLuint tempTexture;
 
-//const int ENVIRONMENT_MAP_SIZE = 1024;
-//const int SHADOW_MAP_SIZE = 1024;
-
-void updateProjectionMatrixAndViewport()
-{
-	int w, h;
-	SDL_GetWindowSize(window, &w, &h);
-	Game::Projection = perspective(static_cast<float>(M_PI) / 4.0f, w / static_cast<float>(h), 1.0f, Game::ViewDistance);
-	Shader::SetProjection(Game::Projection);
-
-	glViewport(0, 0, w, h);
-}
-
 void init(void)
 {
-	srand(time(NULL));
+	Texture::InitTextureLoading();
 
-	Rectangle::Init();
-	Cube::Init();
-	Sphere::Init();
-	Skybox::Init();
-	LightSource::Init();
-	Texture::Init();
-	Shader::Init();
-	Shadow::Init();
-	EnvironmentMap::Init();
+	Texture::LoadTexture("shrek", "textures\\Shrek-and-Yoda.jpg", "bumpmaps\\Shrek-and-Yoda_NRM.jpg");
+	Texture::LoadTexture("ben", "textures\\ben.jpg", "bumpmaps\\ben_NRM.jpg");
+	Texture::LoadTexture("stone_wall", "textures\\stone_wall.jpg", "bumpmaps\\stone_wall_NRM.jpg");
+	Texture::LoadTexture("costanza", "textures\\costanza.jpg", "bumpmaps\\costanza_NRM.jpg");
+	Texture::LoadTexture("dowm_furry", "textures\\dowm furry.jpg", "bumpmaps\\dowm furry_NRM.jpg");
+	Texture::LoadTexture("isaac_final_form", "textures\\finalformsquare.jpg", "bumpmaps\\finalformsquare_NRM.jpg");
+	Texture::LoadTexture("bill", "textures\\bill.png", "bumpmaps\\bill_NRM.jpg");
+	Texture::LoadCubeMap("cubemap_test_1", "textures\\cubemap_test_1.jpg", "bumpmaps\\cubemap_test_1_NRM.jpg");
+	Texture::LoadTexture("skybox_2", "textures\\skybox2.jpg");
+	Texture::LoadCubeMap("skybox_2", "textures\\skybox2.jpg");
+	//Texture::LoadCubeMapMirrored("skybox_2", "textures\\skybox2.jpg");
+	Texture::LoadTexture("sand1", "textures\\sand1.jpg", "bumpmaps\\sand1_NRM.jpg");
+	Texture::LoadTexture("grass1", "textures\\grass1.jpg", "bumpmaps\\grass1_NRM.jpg");
+	Texture::LoadTexture("stone1", "textures\\stone1.jpg", "bumpmaps\\stone1_NRM.jpg");
+	Texture::LoadTexture("snow1", "textures\\snow1.jpg", "bumpmaps\\snow1_NRM.jpg");
+
+	Texture::EndTextureLoading();
+
+	if (Schematic::InitSchematic("models\\Millennium_Falcon.obj", "millennium_falcon") < 0)
+		std::cerr << "error loading Millennium_Falcon model\n";
+	if (Schematic::InitSchematic("models\\R2-D2.obj", "r2d2") < 0)
+		std::cerr << "error loading R2-D2. model\n";
+	if (Schematic::InitSchematic("models\\C-3PO_v2.obj", "c3po") < 0)
+		std::cerr << "error loading C-3PO_v2 model\n";
+	if (Schematic::InitSchematic("models\\Stormtrooper.obj", "stormtrooper") < 0)
+		std::cerr << "error loading Stormtrooper model\n";
+	if (Schematic::InitSchematic("models\\Darth_Sidious.obj", "darth_sidious") < 0)
+		std::cerr << "error loading Darth_Sidious model\n";
+	if (Schematic::InitSchematic("models\\tie-intercept.obj", "tie_fighter") < 0)
+		std::cerr << "error loading tie-intercept model\n";
+
+	terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\terrain1_height.jpg", 25.0f, 25.0f, 0.25f));
+	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("heightmaps\\west_norway.png", 50.0f, 50.0f, 0.25f));
+	//terrainMesh = new TerrainVertexMesh(HeightMapTerrain::CreateTerrainMeshFromFile("textures\\bill.png", 25.0f, 25.0f, 0.1f));
+	terrainMesh->SetTexture1(Texture::GetTextureByName("sand1"));
+	terrainMesh->SetTexture2(Texture::GetTextureByName("grass1"));
+	terrainMesh->SetTexture3(Texture::GetTextureByName("stone1"));
+	terrainMesh->SetTexture4(Texture::GetTextureByName("snow1"));
+	terrainMesh->SetTextureHeights(vec4(0.0f, 0.3f, 0.5f, 0.9f));
+
+	Game::SendVertexDataToGPU();
 
 	//auto v = Shader::Vertices;
 	//auto n = Shader::Normals;
 	//auto s = Shader::Tangents;
 	//auto t = Shader::Binormals;
+	//auto tx = Shader::TextureCoordinates;
+	//auto vi = Shader::VertexIndices;
 
-	glEnable(GL_DEPTH_TEST);
+	glClearColor(0.5, 0.5, 1.0, 1.0);
 
-	glClearColor(0.5, 0.5, 0.5, 1.0);
-
-	Game::ViewDistance = Game::WorldSize * 2.0f;
-
-	// initialize projection matrix
-	updateProjectionMatrixAndViewport();
-
-	// create root object
-	Object *rootObject = new Object(NULL);
-	rootUpdateNode = rootObject->GetUpdateNode();
-	rootModelNode = rootObject->GetModelNode();
-
-	camera = new Camera(rootObject);
-	camera->SetPosition(vec4(0.0f, -25.0f, 0.0f, 1.0f));
-	camera->LookAt(vec4(0.0f, 0.0f, 0.0f, 1.0f));
-	camera->SetZoomOut(10.0f);
+	Game::MainCamera->SetPosition(vec4(0.0f, -25.0f, 0.0f, 1.0f));
+	Game::MainCamera->LookAt(vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	Game::MainCamera->SetZoomOut(10.0f);
 
 	lightSource = LightSource::ObtainLightSource();
 	lightSource->ambient = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->diffuse = vec4(1.0, 1.0, 1.0, 1.0);
 	lightSource->specular = vec4(1.0, 1.0, 1.0, 1.0);
-	//lightSource->position = vec4(0.0f, 0.0f, Game::WorldSize * 0.25f, 1.0);
-	lightSource->position = vec4(0.0f, 0.0f, 0.0f, 1.0);
+	//lightSource->position = vec4(-Game::WorldSize / 2.0f, -Game::WorldSize / 2.0f, Game::WorldSize / 2.0f, 0.0f);
+	//lightSource->position = vec4(0.0f, 0.0f, 10.0f, 1.0f);
+	lightSource->position = vec4(-1.0f, -1.0f, 1.0f, 0.0f);
 	lightSource->UpdateMatrix();
 	LightSource::UpdateLightSourceMatricesInShaders();
 
 	// CONTAINERS
-	cubeContainer = new Object(rootObject);
-	groundContainer = new Object(rootObject);
+	objectContainer = new Object(Game::GetRootObject());
+	groundContainer = new Object(Game::GetRootObject());
 	groundContainer->Translate(vec4(0.0f, 0.0f, -Game::WorldSize / 2.0f, 0.0f));
 
-	char *textureNames[] = { "shrek", "dowm_furry", "isaac_final_form", "costanza" };
+	char *textureNames[] = { "shrek", "dowm_furry", "isaac_final_form", "costanza", "bill" };
 
 	// MANY CUBES
-	int range = Game::WorldSize - 5.0f;
+	int range = Game::WorldSize * 0.75f;
 	for (int i = 0; i < 25; ++i)
 	{
-		Cube *cube = new Cube(cubeContainer);
+		Cube *cube = new Cube(objectContainer);
 		cube->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
-		//cube->SetTexture(Texture::GetTextureByName("shrek"));
-		cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+		//cube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
+		cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 5]));
 		cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
 		cube->Scale(5.0f);
-		cubes.push_back(cube);
+		objects.push_back(cube);
 		//cube->Cull();
 	}
 
+	// R2D2S LOL
+	for (int i = 0; i < 100; ++i)
+	{
+		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("r2d2"));
+		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		o->RotateX(-M_PI / 2.0f);
+		//cube->SetTexture(Texture::GetTextureByName("shrek"));
+		//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+		//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		o->Scale(5.0f);
+		objects.push_back(o);
+		//cube->Cull();
+	}
+
+	// C3POS LMAO
+	for (int i = 0; i < 100; ++i)
+	{
+		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("c3po"));
+		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		o->RotateX(-M_PI / 2.0f);
+		//cube->SetTexture(Texture::GetTextureByName("shrek"));
+		//cube->SetTexture(Texture::GetTextureByName(textureNames[rand() % 4]));
+		//cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+		//cube->SetMaterial(Material::Plastic(vec4(1.0f, 0.0f, 0.0f, 1.0f)));
+		o->Scale(5.0f);
+		objects.push_back(o);
+		//cube->Cull();
+	}
+
+	// STORMTROOPERS
+	for (int i = 0; i < 100; ++i)
+	{
+		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("stormtrooper"));
+		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		o->RotateX(-M_PI / 2.0f);
+		o->Scale(5.0f);
+		objects.push_back(o);
+	}
+
+	// DARTH INSNIDIOUS
+	for (int i = 0; i < 100; ++i)
+	{
+		DrawableObject *o = new DrawableObject(objectContainer, Schematic::GetSchematicByName("darth_sidious"));
+		o->SetPosition(vec4(rand() % range - range / 2.0f, rand() % range - range / 2.0f, rand() % range - range / 2.0f, 1.0f));
+		o->RotateX(-M_PI / 2.0f);
+		o->Scale(5.0f);
+		objects.push_back(o);
+	}
+
 	// MIDDLE CUBE
-	Cube *cube = new Cube(cubeContainer);
+	//middleCube = new Cube(objectContainer);
+	//middleCube = new DrawableObject(objectContainer, Schematic::GetSchematicByName("tie_fighter"));
+	middleCube = new DrawableObject(objectContainer, Schematic::GetSchematicByName("millennium_falcon"));
+	//middleCube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("r2d2"));
+	//middleCube = new DrawableObject(cubeContainer, Schematic::GetSchematicByName("torchic"));
 	//Sphere *cube = new Sphere(cubeContainer);
-	cube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
-	//cube->SetTexture(Texture::GetTextureByName("isaac_final_form"));
-	cube->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
-	//cube->SetEmissive(true);
-	cube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
+	middleCube->SetPosition(vec4(0.0f, 0.0f, -Game::WorldSize * 0.25f, 1.0));
+	//middleCube->SetTexture(Shadow::depthBuffer);
+	//middleCube->SetTexture(Texture::GetTextureByName("bill"));
+	//cube->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
+	//middleCube->SetEmissive(true);
+	//middleCube->SetMaterial(Material::Plastic(vec4(0.3f, 0.3f, 0.3f, 1.0f)));
 	//cube->SetMaterial(Material::Plastic(vec4(1.0f, 1.0f, 1.0f, 0.0f)));
-	cube->Scale(10.0f);
-	cube->RotateX(-M_PI / 2.0f);
-	cubes.push_back(cube);
+	//middleCube->Scale(10.0f);
+	middleCube->Scale(0.1f);
+	//middleCube->Scale(0.01f);
+	middleCube->RotateX(-M_PI / 2.0f);
+	//middleCube->SetBumpMapEnabled(false);
+	//cubes.push_back(cube);
 
 	// SUN
 	//sun = new Cube(rootObject);
-	sun = new Sphere(rootObject);
+	sun = new Sphere(Game::GetRootObject());
 	sun->SetPosition(lightSource->position);
 	sun->SetEmissionColor(vec4(1.0f, 1.0f, 0.0f, 1.0f));
 	sun->SetEmissive(true);
@@ -160,127 +224,140 @@ void init(void)
 	//cameraCube->Scale(1.0f);
 
 	// PLAYER
-	player = new Sphere(camera);
-	//player->SetMaterial(Material::Chrome());
+	player = new Sphere(Game::MainCamera);
+	//player = new DrawableObject(camera, Schematic::GetSchematicByName("torchic"));
+	player->SetMaterial(Material::Chrome());
+	//player->SetTexture(Texture::GetTextureByName("shrek"));
 	//player->SetMaterial(Material::Plastic(vec4(0.25f, 0.25f, 0.25f, 1.0f)));
-	player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-	colorCubemap = EnvironmentMap::GenerateCubeMap();
-	player->SetCubeMap(colorCubemap);
+	//player->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	//colorCubemap = EnvironmentMap::GenerateCubeMap();
+	//player->SetCubeMap(colorCubemap);
 	player->SetReflectiveCubeMap(true);
-	//player->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
-	//player->SetTexture(Texture::GetTextureByName("ben"));
-	//player->SetPosition(vec4(0.0, 5.0f, 0.0, 1.0));
-	//player->SetEmissionColor(vec4(0.2f, 0.5f, 0.3f, 1.0f));
-	//player->SetEmissive(true);
 	player->Scale(1.0f);
 
 	// GIANT SKY CUBE
-	/*Skybox *skybox = new Skybox(rootObject);
-	skybox->SetTexture(Texture::GetTextureByName("shrek"));
-	skybox->SetMaterial(Material::WhiteRubber());
-	skybox->SetScale(Game::WorldSize);*/
+	Skybox *skybox = new Skybox(Game::MainCamera);
+	//skybox->SetTexture(Texture::GetTextureByName("shrek"));
+	skybox->SetCubeMap(Texture::GetCubeMapByName("skybox_2"));
+	//skybox->SetTexture(Texture::GetTextureByName("skybox_2"));
+	//skybox->SetCubeMap(Texture::GetCubeMapByName("cubemap_test_1"));
+	skybox->SetEmissive(true);
+	//skybox->SetMaterial(Material::WhiteRubber());
+	skybox->SetScale(Game::ViewDistance);
+	skybox->RotateX(-M_PI / 2.0f);
+	skybox->RotateZ(M_PI);
+	skybox->DisableShadowCasting();
+	skybox->AddIgnoreParentModelFlag(IGNORE_PARENT_ROTATIONX | IGNORE_PARENT_ROTATIONY | IGNORE_PARENT_ROTATIONZ);
 
-	// FLOOR
-	float floorScale = Game::WorldSize / 10.0f;
-	for (int i = 0; i < Game::WorldSize / floorScale; ++i)
-	{
-		for (int j = 0; j < Game::WorldSize / floorScale; ++j)
-		{
-			Rectangle *rect = new Rectangle(groundContainer);
-			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
-			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
-			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-			rect->Scale(floorScale);
-		}
-	}
+	//// FLOOR
+	//float floorScale = Game::WorldSize / 10.0f;
+	//for (int i = 0; i < Game::WorldSize / floorScale; ++i)
+	//{
+	//	for (int j = 0; j < Game::WorldSize / floorScale; ++j)
+	//	{
+	//		Rectangle *rect = new Rectangle(groundContainer);
+	//		rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
+	//		rect->SetTexture(Texture::GetTextureByName("stone_wall"));
+	//		rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	//		rect->Scale(floorScale);
+	//	}
+	//}
 
-	// CEILING
-	for (int i = 0; i < Game::WorldSize / floorScale; ++i)
-	{
-		for (int j = 0; j < Game::WorldSize / floorScale; ++j)
-		{
-			Rectangle *rect = new Rectangle(groundContainer);
-			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, Game::WorldSize, 1.0));
-			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
-			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-			rect->Scale(floorScale);
-			rect->SetRotationX(M_PI);
-		}
-	}
+	////// CEILING
+	////for (int i = 0; i < Game::WorldSize / floorScale; ++i)
+	////{
+	////	for (int j = 0; j < Game::WorldSize / floorScale; ++j)
+	////	{
+	////		Rectangle *rect = new Rectangle(groundContainer);
+	////		rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, Game::WorldSize, 1.0));
+	////		rect->SetTexture(Texture::GetTextureByName("stone_wall"));
+	////		rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	////		rect->Scale(floorScale);
+	////		rect->SetRotationX(M_PI);
+	////	}
+	////}
 
-	// WALLS
-	// SOUTH
-	Object *southWall = new Object(rootObject);
-	for (int i = 0; i < Game::WorldSize / floorScale; ++i)
-	{
-		for (int j = 0; j < Game::WorldSize / floorScale; ++j)
-		{
-			Rectangle *rect = new Rectangle(southWall);
-			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
-			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
-			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-			rect->Scale(floorScale);
-		}
-	}
-	southWall->SetRotationX(M_PI / 2.0);
-	southWall->Translate(vec4(0.0, -Game::WorldSize / 2.0f, 0.0, 0.0));
+	////// WALLS
+	////// SOUTH
+	////Object *southWall = new Object(rootObject);
+	////for (int i = 0; i < Game::WorldSize / floorScale; ++i)
+	////{
+	////	for (int j = 0; j < Game::WorldSize / floorScale; ++j)
+	////	{
+	////		Rectangle *rect = new Rectangle(southWall);
+	////		rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
+	////		rect->SetTexture(Texture::GetTextureByName("stone_wall"));
+	////		rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	////		rect->Scale(floorScale);
+	////	}
+	////}
+	////southWall->SetRotationX(M_PI / 2.0);
+	////southWall->Translate(vec4(0.0, -Game::WorldSize / 2.0f, 0.0, 0.0));
 
-	// NORTH
-	Object *northWall = new Object(rootObject);
-	for (int i = 0; i < Game::WorldSize / floorScale; ++i)
-	{
-		for (int j = 0; j < Game::WorldSize / floorScale; ++j)
-		{
-			Rectangle *rect = new Rectangle(northWall);
-			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
-			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
-			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-			rect->Scale(floorScale);
-		}
-	}
-	northWall->SetRotationX(-M_PI / 2.0);
-	northWall->Translate(vec4(0.0, Game::WorldSize / 2.0f, 0.0, 0.0));
+	//// NORTH
+	//Object *northWall = new Object(rootObject);
+	//for (int i = 0; i < Game::WorldSize / floorScale; ++i)
+	//{
+	//	for (int j = 0; j < Game::WorldSize / floorScale; ++j)
+	//	{
+	//		Rectangle *rect = new Rectangle(northWall);
+	//		rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
+	//		rect->SetTexture(Texture::GetTextureByName("stone_wall"));
+	//		rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	//		rect->Scale(floorScale);
+	//	}
+	//}
+	//northWall->SetRotationX(-M_PI / 2.0);
+	//northWall->Translate(vec4(0.0, Game::WorldSize / 2.0f, 0.0, 0.0));
 
-	// WEST
-	Object *westWall = new Object(rootObject);
-	for (int i = 0; i < Game::WorldSize / floorScale; ++i)
-	{
-		for (int j = 0; j < Game::WorldSize / floorScale; ++j)
-		{
-			Rectangle *rect = new Rectangle(westWall);
-			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
-			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
-			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-			rect->Scale(floorScale);
-		}
-	}
-	westWall->SetRotationX(-M_PI / 2.0);
-	westWall->SetRotationZ(-M_PI / 2.0);
-	westWall->Translate(vec4(-Game::WorldSize / 2.0f, 0.0, 0.0, 0.0));
+	////// WEST
+	////Object *westWall = new Object(rootObject);
+	////for (int i = 0; i < Game::WorldSize / floorScale; ++i)
+	////{
+	////	for (int j = 0; j < Game::WorldSize / floorScale; ++j)
+	////	{
+	////		Rectangle *rect = new Rectangle(westWall);
+	////		rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
+	////		rect->SetTexture(Texture::GetTextureByName("stone_wall"));
+	////		rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	////		rect->Scale(floorScale);
+	////	}
+	////}
+	////westWall->SetRotationX(-M_PI / 2.0);
+	////westWall->SetRotationZ(-M_PI / 2.0);
+	////westWall->Translate(vec4(-Game::WorldSize / 2.0f, 0.0, 0.0, 0.0));
 
-	// EAST
-	Object *eastWall = new Object(rootObject);
-	for (int i = 0; i < Game::WorldSize / floorScale; ++i)
-	{
-		for (int j = 0; j < Game::WorldSize / floorScale; ++j)
-		{
-			Rectangle *rect = new Rectangle(eastWall);
-			rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
-			rect->SetTexture(Texture::GetTextureByName("stone_wall"));
-			rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
-			rect->Scale(floorScale);
-		}
-	}
-	eastWall->SetRotationX(-M_PI / 2.0);
-	eastWall->SetRotationZ(M_PI / 2.0);
-	eastWall->Translate(vec4(Game::WorldSize / 2.0f, 0.0, 0.0, 0.0));
+	//// EAST
+	//Object *eastWall = new Object(rootObject);
+	//for (int i = 0; i < Game::WorldSize / floorScale; ++i)
+	//{
+	//	for (int j = 0; j < Game::WorldSize / floorScale; ++j)
+	//	{
+	//		Rectangle *rect = new Rectangle(eastWall);
+	//		rect->SetPosition(vec4(-Game::WorldSize / 2.0f + floorScale / 2.0f + i * floorScale, -Game::WorldSize / 2.0f + floorScale / 2.0f + j * floorScale, 0.0f, 1.0));
+	//		rect->SetTexture(Texture::GetTextureByName("stone_wall"));
+	//		rect->SetMaterial(Material::Plastic(vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+	//		rect->Scale(floorScale);
+	//	}
+	//}
+	//eastWall->SetRotationX(-M_PI / 2.0);
+	//eastWall->SetRotationZ(M_PI / 2.0);
+	//eastWall->Translate(vec4(Game::WorldSize / 2.0f, 0.0, 0.0, 0.0));
 
-	// SET SHADOW NEAR AND FAR PLANES
-	Shadow::SetNearAndFarPlanes(2.0f, Game::ViewDistance);
+	terrain = new DrawableObject(Game::GetRootObject());
+	terrain->AddVertexMesh(terrainMesh);
+	terrain->SetScale(10.0f);
+	terrain->Translate(vec4(-2000.0f, -2000.0f, -2000.0f, 0.0f));
+
+	// overwrite z range to give better shadow precision
+	Shadow::SetZRange(100.0f, Game::ViewDistance);
 
 	// ENABLE SHADOWS
-	Shadow::RenderShadowMap(vec3(lightSource->position), sun);
-	Game::MainRenderGraph->SetShadowsEnabled(true);
+	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
+	//Game::MainRenderGraph->SetShadowMode(SHADOW_MODE_OMNI);
+	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
+	Shadow::SetMode(SHADOW_MODE_UNI);
+	Shadow::SetResolution(SHADOW_RESOLUTION_EXTRA_HIGH);
 }
 
 //----------------------------------------------------------------------------
@@ -288,13 +365,13 @@ void init(void)
 bool holdingMouseClick = false;
 int update()
 {
-	FpsTracker::Update();
+	Game::Update();
 
 	SDL_Event ev;
 	while (SDL_PollEvent(&ev))
 	{
 		// send event to camera
-		camera->InputEvent(ev);
+		Game::MainCamera->InputEvent(ev);
 
 		// quit
 		if (ev.type == SDL_QUIT)
@@ -306,11 +383,57 @@ int update()
 		{
 			switch (ev.key.keysym.sym)
 			{
+			// EXIT PROGRAM
 			case SDLK_ESCAPE:
 				return 1;
 				break;
+			// ENABLE FULLSCREEN
 			case SDLK_f:
-				SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+				Game::ToggleFullScreen();
+				break;
+			// ROTATE MIDDLE OBJECT
+			case SDLK_1:
+				middleCube->RotateX(-0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_2:
+				middleCube->RotateX(0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_3:
+				middleCube->RotateY(-0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_4:
+				middleCube->RotateY(0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_5:
+				middleCube->RotateZ(-0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			case SDLK_6:
+				middleCube->RotateZ(0.005f * FpsTracker::GetFrameTimeMs());
+				break;
+			// MOVE LIGHT SOURCE
+			case SDLK_UP:
+				sun->Translate(vec4(0.0f, 0.05f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
+				break;
+			case SDLK_DOWN:
+				sun->Translate(vec4(0.0f, -0.05f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
+				break;
+			case SDLK_LEFT:
+				sun->Translate(vec4(-0.05f, 0.0f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
+				break;
+			case SDLK_RIGHT:
+				sun->Translate(vec4(0.05f, 0.0f, 0.0f, 0.0f) * static_cast<float>(FpsTracker::GetFrameTimeMs()));
+				lightSource->position = sun->GetPosition();
+				lightSource->UpdateMatrix();
+				LightSource::UpdateLightSourceMatricesInShaders();
 				break;
 			}
 		}
@@ -332,7 +455,7 @@ int update()
 		// window event
 		else if (ev.type == SDL_WINDOWEVENT)
 		{
-			updateProjectionMatrixAndViewport();
+			Game::UpdateProjectionMatrixAndViewport();
 		}
 	}
 
@@ -343,34 +466,28 @@ int update()
 
 	// update stuff
 
-	SDL_SetWindowTitle(window, Util::ToString(FpsTracker::GetFps()).c_str());
-
 	/*cubeContainer->RotateX(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
 	cubeContainer->RotateY(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());
 	cubeContainer->RotateZ(static_cast<float>(rand()) / RAND_MAX / 10000.0f * FpsTracker::GetFrameTimeMs());*/
 	//cubeContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 	//cubeContainer->RotateY(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
-	cubeContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
+	//objectContainer->RotateZ(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 
 	//groundContainer->RotateX(1.0f / 10000.0f * FpsTracker::GetFrameTimeMs());
 
 	//for (auto it = cubes.begin(); it != cubes.end(); ++it)
-	concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
+	/*concurrency::parallel_for_each(begin(objects), end(objects), [&](Object *o)
 	{
-		cube->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-		cube->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
-	});
-	//concurrency::parallel_for_each(begin(cubes), end(cubes), [&](Cube *cube)
-	//{
-	//	cube->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-	//	cube->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-	//	cube->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
-	//}, concurrency::static_partitioner());
-
-	rootUpdateNode->Update();
-
-	rootModelNode->Update();
+		o->RotateX(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+		o->RotateY(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+		o->RotateZ(static_cast<float>(rand()) / RAND_MAX / 1000.0f * FpsTracker::GetFrameTimeMs());
+	});*/
+	concurrency::parallel_for_each(begin(objects), end(objects), [&](Object *o)
+	{
+		//o->RotateX(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		//o->RotateY(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+		o->RotateZ(1.0f / 2000.0f * FpsTracker::GetFrameTimeMs());
+	}, concurrency::static_partitioner());
 
 	//sun->SetPosition(camera->GetPosition() - camera->GetLookDirection() * 10.0f);
 	//cameraCube->SetPosition(camera->GetPosition() - camera->GetLookDirection() * 10.0f);
@@ -379,202 +496,31 @@ int update()
 	return 0;
 }
 
-//void renderToColorCubeMap()
-//{
-//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
-//	//glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthTexture);
-//
-//	glViewport(0, 0, ENVIRONMENT_MAP_SIZE, ENVIRONMENT_MAP_SIZE);
-//
-//	//vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
-//	//vec3 projPos = vec3(camera->GetPosition() + camera->GetLookDirection() * camera->GetZoomOut());
-//	vec3 projPos = vec3(camera->GetPosition());
-//	player->DisableRender();
-//
-//	float zNear = 1.0f;
-//	float zFar = Game::ViewDistance;
-//	mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zNear, zFar);
-//	Shader::SetProjection(projection);
-//
-//	glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, colorCubemap, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, colorCubemap, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, colorCubemap, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, colorCubemap, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, colorCubemap, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, colorCubemap, 0);
-//	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//
-//	glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
-//	glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-//	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
-//
-//	player->EnableRender();
-//
-//	Shader::SetCamera(Game::Camera);
-//	updateProjectionMatrixAndViewport();
-//}
-
-//void renderToDepthCubeMap()
-//{
-//	sun->DisableRender();
-//	//sun->Cull();
-//
-//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, frameBuffer);
-//	glDrawBuffer(GL_NONE);
-//	glReadBuffer(GL_NONE);
-//
-//	glViewport(0, 0, SHADOW_MAP_SIZE, SHADOW_MAP_SIZE);
-//
-//	//glCullFace(GL_BACK);
-//
-//	Shader::SetOnlyDepth(true);
-//
-//	float zNear = 2.0f;
-//	float zFar = Game::ViewDistance;
-//	mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zNear, zFar);
-//	Shader::SetProjection(projection);
-//	Shader::SetShadowZRange(vec2(zNear, zFar));
-//
-//	//vec3 projPos = vec3(0.0f, 0.0f, 15.0f);
-//	vec3 projPos = vec3(lightSource->position);
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, depthCubemap, 0);
-//	glClear(GL_DEPTH_BUFFER_BIT);
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 1.0f, 0.0f), vec3(0.0f, 0.0f, 1.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	Shader::SetProjection(projection);
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, depthCubemap, 0);
-//	glClear(GL_DEPTH_BUFFER_BIT);
-//	//Shader::SetProjection(projection * scale(vec3(-1, -1, 1)));
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, -1.0f, 0.0f), vec3(0.0f, 0.0f, -1.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, depthCubemap, 0);
-//	glClear(GL_DEPTH_BUFFER_BIT);
-//	//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, depthCubemap, 0);
-//	glClear(GL_DEPTH_BUFFER_BIT);
-//	//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(-1.0f, 0.0f, 0.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, depthCubemap, 0);
-//	glClear(GL_DEPTH_BUFFER_BIT);
-//	//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, 1.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, depthCubemap, 0);
-//	glClear(GL_DEPTH_BUFFER_BIT);
-//	//Shader::SetProjection(projection * scale(vec3(1, 1, 1)));
-//	Shader::SetCamera(lookAt(projPos, projPos + vec3(0.0f, 0.0f, -1.0f), vec3(0.0f, -1.0f, 0.0f)));
-//	Game::GameRenderGraph->Render();
-//
-//	glDrawBuffer(GL_FRONT);
-//	glReadBuffer(GL_FRONT);
-//
-//	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-//
-//	Shader::SetOnlyDepth(false);
-//	Shader::SetCamera(Game::Camera);
-//	updateProjectionMatrixAndViewport();
-//
-//	sun->EnableRender();
-//}
-
 void draw()
 {
-	EnvironmentMap::Render(colorCubemap, vec3(camera->GetPosition()), player, 1.0f, Game::ViewDistance);
-	Shadow::RenderShadowMap(vec3(lightSource->position), sun);
+	//EnvironmentMap::Render(colorCubemap, vec3(Game::MainCamera->GetPosition()), player, 1.0f, Game::ViewDistance);
+	//Shadow::RenderShadowCubeMap(vec3(lightSource->position), sun);
+	Shadow::RenderShadowOrthoMap(vec3(lightSource->position));
 
-	updateProjectionMatrixAndViewport();
-
-	// clear the window
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	//Shader::SetUseCubeMap(true);
-	//glActiveTexture(GL_TEXTURE2);
-	//glBindTexture(GL_TEXTURE_CUBE_MAP, colorCubemap);
+	Game::UpdateProjectionMatrixAndViewport();
 
 	// draw stuff
-	Game::MainRenderGraph->Render();
-
-	SDL_GL_SwapWindow(window);
-	glFlush();
+	Game::Draw();
 }
 
 int main(int argc, char **argv)
 {
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) != 0)
-	{
-		std::cerr << "Failed to initialize SDL.\n";
-		SDL_Quit();
-		system("pause");
-		return 1;
-	}
-
-	// 4x AA
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-
-	window = SDL_CreateWindow(
-		"SDL2/OpenGL Demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480,
-		SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-
-	// Create an OpenGL context associated with the window.
-	glcontext = SDL_GL_CreateContext(window);
-
-	// enable AA
-	glEnable(GL_MULTISAMPLE);
-
-	//SDL_GL_MakeCurrent(window, glcontext);
-	glewInit();
+	if (int initStatus = Game::Init() != 0)
+		return initStatus;
 
 	init();
-
-	if (SDL_SetRelativeMouseMode(SDL_TRUE) == -1)
-		std::cerr << "unable to set relative mouse mode.\n";
-
-	std::cout << "all systems are go bro\n";
 
 	while (!update())
 	{
 		draw();
 	}
 
-	SDL_GL_DeleteContext(glcontext);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
+	Game::Cleanup();
+
 	return 0;
 }

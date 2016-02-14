@@ -3,6 +3,7 @@
 #include "Shader.h"
 #include "Game.h"
 #include "RenderGraph.h"
+#include "Shadow.h"
 
 namespace Bagnall
 {
@@ -61,6 +62,8 @@ namespace Bagnall
 
 		mat4 projection = perspective(static_cast<float>(M_PI) / 2.0f, 1.0f, zNear, zFar);
 		Shader::SetProjection(projection);
+		ShadowMode shadowMode = Shadow::GetMode();
+		Shader::SetShadowMode(SHADOW_MODE_NONE);
 
 		glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
 
@@ -103,7 +106,8 @@ namespace Bagnall
 		if (source != nullptr)
 			source->EnableRender();
 
-		Shader::SetCamera(Game::Camera);
+		Shader::SetShadowMode(shadowMode);
+		Shader::SetCamera(Game::CameraMatrix);
 	}
 	
 	// PRIVATE

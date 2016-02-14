@@ -19,7 +19,7 @@
 #include <GL/glew.h>
 #include <SDL/SDL.h>
 
-const GLfloat  DegreesToRadians = M_PI / 180.0;
+const GLfloat DegreesToRadians = M_PI / 180.0;
 
 using namespace glm;
 

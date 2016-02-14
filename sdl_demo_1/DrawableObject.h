@@ -2,48 +2,37 @@
 #define DRAWABLEOBJECT_H
 
 #include "Object.h"
+#include "VertexMesh.h"
 
 namespace Bagnall
 {
-	struct RenderNode;
 	class VertexMesh;
+	struct SchematicNode;
 
 	class DrawableObject : public Object
 	{
 	public:
-		DrawableObject(Object *par);
+		DrawableObject(const Object *par);
 
-		DrawableObject(Object *par, GLuint tex, const Material& mat);
-
-		DrawableObject(Object *par, const vec4& emissionCol);
+		DrawableObject(const Object *par, SchematicNode *schematic);
 
 		virtual void Draw() const;
 
-		bool GetEmissive() const;
+		void SendTransformToGPU();
+
+		void AddVertexMesh(VertexMesh *vertexMesh);
 
 		void SetEmissive(bool e);
 
-		vec4 GetEmissionColor() const;
-
 		virtual void SetEmissionColor(const vec4& color);
 
-		bool GetBlend() const;
-
-		void SetBlend(bool b);
-
-		Material GetMaterial() const;
+		//void SetBlend(bool b);
 
 		virtual void SetMaterial(const Material& m);
 
-		GLuint GetTexture() const;
-
 		void SetTexture(GLuint tex);
 
-		GLuint GetCubeMap() const;
-
 		void SetCubeMap (GLuint cm);
-
-		static void UseMaterial(const Material& m);
 
 		void EnableRender();
 
@@ -55,30 +44,21 @@ namespace Bagnall
 
 		bool GetRenderEnabled() const;
 
-		bool GetBumpMapEnabled() const;
-
-		bool GetReflectiveCubeMap() const;
+		void SetBumpMapEnabled(bool b);
 
 		void SetReflectiveCubeMap(bool b);
 
+		void DisableShadowCasting();
+
 	private:
-		bool emissive;
-		vec4 emissionColor;
-		bool blend; // blend material with texture?
-		bool bumpMapEnabled;
 		bool renderEnabled;
-		Material material;
-		GLuint texture;
-		GLuint cubeMap;
-		bool reflectiveCubeMap;
-		RenderNode *renderNode;
 
 	protected:
-		VertexMesh *vertexMesh;
+		std::vector<VertexMesh*> vertexMeshes;
 
 		void init();
 
-		void updateRenderNode();
+		void updateRenderNodes();
 	};
 }
 

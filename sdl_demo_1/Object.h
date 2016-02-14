@@ -28,11 +28,19 @@ namespace Bagnall
 		IGNORE_PARENT_ROTATIONZ = 1 << 3,
 		IGNORE_PARENT_SCALE = 1 << 4
 	};
+	inline IgnoreParentModel operator|(IgnoreParentModel a, IgnoreParentModel b)
+	{
+		return static_cast<IgnoreParentModel>(static_cast<int>(a) | static_cast<int>(b));
+	}
+	inline IgnoreParentModel operator&(IgnoreParentModel a, IgnoreParentModel b)
+	{
+		return static_cast<IgnoreParentModel>(static_cast<int>(a) & static_cast<int>(b));
+	}
 
 	class Object
 	{
 	public:
-		Object(Object *parent);
+		Object(const Object *parent);
 
 		virtual ~Object();
 

@@ -4,6 +4,7 @@
 #include "Texture.h"
 #include "Shadow.h"
 #include "Game.h"
+#include "TerrainVertexMesh.h"
 
 namespace Bagnall
 {
@@ -11,10 +12,9 @@ namespace Bagnall
 
 	RenderGraph::RenderGraph()
 	{
-		shadowsEnabled = false;
 	}
 
-	RenderNode* RenderGraph::AddDrawableObject(DrawableObject *o)
+	RenderNode* RenderGraph::AddVertexMesh(VertexMesh *o)
 	{
 		auto cubeMap = o->GetCubeMap();
 		auto texture = o->GetTexture();
@@ -41,7 +41,7 @@ namespace Bagnall
 					{
 						auto *cubeMapBumpNode = cubeMapBumpNodeMap[cubeMap];
 
-						cubeMapBumpNode->objects.push_back(o);
+						cubeMapBumpNode->meshes.push_back(o);
 						return cubeMapBumpNode;
 					}
 					// with material
@@ -54,7 +54,7 @@ namespace Bagnall
 
 						materialNode = (*_materialNodeMap)[material];
 
-						materialNode->objects.push_back(o);
+						materialNode->meshes.push_back(o);
 						return materialNode;
 					}
 				}
@@ -69,7 +69,7 @@ namespace Bagnall
 					{
 						auto *cubeMapNode = cubeMapNodeMap[cubeMap];
 
-						cubeMapNode->objects.push_back(o);
+						cubeMapNode->meshes.push_back(o);
 						return cubeMapNode;
 					}
 					// with material
@@ -82,7 +82,7 @@ namespace Bagnall
 
 						materialNode = (*_materialNodeMap)[material];
 
-						materialNode->objects.push_back(o);
+						materialNode->meshes.push_back(o);
 						return materialNode;
 					}
 				}
@@ -106,7 +106,7 @@ namespace Bagnall
 
 					auto *textureBumpNode = textureBumpNodeMap[texture];
 
-					textureBumpNode->objects.push_back(o);
+					textureBumpNode->meshes.push_back(o);
 					return textureBumpNode;
 				}
 				// without bump map
@@ -117,7 +117,7 @@ namespace Bagnall
 
 					auto *textureNode = textureNodeMap[texture];
 
-					textureNode->objects.push_back(o);
+					textureNode->meshes.push_back(o);
 					return textureNode;
 				}
 			}
@@ -149,7 +149,7 @@ namespace Bagnall
 				materialNode = (*_materialNodeMap)[material];
 			}
 
-			materialNode->objects.push_back(o);
+			materialNode->meshes.push_back(o);
 			return materialNode;
 		}
 		// emissive
@@ -165,7 +165,7 @@ namespace Bagnall
 					cubeMapEmissiveNodeMap.emplace(cubeMap, new CubeMapEmissiveNode(cubeMap));
 
 				auto cubeMapEmissiveNode = cubeMapEmissiveNodeMap[cubeMap];
-				cubeMapEmissiveNode->objects.push_back(o);
+				cubeMapEmissiveNode->meshes.push_back(o);
 				return cubeMapEmissiveNode;
 			}
 			// texture
@@ -175,7 +175,7 @@ namespace Bagnall
 					textureEmissiveNodeMap.emplace(texture, new TextureEmissiveNode(texture));
 
 				auto textureEmissiveNode = textureEmissiveNodeMap[texture];
-				textureEmissiveNode->objects.push_back(o);
+				textureEmissiveNode->meshes.push_back(o);
 				return textureEmissiveNode;
 			}
 			// no texture
@@ -189,9 +189,36 @@ namespace Bagnall
 
 			emissiveNode = (*_emissiveNodeMap)[o->GetEmissionColor()];
 
-			emissiveNode->objects.push_back(o);
+			emissiveNode->meshes.push_back(o);
 			return emissiveNode;
 		}
+	}
+
+	void RenderGraph::AddTerrainVertexMesh(TerrainVertexMesh *o)
+	{
+		if (!o->GetBumpMapEnabled())
+		{
+			auto it = std::find(terrainVertexMeshes.begin(), terrainVertexMeshes.end(), o);
+			if (it == terrainVertexMeshes.end())
+				terrainVertexMeshes.push_back(o);
+		}
+		else
+		{
+			auto it = std::find(terrainVertexMeshesWithBump.begin(), terrainVertexMeshesWithBump.end(), o);
+			if (it == terrainVertexMeshesWithBump.end())
+				terrainVertexMeshesWithBump.push_back(o);
+		}
+	}
+
+	void RenderGraph::RemoveTerrainVertexMesh(TerrainVertexMesh *o)
+	{
+		auto it = std::find(terrainVertexMeshes.begin(), terrainVertexMeshes.end(), o);
+		if (it != terrainVertexMeshes.end())
+			terrainVertexMeshes.erase(it);
+
+		it = std::find(terrainVertexMeshesWithBump.begin(), terrainVertexMeshesWithBump.end(), o);
+		if (it != terrainVertexMeshesWithBump.end())
+			terrainVertexMeshesWithBump.erase(it);
 	}
 
 	void RenderGraph::Render() const
@@ -235,185 +262,15 @@ namespace Bagnall
 		Shader::SetProgram("cubemap_bump");
 		for (auto it = cubeMapBumpNodeMap.begin(); it != cubeMapBumpNodeMap.end(); ++it)
 			(*it).second->Render();
-	}
 
-	void RenderGraph::SetShadowsEnabled(bool s)
-	{
-		shadowsEnabled = s;
+		// render terrain without bump maps
+		/*Shader::SetProgram("terrain_texture");
+		for (auto it = terrainVertexMeshes.begin(); it != terrainVertexMeshes.end(); ++it)
+			(*it)->DrawWithoutBumpMap();*/
 
-		Shader::SetProgram("material");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
-
-		Shader::SetProgram("texture");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
-
-		Shader::SetProgram("texture_bump");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
-
-		Shader::SetProgram("cubemap");
-		Shader::SetUseShadowCubeMap(s);
-		if (shadowsEnabled)
-			Shadow::BindToGPU();
-	}
-
-	bool RenderGraph::GetShadowsEnabled() const
-	{
-		return shadowsEnabled;
-	}
-
-	// CUBEMAPNODE PUBLIC
-
-	void CubeMapNode::Render() const
-	{
-		// bind cube map
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
-
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
-
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
-
-	// CUBEMAPBUMPNODE PUBLIC
-
-	void CubeMapBumpNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
-
-		// bind bump map
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, bumpMap);
-
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
-
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
-
-	// CUBEMAPEMISSIVENODE PUBLIC
-
-	void CubeMapEmissiveNode::Render() const
-	{
-		// bind cube map
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMap);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// TEXTUREBUMPNODE PUBLIC
-
-	void TextureBumpNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// bind bump map
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, bumpmap);
-
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
-
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
-
-	// TEXTURENODE PUBLIC
-
-	void TextureNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// render objects without materials
-		Shader::SetTextureBlend(false);
-		RenderNode::Render();
-		Shader::SetTextureBlend(true);
-
-		// render material nodes
-		for (auto it = materialNodeMap.begin(); it != materialNodeMap.end(); ++it)
-		{
-			(*it).second->Render();
-		}
-	}
-
-	// TEXTUREEMISSIVENODE PUBLIC
-
-	void TextureEmissiveNode::Render() const
-	{
-		// bind texture
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// MATERIALNODE PUBLIC
-
-	void MaterialNode::Render() const
-	{
-		// send material properties to GPU
-		Shader::SetMaterialAmbient(material.ambient);
-		Shader::SetMaterialDiffuse(material.diffuse);
-		Shader::SetMaterialSpecular(material.specular);
-		Shader::SetMaterialShininess(material.shininess);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// EMISSIVENODE PUBLIC
-
-	void EmissiveNode::Render() const
-	{
-		// send color to GPU
-		Shader::SetEmissionColor(emissionColor);
-
-		// render objects
-		RenderNode::Render();
-	}
-
-	// RENDERNODE PUBLIC
-
-	void RenderNode::Render() const
-	{
-		// render objects
-		for (auto it = objects.begin(); it != objects.end(); ++it)
-		{
-			auto o = *it;
-			if (o->GetRenderEnabled())
-				o->Draw();
-		}
+		// render terrain with bump maps
+		Shader::SetProgram("terrain_texture_bump");
+		for (auto it = terrainVertexMeshesWithBump.begin(); it != terrainVertexMeshesWithBump.end(); ++it)
+			(*it)->DrawWithBumpMap();
 	}
 }

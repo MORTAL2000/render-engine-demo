@@ -12,6 +12,7 @@ Date:				December 9, 2015
 *************************************************************************************/
 
 #include "Util.h"
+#include <fstream>
 
 namespace Bagnall
 {
@@ -165,5 +166,18 @@ namespace Bagnall
 	{
 		for (int i = 0; i < vecs.size(); ++i)
 			vecs[i] = func(vecs[i]);
+	}
+
+	std::vector<char> Util::ReadAllBytes(char const* fileName)
+	{
+		std::ifstream ifs(fileName, std::ios::binary | std::ios::ate);
+		std::ifstream::pos_type pos = ifs.tellg();
+
+		std::vector<char>  result(pos);
+
+		ifs.seekg(0, std::ios::beg);
+		ifs.read(&result[0], pos);
+
+		return result;
 	}
 }

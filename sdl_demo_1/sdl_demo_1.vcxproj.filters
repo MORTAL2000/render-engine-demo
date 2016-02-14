@@ -28,6 +28,12 @@
     <Filter Include="Source Files\shaders\fragment">
       <UniqueIdentifier>{0c15c50d-9864-4dbc-a791-5886c0cad289}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\models">
+      <UniqueIdentifier>{e872f1d8-da98-4284-bcf5-6a7c53c272fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\heightmaps">
+      <UniqueIdentifier>{30a882b9-53ab-4f42-803e-a005ded9de8d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -102,6 +108,24 @@
     <ClCompile Include="VertexMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Schematic.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMapTerrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainVertexMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SDLUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HeightMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\vertex\vshader_cubemap.glsl">
@@ -157,6 +181,18 @@
     </None>
     <None Include="shaders\fragment\fshader_cubemap_bump.glsl">
       <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="model\torchic.blend">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="model\Millennium_Falcon.mtl">
+      <Filter>Resource Files\models</Filter>
+    </None>
+    <None Include="shaders\fragment\fshader_terrain_texture_bump.glsl">
+      <Filter>Source Files\shaders\fragment</Filter>
+    </None>
+    <None Include="shaders\vertex\vshader_terrain_texture_bump.glsl">
+      <Filter>Source Files\shaders\vertex</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +268,24 @@
     <ClInclude Include="VertexMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Schematic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMapTerrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainVertexMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SDLUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HeightMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="textures\Shrek-and-Yoda.jpg">
@@ -275,6 +329,21 @@
     </Image>
     <Image Include="bumpmaps\cubemap_test_1_NRM.jpg">
       <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="textures\Millennium_Falcon_Bottom_D.tga">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="textures\Millennium_Falcon_Top_D.tga">
+      <Filter>Resource Files\textures</Filter>
+    </Image>
+    <Image Include="bumpmaps\Millennium_Falcon_Bottom_N.tga">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="bumpmaps\Millennium_Falcon_Top_N.tga">
+      <Filter>Resource Files\bumpmaps</Filter>
+    </Image>
+    <Image Include="heightmaps\terrain.png">
+      <Filter>Resource Files\heightmaps</Filter>
     </Image>
   </ItemGroup>
 </Project>

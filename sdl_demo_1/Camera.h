@@ -10,31 +10,14 @@ namespace Bagnall
 	class Camera : public Object
 	{
 	public:
-		/**********************************************************************
-		Function:		Camera constructor
-		Purpose:		Create a camera object
-		**********************************************************************/
 		Camera(Object *par);
 
-		/**********************************************************************
-		Function:		Update
-		Purpose:		Update the camera object
-		**********************************************************************/
 		void Update();
 
 		float GetZoomOut() const;
 
-		/**********************************************************************
-		Function:		SetZoomOut
-		Purpose:		Set the zoom out value.
-		Parameters:		float z - new zoom out value
-		**********************************************************************/
 		void SetZoomOut(float z);
 
-		/**********************************************************************
-		Function:		GetLookDirection
-		Purpose:		Getter for lookDirection
-		**********************************************************************/
 		vec4 GetLookDirection() const;
 
 		void SetLookDirection(const vec3& lookDir);
@@ -54,10 +37,6 @@ namespace Bagnall
 
 		void move();
 
-		/**********************************************************************
-		Function:		updateGameCamera
-		Purpose:		Update the camera matrix in the vertex shader
-		**********************************************************************/
 		void updateGameCamera();
 	};
 }

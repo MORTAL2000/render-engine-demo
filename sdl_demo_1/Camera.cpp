@@ -144,9 +144,9 @@ namespace Bagnall
 
 		vec4 zoomOffset = -(normalize(lookPos - position)) * zoomOut;
 
-		Game::Camera = lookAt(vec3(position + zoomOffset), vec3(lookPos), vec3(0.0f, 0.0f, 1.0f));
+		Game::CameraMatrix = lookAt(vec3(position + zoomOffset), vec3(lookPos), vec3(0.0f, 0.0f, 1.0f));
 		//Game::Camera = Util::LookAt(vec3(position + zoomOffset), vec3(lookPos), vec3(0.0f, 0.0f, 1.0f));
-		Shader::SetCamera(Game::Camera);
+		Shader::SetCamera(Game::CameraMatrix);
 		//Game::MainRenderGraph->SetCameraInAll(Game::Camera);
 
 		Game::CameraPosition = position + zoomOffset;

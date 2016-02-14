@@ -6,131 +6,112 @@
 #include "Game.h"
 #include "Shadow.h"
 #include "VertexMesh.h"
+#include "Schematic.h"
+#include "Texture.h"
 
 namespace Bagnall
 {
 	// PUBLIC
 
-	DrawableObject::DrawableObject(Object *par) : Object(par)
+	DrawableObject::DrawableObject(const Object *par) : Object(par)
 	{
-		SetTexture(0);
-		emissive = false;
-		SetMaterial(Material::None());
 		init();
 	}
 
-	DrawableObject::DrawableObject(Object *par, GLuint tex, const Material& mat) : Object(par)
+	DrawableObject::DrawableObject(const Object *par, SchematicNode *schematic) : DrawableObject(par)
 	{
-		SetTexture(tex);
-		SetMaterial(mat);
-		blend = true;
-		init();
-	}
+		for (auto it = schematic->vertexMeshes.begin(); it != schematic->vertexMeshes.end(); ++it)
+		{
+			vertexMeshes.push_back(new VertexMesh(*it));
+			vertexMeshes[vertexMeshes.size() - 1]->SetOwner(this);
+		}
 
-	DrawableObject::DrawableObject(Object *par, const vec4& emissionCol) : Object(par)
-	{
-		emissive = true;
-		SetEmissionColor(emissionCol);
-		init();
+		for (auto it = schematic->children.begin(); it != schematic->children.end(); ++it)
+			AddChild(new DrawableObject(this, *it));
+
+		updateRenderNodes();
 	}
 
 	void DrawableObject::Draw() const
 	{
 		Shader::SetModel(finalModel);
-		if (cubeMap != 0)
-			Shader::SetReflectiveCubeMap(reflectiveCubeMap);
-		if (vertexMesh != nullptr)
-			vertexMesh->Draw();
+		/*if (cubeMap != 0)
+			Shader::SetReflectiveCubeMap(reflectiveCubeMap);*/
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->Draw();
 	};
-	
-	bool DrawableObject::GetEmissive() const
+
+	void DrawableObject::SendTransformToGPU()
 	{
-		return emissive;
+		Shader::SetModel(finalModel);
+	}
+
+	void DrawableObject::AddVertexMesh(VertexMesh *vertexMesh)
+	{
+		vertexMeshes.push_back(vertexMesh);
+		vertexMeshes[vertexMeshes.size() - 1]->SetOwner(this);
+		updateRenderNodes();
 	}
 
 	void DrawableObject::SetEmissive(bool e)
 	{
-		emissive = e;
-		updateRenderNode();
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->SetEmissive(e);
+		updateRenderNodes();
 	}
 
-	vec4 DrawableObject::GetEmissionColor() const
-	{
-		return emissionColor;
-	}
-
-	bool DrawableObject::GetBlend() const
-	{
-		return blend;
-	}
-
-	void DrawableObject::SetBlend(bool b)
-	{
-		blend = b;
-	}
+	//void DrawableObject::SetBlend(bool b)
+	//{
+	//	blend = b;
+	//}
 
 	void DrawableObject::SetEmissionColor(const vec4& c)
 	{
-		emissionColor = c;
-		updateRenderNode();
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->SetEmissionColor(c);
+		updateRenderNodes();
 	}
 
-	Material DrawableObject::GetMaterial() const
-	{
-		return material;
-	}
 	void DrawableObject::SetMaterial(const Material& m)
 	{
-		material = m;
-		updateRenderNode();
-	}
-
-	GLuint DrawableObject::GetTexture() const
-	{
-		return texture;
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->SetMaterial(m);
+		updateRenderNodes();
 	}
 
 	void DrawableObject::SetTexture(GLuint tex)
 	{
-		texture = tex;
-		updateRenderNode();
-	}
-
-	GLuint DrawableObject::GetCubeMap() const
-	{
-		return cubeMap;
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->SetTexture(tex);
+		updateRenderNodes();
 	}
 
 	void DrawableObject::SetCubeMap(GLuint cm)
 	{
-		cubeMap = cm;
-		updateRenderNode();
-	}
-
-	void DrawableObject::UseMaterial(const Material& m)
-	{
-		/*glUniform4fv(Game::MaterialAmbientLoc, 1, m.ambient);
-		glUniform4fv(Game::MaterialDiffuseLoc, 1, m.diffuse);
-		glUniform4fv(Game::MaterialSpecularLoc, 1, m.specular);
-		glUniform1f(Game::MaterialShininessLoc, m.shininess);*/
-		Shader::SetMaterialAmbient(m.ambient);
-		Shader::SetMaterialDiffuse(m.diffuse);
-		Shader::SetMaterialSpecular(m.specular);
-		Shader::SetMaterialShininess(m.shininess);
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->SetCubeMap(cm);
+		updateRenderNodes();
 	}
 
 	void DrawableObject::EnableRender()
 	{
 		renderEnabled = true;
-		updateRenderNode();
+
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->EnableRender();
 
 		for (auto it = children.begin(); it != children.end(); ++it)
 			static_cast<DrawableObject*>(*it)->EnableRender();
+
+		updateRenderNodes();
 	}
 
 	void DrawableObject::DisableRender()
 	{
 		renderEnabled = false;
+
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->DisableRender();
 
 		for (auto it = children.begin(); it != children.end(); ++it)
 			static_cast<DrawableObject*>(*it)->DisableRender();
@@ -138,22 +119,20 @@ namespace Bagnall
 
 	void DrawableObject::Cull()
 	{
-		if (renderNode != NULL)
-			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));
-		renderNode = NULL;
-
-		Shadow::RemoveFromDepthRenderList(this);
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->Cull();
 
 		Object::Cull();
 	}
 
 	void DrawableObject::UnCull()
 	{
-		updateRenderNode();
-
-		Shadow::AddToDepthRenderList(this);
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->UnCull();
 
 		Object::UnCull();
+
+		updateRenderNodes();
 	}
 
 	bool DrawableObject::GetRenderEnabled() const
@@ -161,38 +140,37 @@ namespace Bagnall
 		return renderEnabled;
 	}
 
-	bool DrawableObject::GetBumpMapEnabled() const
+	void DrawableObject::SetBumpMapEnabled(bool b)
 	{
-		return bumpMapEnabled;
-	}
-
-	bool DrawableObject::GetReflectiveCubeMap() const
-	{
-		return reflectiveCubeMap;
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->SetBumpMapEnabled(b);
 	}
 
 	void DrawableObject::SetReflectiveCubeMap(bool b)
 	{
-		reflectiveCubeMap = b;
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->SetReflectiveCubeMap(b);
 	}
+
+	void DrawableObject::DisableShadowCasting()
+	{
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			Shadow::RemoveFromDepthRenderList(*it);
+		for (auto it = children.begin(); it != children.end(); ++it)
+			static_cast<DrawableObject*>(*it)->DisableShadowCasting();
+	};
 
 	// PRIVATE
 
 	void DrawableObject::init()
 	{
-		bumpMapEnabled = true;
 		renderEnabled = true;
-		cubeMap = 0;
-		reflectiveCubeMap = false;
-		vertexMesh = nullptr;
-		updateRenderNode();
-		Shadow::AddToDepthRenderList(this);
+		updateRenderNodes();
 	}
 
-	void DrawableObject::updateRenderNode()
+	void DrawableObject::updateRenderNodes()
 	{
-		if (renderNode != NULL)
-			renderNode->objects.erase(std::find(renderNode->objects.begin(), renderNode->objects.end(), this));
-		renderNode = Game::MainRenderGraph->AddDrawableObject(this);
+		for (auto it = vertexMeshes.begin(); it != vertexMeshes.end(); ++it)
+			(*it)->UpdateRenderNode();
 	}
 }

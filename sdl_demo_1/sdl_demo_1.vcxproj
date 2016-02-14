@@ -74,11 +74,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>OpenGL32.lib;SDL2.lib;SDL2main.lib;glew32.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;SDL2.lib;SDL2main.lib;glew32.lib;SDL2_image.lib;assimp-vc130-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -98,13 +99,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>OpenGL32.lib;SDL2.lib;SDL2main.lib;glew32.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>OpenGL32.lib;SDL2.lib;SDL2main.lib;glew32.lib;SDL2_image.lib;assimp-vc130-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -130,6 +132,8 @@
     <ClCompile Include="FpsTracker.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Geometry.cpp" />
+    <ClCompile Include="HeightMap.cpp" />
+    <ClCompile Include="HeightMapTerrain.cpp" />
     <ClCompile Include="InitShader.cpp" />
     <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="main.cpp" />
@@ -138,16 +142,22 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Rectangle.cpp" />
     <ClCompile Include="RenderGraph.cpp" />
+    <ClCompile Include="RenderNode.cpp" />
+    <ClCompile Include="Schematic.cpp" />
+    <ClCompile Include="SDLUtil.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Shadow.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Sphere.cpp" />
+    <ClCompile Include="TerrainVertexMesh.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="UpdateGraph.cpp" />
     <ClCompile Include="Util.cpp" />
     <ClCompile Include="VertexMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="model\Millennium_Falcon.mtl" />
+    <None Include="model\torchic.blend" />
     <None Include="shaders\fragment\fshader_cubemap.glsl" />
     <None Include="shaders\fragment\fshader_cubemap_bump.glsl" />
     <None Include="shaders\fragment\fshader_depth.glsl" />
@@ -155,6 +165,7 @@
     <None Include="shaders\fragment\fshader_emissive_cubemap.glsl" />
     <None Include="shaders\fragment\fshader_emissive_texture.glsl" />
     <None Include="shaders\fragment\fshader_material.glsl" />
+    <None Include="shaders\fragment\fshader_terrain_texture_bump.glsl" />
     <None Include="shaders\fragment\fshader_texture.glsl" />
     <None Include="shaders\fragment\fshader_texture_bump.glsl" />
     <None Include="shaders\vertex\vshader_cubemap.glsl" />
@@ -164,6 +175,7 @@
     <None Include="shaders\vertex\vshader_emissive_cubemap.glsl" />
     <None Include="shaders\vertex\vshader_emissive_texture.glsl" />
     <None Include="shaders\vertex\vshader_material.glsl" />
+    <None Include="shaders\vertex\vshader_terrain_texture_bump.glsl" />
     <None Include="shaders\vertex\vshader_texture.glsl" />
     <None Include="shaders\vertex\vshader_texture_bump.glsl" />
   </ItemGroup>
@@ -177,6 +189,8 @@
     <ClInclude Include="FpsTracker.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Geometry.h" />
+    <ClInclude Include="HeightMap.h" />
+    <ClInclude Include="HeightMapTerrain.h" />
     <ClInclude Include="InitShader.h" />
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Material.h" />
@@ -184,10 +198,14 @@
     <ClInclude Include="Object.h" />
     <ClInclude Include="Rectangle.h" />
     <ClInclude Include="RenderGraph.h" />
+    <ClInclude Include="RenderNode.h" />
+    <ClInclude Include="Schematic.h" />
+    <ClInclude Include="SDLUtil.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Shadow.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Sphere.h" />
+    <ClInclude Include="TerrainVertexMesh.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="UpdateGraph.h" />
     <ClInclude Include="Util.h" />
@@ -199,13 +217,18 @@
     <Image Include="bumpmaps\cubemap_test_1_NRM.jpg" />
     <Image Include="bumpmaps\dowm furry_NRM.jpg" />
     <Image Include="bumpmaps\finalformsquare_NRM.jpg" />
+    <Image Include="bumpmaps\Millennium_Falcon_Bottom_N.tga" />
+    <Image Include="bumpmaps\Millennium_Falcon_Top_N.tga" />
     <Image Include="bumpmaps\Shrek-and-Yoda_NRM.jpg" />
     <Image Include="bumpmaps\stone_wall_NRM.jpg" />
+    <Image Include="heightmaps\terrain.png" />
     <Image Include="textures\ben.jpg" />
     <Image Include="textures\costanza.jpg" />
     <Image Include="textures\cubemap_test_1.jpg" />
     <Image Include="textures\dowm furry.jpg" />
     <Image Include="textures\finalformsquare.jpg" />
+    <Image Include="textures\Millennium_Falcon_Bottom_D.tga" />
+    <Image Include="textures\Millennium_Falcon_Top_D.tga" />
     <Image Include="textures\Shrek-and-Yoda.jpg" />
     <Image Include="textures\stone_wall.jpg" />
   </ItemGroup>
